@@ -9,12 +9,12 @@
     "popup": "popup.html"
   },
   "content_scripts": [{
-    "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file:///*"],
+    "matches": ["http://*/*", "https://*/*", "ftp://*/*"],
     "js": ["page.js"],
     "css": ["style.css"],
-    "run_at": "document_start"
+    "run_at": "document_end"
   }],
-  "icons": { 
+  "icons": {
     "19": "icon_19.png",
     "48": "icon_48.png",
     "128": "icon_128.png"

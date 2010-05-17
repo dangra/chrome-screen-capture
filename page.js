@@ -23,7 +23,40 @@ var page = {
   docWeight: 0,
   winHeight: 0,
   winWidth: 0,
-
+  fixedElements_ : [],
+  
+  hookBodyScrollValue: function(needHook) {
+    document.documentElement.setAttribute("__screen_capture_need_hook_scroll_value__", needHook);
+  },
+  
+  enableFixedPosition: function(enableFlag) {
+    if (enableFlag) {
+      for (var i = 0, l = this.fixedElements_.length; i < l; ++i) {
+        this.fixedElements_[i].style.position = "fixed";
+      }
+    } else {
+      this.fixedElements_ = [];
+      var nodeIterator = document.createNodeIterator(
+          document.documentElement,
+          NodeFilter.SHOW_ELEMENT,
+          null,
+          false
+      );
+      var currentNode;
+      while (currentNode = nodeIterator.nextNode()) {
+        var nodeComputedStyle = document.defaultView.getComputedStyle(currentNode, "");
+        // Skip nodes which don't have computeStyle or are invisible.
+        if (!nodeComputedStyle)
+          return;
+        var nodePosition = nodeComputedStyle.getPropertyValue("position");
+        if (nodePosition == "fixed") {
+          this.fixedElements_.push(currentNode);
+          currentNode.style.position = "absolute";
+        }
+      }
+    }
+  },
+  
   /**
   * Receive messages from background page, and then decide what to do next
   */
@@ -51,6 +84,8 @@ var page = {
   * Initialize scrollbar position, and get the data browser
   */
   scrollInit: function() {
+    this.enableFixedPosition(false);
+    this.hookBodyScrollValue(true);
     page.docHeight = document.body.scrollHeight;
     page.docWidth = document.body.scrollWidth;
     page.winHeight = window.innerHeight;
@@ -92,6 +127,8 @@ var page = {
     }
     else {
       window.scrollTo(page.startX, page.startY);
+      this.enableFixedPosition(true);
+      this.hookBodyScrollValue(false);
       return {'msg': 'scroll_finished'};
     }
   },
@@ -387,6 +424,43 @@ var page = {
     if($(id)) {
       $(id).parentNode.removeChild($(id));
     }
+  },
+  
+  injectJavaScriptResource: function(scriptResource) {
+    var hasError = true;
+    var request = new XMLHttpRequest();
+    // open the request
+    request.open("get", chrome.extension.getURL(scriptResource), false);
+    // send the request
+    try {
+      request.send(null);
+    } catch (e) {
+      hasError = true;
+      window.console.log(e);
+    }
+    var contents = request.responseText;
+    request = null;
+  
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.charset = "utf-8";
+    if (hasError) {
+      script.src = chrome.extension.getURL(scriptResource);
+      window.console.log("inject script tag: " + script.src);      
+    } else {
+      var scriptContents = document.createTextNode(contents);
+      script.appendChild(scriptContents);
+      window.console.log("inject script contents: " + script.src);            
+    }
+    (document.head || document.body || document.documentElement).appendChild(script);
+  },
+  
+  /**
+  * Remove an element
+  */
+  init: function() {
+    this.messageListener();  
+    this.injectJavaScriptResource("page_context.js");  
   }
 };
 
@@ -394,4 +468,4 @@ function $(id) {
   return document.getElementById(id);
 }
 
-page.messageListener();
+page.init();
