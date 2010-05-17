@@ -1,0 +1,105 @@
+<!--
+ * Copyright (c) 2009 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+<head>
+<style type="text/css">
+body {
+  font-family: arial, Verdana;
+  font-size: 13px;
+
+}
+.menu {
+  border: 1px solid #bec9ce;
+  color: #3d5d6a;
+  cursor: pointer;
+  display: none;
+  margin-top: 5px;
+  line-height: 22px;
+  text-indent: 1em;
+  width: 170px;
+}
+.menu:hover {
+  background-color: #3d5d6a;
+  color: #ffffff;
+}
+#loadDiv {
+  color: #3d5d6a;
+  display: none;
+  font-weight: bold;
+  font-family: Verdana, simsun;
+  font-size: 12px;
+  margin-top: 20px;
+  line-height: 40px;
+  text-align: center;
+  width: 180px;
+}
+</style>
+<script type='text/javascript'>
+  bg = chrome.extension.getBackgroundPage();
+  function toDo(what) {
+    switch(what) {
+      case 'capture_window':
+        bg.screenshot.captureWindow();
+        window.close();
+        break;
+      case 'capture_area':
+        bg.screenshot.showSelectionArea();
+        window.close();
+        break;
+      case 'capture_webpage':
+        bg.screenshot.captureWebpage();
+        document.getElementById('loadDiv').style.display = 'block';
+        document.getElementById('item').style.display = 'none';
+        break;
+      case 'capture_special_page':
+        bg.screenshot.captureSpecialPage();
+        window.close();
+        break;
+    }
+  }
+
+  function i18nReplace(id, name) {
+    return document.getElementById(id).innerText = chrome.i18n.getMessage(name);
+  }
+
+  function init() {
+    chrome.tabs.getSelected(null, function(tab) {
+      bg.screenshot.tabid = tab.id;
+      if (tab.url.indexOf('chrome') == 0) {
+        document.getElementById('captureSpecialPage').style.display = 'block';
+      }
+      chrome.tabs.sendRequest(tab.id, {msg: 'content_script_is_load'},
+          function(response) {
+           document.getElementById('captureWindow').style.display = 'block';
+           document.getElementById('captureArea').style.display = 'block';
+           document.getElementById('captureWebpage').style.display = 'block';
+      });
+    });
+    i18nReplace('captureSpecialPage', 'captureSpecialWindow');
+    i18nReplace('captureWindow', 'captureWindow');
+    i18nReplace('captureArea', 'captureArea');
+    i18nReplace('captureWebpage', 'captureWebpage');
+    i18nReplace('loading', 'loading');
+  }
+</script>
+</head>
+
+<body onload="init()"><div id="tt"></div>
+  <div id="loadDiv" ><img src="loading.gif" alt="">
+    <div id="loading">Loading please wait...</div>
+  </div>
+  <div id="item">
+
+    <div class="menu" onclick="toDo('capture_special_page');"
+        id="captureSpecialPage"></div>
+    <div class="menu" onclick="toDo('capture_window');" id="captureWindow">
+    </div>
+    <div class="menu" onclick="toDo('capture_area');" id="captureArea"></div>
+    <div class="menu" onclick="toDo('capture_webpage');" id="captureWebpage">
+    </div>
+  </div>
+</body>
+</html>

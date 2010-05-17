@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "name": "__MSG_name__",
+  "description": "__MSG_description__",
+  "background_page": "background.html",
+  "browser_action": {
+    "default_icon": "icon_19.png",
+    "default_title": "__MSG_default_title__",
+    "popup": "popup.html"
+  },
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file:///*"],
+    "js": ["page.js"],
+    "css": ["style.css"],
+    "run_at": "document_start"
+  }],
+  "icons": { 
+    "19": "icon_19.png",
+    "48": "icon_48.png",
+    "128": "icon_128.png"
+  },
+  "default_locale": "en",
+  "options_page": "options.html",
+  "permissions": ["tabs", "http://*/*", "https://*/*"]
+}

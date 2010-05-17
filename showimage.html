@@ -1,0 +1,539 @@
+<!--
+ * Copyright (c) 2009 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+ <HEAD>
+  <title> </title>
+  <style type="text/css">
+  body {
+    font-size: 12px;
+    font-family: arial, Verdana;
+    margin: 0;
+    padding: 0;
+  }
+  #header {
+    background: url(images/toolbar_bg.png);
+    height: 36px;
+    overflow: hide;
+  }
+  #showBox {
+     overflow: auto;
+  }
+  #photo {
+    cursor: crosshair;
+    margin: 0px 0px 0px 0px;
+    padding: 0px;
+    position: relative;
+  }
+  #tip {
+    color: #333333;
+    padding: 0 5px;
+    height: 36px;
+    font-size: 13px;
+    line-height: 36px;
+    overflow: hide;
+    margin-left: 270px;
+    left: 400px;
+  }
+  .toolbar {
+    float: left;
+    height: 30px;
+    margin-left: 10px;
+    padding-top: 6px;
+  }
+  .toolbar a {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#dddddd));
+    border: 1px solid #999;
+    border-bottom-left-radius: 2px 2px;
+    border-bottom-right-radius: 2px 2px;
+    border-top-left-radius: 2px 2px;
+    border-top-right-radius: 2px 2px;
+    color:#333333;
+    height: 18px;
+    line-height: 18px;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 12px;
+    padding: 2px 8px 2px 8px;
+    text-decoration: none;
+
+  }
+  .toolbar a:hover {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#cccccc), to(#dddddd));
+  }
+
+  .toolbar a.selected {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#cccccc), to(#dddddd))
+  }
+  .layer {
+    font-size:12px;
+    font-family: arial;
+    height: 0;
+    position: absolute;
+    width: 0;
+    z-index: 100;
+    line-height: 22px;
+    word-wrap: break-word;
+    text-align: left;
+    outline: 0;
+  }
+
+  .closeButton {
+    position: absolute;
+    display: none;
+    cursor: pointer;
+    top: -15px;
+  }
+  .clear {
+    clear: both;
+  }
+  </style>
+ 
+ </head>
+ <body>
+  <div id="header">
+  <div id="toolbar" class="toolbar">
+  <a href="javascript:void(0)" id="highlight" class="selected"
+      onclick="photoShop.toDo('highlight')">
+    <img src="images/highlight.gif" alt="" />
+    <span id="tHighlight"> Highlight</span>
+  </a>
+  <a href="javascript:void(0)" id="blackout"
+      onclick="photoShop.toDo('blackout')">
+    <img src="images/blackout.gif" alt="" />
+    <span id="tRedact"> Redact</span>
+  </a>
+  <a href="javascript:void(0)" id="text" onclick="photoShop.toDo('text')">
+    <img src="images/text.png" alt="" /><span id="tText">Text</span>
+  </a>
+  </div>
+  <div id="tip"></div>
+  <div class="toolbar" id="okBtn" style="position:fixed; left:87%; margin-left:20px; top:0px;">
+     <a href="javascript:void(0)" id="ok" onclick="photoShop.draw()">
+       <span id="tOk">OK</span>
+     </a>
+     <a href="javascript:void(0)" id="cancel" onclick="photoShop.closeCurrentTab()">
+       <span id="tCancel">Cancel</span>
+     </a>
+  </div>
+  <div class="clear"></div>
+  </div>
+  <div id="showBox">
+  <div id="photo">
+  <canvas id="canvas" onSelectStart="return false"></canvas>
+  <img id="pic" src="#" style="display:none">
+  <div class="layer" id="layer0"></div>
+  </div>
+  </div>  
+   <script>
+   var bg = chrome.extension.getBackgroundPage();
+   var photoShop = {
+     startX: 0,
+     startY: 0,
+     endX: 0,
+     endY: 0,
+     dragFlag: false,
+     flag: 'highlight',
+     layerId: 'layer0',
+     color: '',
+     highlightColor: '',
+     lastValidAction: 0,
+     markedArea: [],
+     isDraw: true,
+     offsetX: 0,
+     offsetY: 36,
+     nowHeight: 0,
+     nowWidth: 0,
+     picWidth: 0,
+     pciHeight: 0,
+     highlightType: 'border',
+     text: '',
+
+     i18nReplace: function(id,name,type) {
+       if(type == 'title') {
+         return $(id).title = chrome.i18n.getMessage(name);
+       }
+	   return $(id).innerHTML = chrome.i18n.getMessage(name);
+	 },
+
+    init: function() {
+      photoShop.i18nReplace('tip', 'tipStep1');
+      photoShop.i18nReplace('tHighlight', 'highlight');
+      photoShop.i18nReplace('highlight', 'highlight', 'title');
+      photoShop.i18nReplace('tRedact', 'redact');
+      photoShop.i18nReplace('blackout', 'redact', 'title');
+      photoShop.i18nReplace('tText', 'text');
+      photoShop.i18nReplace('text', 'text', 'title');
+      photoShop.i18nReplace('tCancel', 'cancel');
+      photoShop.i18nReplace('cancel', 'cancel', 'title');
+      photoShop.i18nReplace('tOk', 'ok');
+      photoShop.i18nReplace('ok', 'ok', 'title');
+
+      $('showBox').style.height = window.innerHeight - photoShop.offsetY;
+      $('canvas').width = $('photo').style.width = bg.screenshot.canvas.width;
+      $('canvas').height = $('photo').style.height = bg.screenshot.canvas.height;
+      
+      var context;
+      context = $('canvas').getContext('2d');
+      context.drawImage(bg.screenshot.canvas,0,0);
+      $('canvas').style.display = 'block';
+    },
+
+    setHighLightMode: function() {
+      photoShop.highlightType = localStorage.highlightType ?
+          localStorage.highlightType : 'border';
+      photoShop.highlightColor = localStorage.highlightColor ?
+          localStorage.highlightColor : '#FF0000';
+      $(photoShop.layerId).style.border = '2px solid ' +
+            photoShop.highlightColor;
+      if (photoShop.highlightType == 'rect') {
+        $(photoShop.layerId).style.backgroundColor = photoShop.highlightColor;
+        $(photoShop.layerId).style.opacity = 0.5;
+      }
+    },
+
+    setBlackoutMode: function() {
+      $(photoShop.layerId).style.opacity = 1;
+      $(photoShop.layerId).style.backgroundColor = '#000000';
+      $(photoShop.layerId).style.border = '2px solid #000000';
+    },
+
+    setTextMode: function() {
+      localStorage.fontSize = localStorage.fontSize ?
+          localStorage.fontSize : '12px';
+      localStorage.fontColor = localStorage.fontColor ?
+          localStorage.fontColor : '#FF0000';
+      $(photoShop.layerId).setAttribute('contentEditable', true);
+      $(photoShop.layerId).style.border = '1px dotted #333333';
+      $(photoShop.layerId).style.cursor = 'text';
+      $(photoShop.layerId).style.fontSize = localStorage.fontSize;
+      $(photoShop.layerId).style.color = localStorage.fontColor;
+      $(photoShop.layerId).innerHTML = '<br/>';
+      $(photoShop.layerId).setAttribute("onblur",
+          "photoShop.setTextToArray('" + photoShop.layerId + "')");
+      var id = photoShop.layerId;
+      $(photoShop.layerId).addEventListener('click', function() {
+        $(id).style.border = '1px dotted #333333';  
+      }, true);
+    },
+
+    setTextToArray: function(id) {
+      var str = $(id).innerText.split("\n");
+      if (photoShop.markedArea.length > 0) {
+        for (var i = photoShop.markedArea.length - 1; i >= 0; i--) {
+          if (photoShop.markedArea[i].id == id) {
+            photoShop.markedArea[i].context = str;
+            break;
+          }
+        }
+        $(id).style.borderWidth = 0;
+        //$(id).style.cursor = 'default';
+        //$(id).removeAttribute('onblur');
+        //$(id).removeAttribute('contentEditable');
+      }
+    },
+
+    closeCurrentTab: function() {
+      chrome.tabs.getSelected(null, function(tab) {
+        chrome.tabs.remove(tab.id);
+      });
+    },
+     
+    finish: function() {
+      $('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
+      photoShop.removeElement('floatDiv');
+      photoShop.markedArea = [];
+      photoShop.dragFlag = false;
+      photoShop.lastValidAction = 0;
+      photoShop.isDraw = false;
+      bg.screenshot.data = null;
+      $('toolbar').style.display = 'none';
+      $('okBtn').style.display = 'none';
+      $('canvas').style.display = 'none';
+      $('pic').style.display = 'block';
+      $('photo').style.cursor = 'default';
+    },
+
+    setButtonCheck: function(id) {
+      $('highlight').className = '';
+      $('blackout').className = '';
+      $('text').className = '';
+      $(id).className = 'selected';
+    },
+
+    colorRgba: function(color, opacity) {
+      var sColor = color.toLowerCase();
+      var sColorChange = [];
+      for (var i = 1; i < sColor.length; i += 2) {
+        sColorChange.push(parseInt("0x" + sColor.slice(i,i + 2)));
+      }
+      return "rgba(" + sColorChange.join(",") + "," + opacity + ")";
+    },
+
+    /**
+    * Undo the current operation
+    */
+
+    toDo: function(what) {
+      switch(what) {
+        case 'highlight':
+          photoShop.flag = 'highlight';
+          break;
+        case 'blackout':
+          photoShop.flag = 'blackout';
+          break;
+        case 'text':
+          photoShop.flag = 'text';
+      }
+      photoShop.isDraw = true;
+      photoShop.setButtonCheck(what);
+    },
+
+    setDivStyle: function() {
+      $(photoShop.layerId).setAttribute("style", "");
+      $(photoShop.layerId).setAttribute("contentEditable", false);
+      switch(photoShop.flag) {
+        case 'highlight':
+          photoShop.setHighLightMode();
+          break;
+        case 'blackout':
+          photoShop.setBlackoutMode();
+          break;
+        case 'text':
+          photoShop.setTextMode();
+          break;
+      }
+    },
+
+    /**
+    * Create a layer and set style
+    */
+    createDiv: function() {
+      photoShop.lastValidAction++;
+      photoShop.layerId = 'layer' + photoShop.lastValidAction;
+      if ($(photoShop.layerId)) {
+        photoShop.removeElement(photoShop.layerId);
+      }
+      var divElement = document.createElement('div');
+      divElement.id = photoShop.layerId;
+      divElement.className = 'layer';
+      $('photo').appendChild(divElement);
+      return divElement;
+    },
+
+    createCloseButton: function(parent, id, left) {
+      var imgElement = document.createElement('img');
+      imgElement.id = id;
+      imgElement.src = 'images/cross.png';
+      imgElement.className = 'closeButton';
+      imgElement.style.left = left - 15 + 'px';
+      imgElement.onclick = function() {
+        $(parent).style.display = 'none';
+        photoShop.removeLayer(parent);
+      };
+      $(parent).onmousemove = function() {
+        if (!photoShop.dragFlag) {
+          photoShop.showCloseButton(id);
+          $(parent).style.zIndex = 110;
+        }
+      };
+      $(parent).onmouseout = function() {
+        if (!photoShop.dragFlag) {
+          photoShop.hideCloseButton(id);
+          $(parent).style.zIndex = 100;
+        }
+      };
+      $(parent).appendChild(imgElement);
+      return imgElement;
+    },
+
+    showCloseButton: function(id) {
+      document.getElementById(id).style.display = 'block';
+      photoShop.isDraw = false;
+    },
+
+    hideCloseButton: function(id) {
+      document.getElementById(id).style.display = 'none';
+      photoShop.isDraw = true;
+    },
+
+    removeLayer: function(id) {
+      for (var i = 0; i < photoShop.markedArea.length; i++) {
+        if (photoShop.markedArea[i].id == id) {
+          photoShop.markedArea.splice(i, 1);
+          return;
+        }
+      }
+      photoShop.removeElement(id);
+    },
+
+    /**
+    *  Set the starting point(x,y) when mouse pressed
+    */
+    onMouseDown: function(event) {
+      if (photoShop.isDraw && event.button != 2) {
+        photoShop.setDivStyle();
+        photoShop.dragFlag = true;
+        photoShop.startX = event.pageX + $('showBox').scrollLeft -
+            photoShop.offsetX;
+        photoShop.startY = event.pageY + $('showBox').scrollTop -
+            photoShop.offsetY;
+        $(photoShop.layerId).style.left = photoShop.startX + 'px';
+        $(photoShop.layerId).style.top = photoShop.startY + 'px';
+        $(photoShop.layerId).style.height = 0;
+        $(photoShop.layerId).style.width = 0;
+        $(photoShop.layerId).style.display = 'block';
+      }
+    },
+
+    onMouseUp: function(event) {
+      photoShop.endX = event.pageX + $('showBox').scrollLeft - photoShop.offsetX ;
+      photoShop.endY = event.pageY + $('showBox').scrollTop - photoShop.offsetY ;
+      if (photoShop.isDraw && photoShop.dragFlag && photoShop.endX !=
+          photoShop.startX && photoShop.endY != photoShop.startY) {
+        photoShop.markedArea.push({
+          'id': photoShop.layerId,
+          'x': (photoShop.startX < photoShop.endX) ? photoShop.startX :
+              photoShop.endX,
+          'y': (photoShop.startY < photoShop.endY) ? photoShop.startY :
+              photoShop.endY,
+          'width': photoShop.nowWidth,
+          'height': photoShop.nowHeight,
+          'flag': photoShop.flag,
+          'highlightType': photoShop.highlightType,
+          'highlightColor': photoShop.highlightColor,
+          'fontSize': localStorage.fontSize,
+          'fontColor': localStorage.fontColor,
+          'context': ''
+        });
+        $(photoShop.layerId).focus();
+        var imageBtnId = 'close_' + photoShop.layerId;
+        photoShop.createCloseButton(photoShop.layerId, imageBtnId, 
+            photoShop.nowWidth);
+        photoShop.createDiv();
+        event.stopPropagation();
+        event.preventDefault();
+      } 
+      photoShop.dragFlag = false;
+
+    },
+
+    /**
+    * Refresh div‘s height and width when the mouse move
+    */
+    onMouseMove: function(event) {
+      if(photoShop.dragFlag) {
+        photoShop.endX = event.pageX + $('showBox').scrollLeft -
+             photoShop.offsetX;
+        if (photoShop.endX > bg.screenshot.canvas.width) {
+          photoShop.endX = bg.screenshot.canvas.width ;
+        }
+
+        if (photoShop.endX < 0) {
+          photoShop.endX = 0;
+        }
+
+        photoShop.endY = event.pageY + $('showBox').scrollTop -
+             photoShop.offsetY;
+        if (photoShop.endY > bg.screenshot.canvas.height) {
+          photoShop.endY = bg.screenshot.canvas.height ;
+        }
+        if (photoShop.endY < 0) {
+          photoShop.endY = 0;
+        }
+        photoShop.nowHeight = photoShop.endY - photoShop.startY - 1;
+        photoShop.nowWidth = photoShop.endX - photoShop.startX - 1;
+
+        if(photoShop.nowHeight < 0) {
+          $(photoShop.layerId).style.top = photoShop.endY + 'px';
+          photoShop.nowHeight = -1 * photoShop.nowHeight;
+        }
+        if(photoShop.nowWidth < 0) {
+          $(photoShop.layerId).style.left = photoShop.endX + 'px';
+          photoShop.nowWidth = -1 * photoShop.nowWidth;
+        }
+
+        $(photoShop.layerId).style.height = photoShop.nowHeight - 3;
+        $(photoShop.layerId).style.width = photoShop.nowWidth - 3;
+        event.stopPropagation();
+        event.preventDefault();
+      }
+
+    },
+
+    /**
+    * Remove a div
+    */
+    removeElement: function(id) {
+      if($(id)) {
+        $(id).parentNode.removeChild($(id));
+      }
+    },
+
+    /**
+    * Use the fillStyle,fillText and fillRect functions draws Rectangles,
+    * and render to canvas
+    */
+    draw: function() {
+      var context = $('canvas').getContext('2d');
+
+      for(var j = 0; j<photoShop.markedArea.length; j++) {
+        switch(photoShop.markedArea[j].flag) {
+          case 'highlight':
+            if (photoShop.markedArea[j].highlightType == 'border') {
+              context.strokeStyle = photoShop.markedArea[j].highlightColor;
+              context.lineWidth = 2;
+              context.strokeRect(photoShop.markedArea[j].x,
+                                 photoShop.markedArea[j].y,
+                                 photoShop.markedArea[j].width,
+                                 photoShop.markedArea[j].height);
+            } else {
+              context.fillStyle = photoShop.colorRgba(
+                  photoShop.markedArea[j].highlightColor, 0.5);
+              context.fillRect(photoShop.markedArea[j].x,
+                               photoShop.markedArea[j].y,
+                               photoShop.markedArea[j].width,
+                               photoShop.markedArea[j].height);
+            }
+            break;
+          case 'blackout':
+            context.fillStyle = 'rgb(0,0,0)';
+            context.fillRect(photoShop.markedArea[j].x,
+                             photoShop.markedArea[j].y,
+                             photoShop.markedArea[j].width,
+                             photoShop.markedArea[j].height);
+            break;
+          case 'text':
+            context.textBaseline = 'top';
+            if (photoShop.markedArea[j].context.length > 0) {
+              for (var i = 0; i < photoShop.markedArea[j].context.length; i++) {
+                context.fillStyle = photoShop.markedArea[j].fontColor;
+                context.font = photoShop.markedArea[j].fontSize + ' arial';
+                context.fillText(photoShop.markedArea[j].context[i],
+                                 photoShop.markedArea[j].x,
+                                 (photoShop.markedArea[j].y + 20*i));
+              }
+            }
+            break;
+        }
+        photoShop.removeElement(photoShop.markedArea[j].id);
+      }
+      photoShop.finish();
+      $('pic').src = $('canvas').toDataURL('image/jpeg');
+    }
+  };
+   
+  function $(id) {
+    return document.getElementById(id);
+  };
+  photoShop.init();
+  $('photo').addEventListener('mousemove', photoShop.onMouseMove, true);
+  $('photo').addEventListener('mousedown', photoShop.onMouseDown, true);
+  $('photo').addEventListener('mouseup', photoShop.onMouseUp, true);
+  document.addEventListener('mouseup', photoShop.onMouseUp, true);
+  document.addEventListener('mousemove', photoShop.onMouseMove, true);
+  </script>
+ </body>
+</html>

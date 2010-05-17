@@ -1,0 +1,166 @@
+<!--
+ * Copyright (c) 2009 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+<head>
+<script>
+
+var screenshot = {
+  tabid: 0,
+  data: '',
+  canvas: document.createElement("canvas"),
+  visibleHeight: 0,
+  visibleWidth: 0,
+  scrollXCount: 0,
+  scrollYCount: 0,
+
+  /**
+  * Receive messages from content_script, and then decide what to do next
+  */
+  messageListener: function() {
+    chrome.extension.onConnect.addListener(function(port) {
+      port.onMessage.addListener(function(obj) {
+        switch(obj.msg) {
+          case 'capture_selected':
+            screenshot.capturePortion(obj.x, obj.y, obj.width, obj.height);
+            break;
+        }
+      });
+    });
+  },
+
+  showSelectionArea: function() {
+    screenshot.sendMessage('show_selection_area', null);
+  },
+
+  captureWindow: function() {
+    screenshot.sendMessage('capture_window', screenshot.onResponseVisibleSize);
+  },
+
+  captureWebpage: function() {
+    screenshot.sendMessage('scroll_init', screenshot.onResponseVisibleSize);
+  },
+
+  onResponseVisibleSize: function(response) {
+    switch(response.msg) {
+      case 'capture_window':
+        screenshot.capturePortion(0, 0, response.width, response.height);
+        break;
+      case 'scroll_init_done':
+        screenshot.canvas.width = response.width;
+        screenshot.canvas.height = response.height;
+        screenshot.visibleHeight = response.visibleHeight;
+        screenshot.visibleWidth = response.visibleWidth;
+        screenshot.scrollXCount = response.scrollXCount;
+        screenshot.scrollYCount = response.scrollYCount;
+        setTimeout("screenshot.captureAndScroll()",100);
+        break;
+      case 'scroll_next_done':
+        screenshot.scrollXCount = response.scrollXCount;
+        screenshot.scrollYCount = response.scrollYCount;
+        setTimeout("screenshot.captureAndScroll()",100);
+        break;
+      case 'scroll_finished':
+        screenshot.captureAndScrollDone();
+        break;
+    }
+  },
+
+  captureSpecialPage: function() {
+    chrome.tabs.captureVisibleTab(null, function(data) {
+      var image = new Image();
+      image.onload = function() {
+        screenshot.canvas.width = image.width;
+        screenshot.canvas.height = image.height;
+        var context = screenshot.canvas.getContext("2d");
+        context.drawImage(image, 0, 0);
+        screenshot.postImage();
+      }
+      image.src = data;
+    });
+  },
+
+  /**
+  * Use drawImage method to slice parts of a source image and draw them to
+  * the canvas
+  */
+  capturePortion: function(x, y, width, height) {
+    chrome.tabs.captureVisibleTab(null, function(data) {
+      var image = new Image();
+      image.onload = function() {
+        screenshot.canvas.width = width;
+        screenshot.canvas.height = height;
+        var context = screenshot.canvas.getContext("2d");
+        context.drawImage(image, x, y, width, height, 0, 0, width, height);
+        screenshot.postImage();
+      };
+      image.src = data;
+    });
+  },
+
+  /**
+  * Use the drawImage method to stitching images, and render to canvas
+  */
+  captureAndScroll: function() {
+    chrome.tabs.captureVisibleTab(null, function(data) {
+      var image = new Image();
+      image.onload = function() {
+        var context = screenshot.canvas.getContext('2d');
+        var width = 0;
+        var height = 0;
+        var x1 = 0;
+        var x2 = 0;
+        var y1 = 0;
+        var y2 = 0;
+        if ((screenshot.scrollYCount + 1) * screenshot.visibleWidth >
+            screenshot.canvas.width) {
+          width = screenshot.canvas.width % screenshot.visibleWidth ;
+          x1 = (screenshot.scrollYCount + 1) * screenshot.visibleWidth -
+              screenshot.canvas.width ;
+        } else {
+          width = screenshot.visibleWidth;
+        }
+        if ((screenshot.scrollXCount + 1) * screenshot.visibleHeight >
+            screenshot.canvas.height) {
+          height = screenshot.canvas.height % screenshot.visibleHeight;
+          y1 = (screenshot.scrollXCount + 1) * screenshot.visibleHeight -
+              screenshot.canvas.height;
+        } else {
+          height = screenshot.visibleHeight ;
+        }
+        x2 = screenshot.scrollYCount * screenshot.visibleWidth ;
+        y2 = screenshot.scrollXCount * screenshot.visibleHeight ;
+        context.drawImage(image, x1, y1, width, height, x2, y2, width, height);
+        screenshot.sendMessage('scroll_next', screenshot.onResponseVisibleSize);
+      };
+      image.src = data;
+    });
+  },
+
+  captureAndScrollDone: function() {
+    screenshot.postImage();
+  },
+
+  /**
+  * Send the Message to content-script
+  */
+  sendMessage: function(message, callback) {
+    chrome.tabs.sendRequest(screenshot.tabid, {msg: message}, callback);
+  },
+
+  /**
+  * Post image to 'showimage.html'
+  */
+  postImage: function() {
+    chrome.tabs.create({'url': 'showimage.html'}, function() {});
+  }
+
+};
+
+screenshot.messageListener();
+
+</script>
+</head>
+</html>

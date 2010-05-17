@@ -1,0 +1,295 @@
+<!--
+ * Copyright (c) 2009 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+ <head>
+  <title> Options </title>
+  <style>
+  body {
+    font-family:helvetica, arial, sans-serif,simsun;
+    font-size:80%;
+    margin:10px;
+  }
+  #header {
+    padding-bottom:2em;
+    padding-top:1em;
+  }
+  #header h1 {
+    font-size: 30px;
+    display: inline;
+    color: #3d5d6a;
+    padding-bottom: 40px;
+    padding-left: 90px;
+    padding-top: 80px;
+    background: url(icon_64.png) no-repeat;
+    background-position: 1px 62px;
+  }
+  h4 {
+    padding-left: 0.5em;
+    border-bottom: 2px dotted #c3c3c3;
+    color: #333333;
+    line-height: 28px;
+    font-size: 15px;
+  }
+  p {
+    padding-left: 2em;
+    font-family: verdana, arial, sans-serif, simsun;
+    font-size: 14px;
+  }
+  .section-header {
+    background: #ebeff9;
+    border-top: 1px solid #b5c7de;
+    font-size: 99%;
+    padding: 3px 0 2px 5px;
+    font-weight: bold;
+    margin-bottom: 1em;
+    margin-top: 1em;
+  }
+  .contentBox {
+    border: 3px solid #bec9ce;
+    border-bottom-left-radius: 20px 20px;
+    border-bottom-right-radius: 20px 20px;
+    border-top-left-radius: 20px 20px;
+    border-top-right-radius: 20px 20px;
+    padding: 30px;
+    text-align: left;
+    margin: 50px auto;
+    width: 600px;
+  }
+  .section-content {
+    padding-left: 80px;
+    line-height: 25px;
+  }
+  .colorBox {
+    float: left;
+    width: 60px;
+    height: 20px;
+    margin: 3px 0 0 10px;
+  }
+  #colorpad {
+    position: absolute;
+    word-wrap: break-word;
+    word-break: normal;
+    z-index: 10;
+    border: #000000 solid 1px;
+    background-color: #ffffff;
+    padding: 5px;
+    width: 393px;
+  }
+  #colorpad a {
+    margin: 2px;
+    padding: 1px;
+    display: block;
+    height: 20px;
+    width: 20px;
+    float: left;
+    border: 1px solid #333333;
+  }
+  .contentLeft {
+    float: left;
+    width: 100px;
+    line-height: 28px;
+  }
+  .contentRight {
+    float: left;
+  }
+  .clear {
+    clear: both;
+  }
+  .section-content {
+    padding-left: 80px;
+  }
+  #colorBox {
+    background: #ff0000;
+    position: relative;
+    width: 60px;
+    height: 20px;
+    top: -37px;
+    left: 260px;
+  }
+  </style>
+  <script>
+  var isColorPadLoad = false;
+  var targetObj = false;
+  var colorType;
+
+
+  function init() {
+    i18nReplace('name', 'name');
+    i18nReplace('highlightSetting', 'highlightSetting');
+    i18nReplace('border', 'border');
+    i18nReplace('rect', 'rect');
+    i18nReplace('color', 'color');
+    i18nReplace('fontSetting', 'fontSetting');
+    i18nReplace('tFontColor', 'fontColor');
+    i18nReplace('tFontSize', 'fontSize');
+    i18nReplace('highlightMode', 'highlightMode');
+    var highlightColor = document.getElementById('hColor');
+    var fontColor = document.getElementById('fontColor');
+    var fontSize = document.getElementById('fontSize');
+
+    switch(localStorage.highlightType) {
+      case 'border':
+        document.getElementById('borderMode').checked = true;
+        break;
+      case 'rect':
+        document.getElementById('rectMode').checked = true;
+        break;
+    }
+    highlightColor.value = localStorage.highlightColor = localStorage.highlightColor ?
+        localStorage.highlightColor : highlightColor.value;
+    fontColor.value = localStorage.fontColor = localStorage.fontColor ?
+        localStorage.fontColor : fontColor.value;
+    fontSize.value = localStorage.fontSize = localStorage.fontSize ?
+        localStorage.fontSize : fontSize.value;
+    document.getElementById('highlightColorBox').style.backgroundColor =
+        highlightColor.value;
+    document.getElementById('textColorBox').style.backgroundColor =
+        fontColor.value;
+    color.value = localStorage.highlightColor = localStorage.highlightColor ?
+        localStorage.highlightColor : color.value;
+
+    document.getElementById('borderMode').
+        addEventListener('change', save, false);
+    document.getElementById('rectMode').addEventListener('change', save, false);
+    highlightColor.addEventListener('change', save, false);
+    fontColor.addEventListener('change', save, false);
+    fontSize.addEventListener('change', save, false);
+  }
+
+  function save() {
+     localStorage.highlightType = document.getElementById('borderMode').
+         checked ? 'border':'' || document.getElementById('rectMode').checked ?
+         'rect' : '';
+     localStorage.fontSize = document.getElementById('fontSize').value;
+  }
+
+  function colorPadLoad() {
+    var colorList = ['#000000', '#808080', '#800000', '#808000', '#008000',
+                     '#008080', '#000080', '#800080', '#808040', '#004040',
+                     '#0080FF', '#004080', '#8000FF', '#804000', '#FFFFFF',
+                     '#C0C0C0', '#FF0000', '#FFF000', '#00FF00', '#00FFFF',
+                     '#0000FF', '#FF00FF', '#FFFF80', '#00FF80', '#80FFFF',
+                     '#8080FF', '#FF0080', '#FF8040'];   
+    var  colorPadStr = '';
+    colorPadStr += '<div id="colorpad">';
+    colorPadStr += '<div style="text-align:right; cursor:pointer;"' +
+        'onclick="hideColorPad();">' + chrome.i18n.getMessage('close') +
+        '</div>';
+    for(var i = 0; i < colorList.length; i++) {
+      colorList[i]= '<a href="javascript:colorPadPick(\'' + colorList[i] +
+          '\');" style="background:' + colorList[i] + ';"></a>';
+    }
+    colorPadStr = colorPadStr + colorList.join("\n") + '</div>';
+    var container = document.createElement('div');
+    container.id = 'container';
+    container.innerHTML = colorPadStr;
+    document.body.appendChild(container);
+    isColorPadLoad = true;
+  }
+
+  function showColorPad(event, obj, type) {
+    if (!isColorPadLoad) {
+      colorPadLoad(); 
+    }
+    var position = colorPadPostion(event, obj);
+    document.getElementById('colorpad').style.top   = (position.y + 20) + 'px';
+    document.getElementById('colorpad').style.left = (position.x - 30) + 'px';
+    document.getElementById('colorpad').style.display = 'block';
+    targetObj = obj;
+    colorType = type;
+  }
+
+  function hideColorPad() {
+    if (!isColorPadLoad) {
+      return false;
+    }
+    document.getElementById('colorpad').style.display = 'none';
+  }
+
+  function colorPadPick(color) {
+    targetObj.value = color;
+    if(colorType == 'highlight') {
+      localStorage.highlightColor = document.getElementById('hColor').value;
+      document.getElementById('highlightColorBox').
+          style.backgroundColor = color;
+    }
+    if(colorType == 'text') {
+      localStorage.fontColor = document.getElementById('fontColor').value;
+      document.getElementById('textColorBox').style.backgroundColor = color;
+    }
+    hideColorPad();
+  }
+
+  function colorPadPostion(event, obj) {
+    var position = new Object();
+    position.x = event.clientX;
+    position.y = event.clientY;
+    return position;
+  }
+
+  function i18nReplace(id, name) {
+    return document.getElementById(id).innerText = chrome.i18n.getMessage(name);
+  }
+
+  </script>
+ </head>
+ <body onload="init();">
+
+ <div class="contentBox">
+   <div id="header">
+     <h1 id="name">Screen Capture </h1>
+     <span style="color:#cccccc; font-size:18px;margin-left:18px;">
+       <sub>Version 1.0</sub>
+     </span>
+   </div>
+   <h4 id="highlightSetting"></h4>
+   <div class="section-content">
+     <div class="contentLeft"><span id="highlightMode"></span> </div>
+     <div class="contentRight">
+       <label>
+         <input type="radio" id="borderMode" checked="true" name="highlight">
+         <span id="border"></span>
+       </label>
+       <label>
+         <input type="radio" id="rectMode" name="highlight">
+         <span id="rect"></span>
+       </label>
+     </div>
+     <div class="clear"></div>
+     <div class="contentLeft"><span id="color"></span></div>
+     <div class="contentRight">
+       <input id="hColor" value="#FF0000" size="10" type="text" readonly="true"
+           onclick="showColorPad(event, this,'highlight');">
+     </div>
+     <div id="highlightColorBox" class="colorBox"></div>
+     <div class="clear"></div>
+   </div>
+
+   <h4 id="fontSetting"></h4>
+   <div class="section-content">
+     <div class="contentLeft"><span id="tFontSize"></span></div>
+     <div class="contentRight">
+       <select id="fontSize">
+         <option value="10">10</option>
+         <option value="12" selected>12</option>
+         <option value="14">14</option>
+         <option value="18">18</option>
+         <option value="20">20</option>
+         <option value="24">24</option>
+       </select>
+     </div>
+     <div class="clear"></div>
+     <div class="contentLeft"><span id="tFontColor"></span></div>
+     <div class="contentRight">
+       <input id="fontColor" value="#FF0000" size="10" type="text"
+           readonly="true" onclick="showColorPad(event, this, 'text');">
+     </div>
+     <div id="textColorBox" class="colorBox"></div>
+     <div class="clear"></div>
+   </div>
+ </div>
+ </body>
+</html>
