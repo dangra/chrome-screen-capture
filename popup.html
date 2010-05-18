@@ -36,6 +36,13 @@ body {
   text-align: center;
   width: 180px;
 }
+#tip {
+  color: #3d5d6a;
+	font-size: 12px;
+	font-family: Verdana, simsun;
+	text-align: left;
+	width: 170px;
+}
 </style>
 <script type='text/javascript'>
   bg = chrome.extension.getBackgroundPage();
@@ -69,10 +76,12 @@ body {
     chrome.tabs.getSelected(null, function(tab) {
       bg.screenshot.tabid = tab.id;
       if (tab.url.indexOf('chrome') == 0) {
+			  document.getElementById('tip').style.display = 'none';
         document.getElementById('captureSpecialPage').style.display = 'block';
       }
       chrome.tabs.sendRequest(tab.id, {msg: 'content_script_is_load'},
           function(response) {
+					 document.getElementById('tip').style.display = 'none';
            document.getElementById('captureWindow').style.display = 'block';
            document.getElementById('captureArea').style.display = 'block';
            document.getElementById('captureWebpage').style.display = 'block';
@@ -83,14 +92,16 @@ body {
     i18nReplace('captureArea', 'captureArea');
     i18nReplace('captureWebpage', 'captureWebpage');
     i18nReplace('loading', 'loading');
+		i18nReplace('tip', 'tip');
   }
 </script>
 </head>
 
-<body onload="init()"><div id="tt"></div>
+<body onload="init()">
   <div id="loadDiv" ><img src="loading.gif" alt="">
     <div id="loading">Loading please wait...</div>
   </div>
+	<div id="tip">Please refresh this page to perform screen capture actions</div>
   <div id="item">
 
     <div class="menu" onclick="toDo('capture_special_page');"
