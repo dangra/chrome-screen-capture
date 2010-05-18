@@ -32,5 +32,5 @@
   "fontColor": {"message": "文字颜色"},
   "fontSize": {"message": "文字大小"},
   "close": {"message": "关闭"},
-	"tip": {"message": "请先刷新当前页面再截屏"}
+  "tip": {"message": "请先刷新当前页面再截屏"}
 }
