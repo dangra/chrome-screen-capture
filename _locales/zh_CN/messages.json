@@ -32,5 +32,7 @@
   "fontColor": {"message": "文字颜色"},
   "fontSize": {"message": "文字大小"},
   "close": {"message": "关闭"},
-  "tip": {"message": "请先刷新当前页面再截屏"}
+  "option": {"message": "网页截图设置"},
+  "tip1": {"message": "请先刷新当前页面再截屏"},
+  "tip2": {"message": "当前页面不能使用截屏功能"}
 }

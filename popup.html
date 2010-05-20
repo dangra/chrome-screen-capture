@@ -81,10 +81,15 @@ body {
       }
       chrome.tabs.sendRequest(tab.id, {msg: 'content_script_is_load'},
           function(response) {
-           document.getElementById('tip').style.display = 'none';
-           document.getElementById('captureWindow').style.display = 'block';
-           document.getElementById('captureArea').style.display = 'block';
-           document.getElementById('captureWebpage').style.display = 'block';
+            if (response) {
+              i18nReplace('tip', 'tip2');
+
+            } else {
+              document.getElementById('tip').style.display = 'none';
+              document.getElementById('captureWindow').style.display = 'block';
+              document.getElementById('captureArea').style.display = 'block';
+              document.getElementById('captureWebpage').style.display = 'block';
+            }
       });
     });
     i18nReplace('captureSpecialPage', 'captureSpecialWindow');
@@ -92,7 +97,7 @@ body {
     i18nReplace('captureArea', 'captureArea');
     i18nReplace('captureWebpage', 'captureWebpage');
     i18nReplace('loading', 'loading');
-    i18nReplace('tip', 'tip');
+    i18nReplace('tip', 'tip1');
   }
 </script>
 </head>

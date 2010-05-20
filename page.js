@@ -56,6 +56,21 @@ var page = {
       }
     }
   },
+
+  checkPageIsOnlyEmbedElement: function() {
+    var bodyNode = document.body.children;
+    var isOnlyEmbed = false;
+    for (var i = 0; i < bodyNode.length; i++) {
+      var tagName = bodyNode[i].tagName;
+      if (tagName == 'OBJECT' || tagName == 'EMBED' || tagName == 'VIDEO' || tagName == 'SCRIPT') {
+        isOnlyEmbed = true;
+      } else if (bodyNode[i].style.display != 'none'){
+        isOnlyEmbed = false;
+        break;
+      }
+    }
+    return isOnlyEmbed;
+  },
   
   /**
   * Receive messages from background page, and then decide what to do next
@@ -63,7 +78,9 @@ var page = {
   messageListener: function() {
     chrome.extension.onRequest.addListener(function(request, sender, response) {
       switch (request.msg) {
-        case 'content_script_is_load': response(true); break;
+        case 'content_script_is_load':
+          response(page.checkPageIsOnlyEmbedElement());
+          break;
         case 'capture_window': response(page.getWindowSize()); break;
         case 'show_selection_area': page.showSelectionArea(); break;
         case 'scroll_init': response(page.scrollInit()); break;

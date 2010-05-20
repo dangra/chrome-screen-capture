@@ -32,6 +32,8 @@
   "fontColor": {"message": "Font Color"},
   "fontSize": {"message": "Font Size"},
   "close": {"message": "Close"},
-  "tip": {"message": "Please refresh this page to perform screen capture actions"}
+  "option": {"message": "Screen Capture Options"},
+  "tip1": {"message": "Please refresh this page to perform screen capture actions"},
+  "tip2": {"message": "Unable to perform screen capture actions on this page"}
   
 }
