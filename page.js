@@ -62,7 +62,8 @@ var page = {
     var isOnlyEmbed = false;
     for (var i = 0; i < bodyNode.length; i++) {
       var tagName = bodyNode[i].tagName;
-      if (tagName == 'OBJECT' || tagName == 'EMBED' || tagName == 'VIDEO' || tagName == 'SCRIPT') {
+      if (tagName == 'OBJECT' || tagName == 'EMBED' || tagName == 'VIDEO' ||
+          tagName == 'SCRIPT') {
         isOnlyEmbed = true;
       } else if (bodyNode[i].style.display != 'none'){
         isOnlyEmbed = false;
