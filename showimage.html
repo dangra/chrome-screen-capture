@@ -16,7 +16,7 @@
   #header {
     background: url(images/toolbar_bg.png);
     height: 36px;
-    overflow: hide;
+    overflow: hidden;
   }
   #showBox {
      overflow: auto;
@@ -33,12 +33,11 @@
     height: 36px;
     font-size: 13px;
     line-height: 36px;
-    overflow: hide;
-    margin-left: 270px;
-    left: 400px;
+    overflow: hidden;
+    text-align: center;
   }
   .toolbar {
-    float: left;
+    position:fixed;
     height: 30px;
     margin-left: 10px;
     padding-top: 6px;
@@ -110,7 +109,7 @@
   </a>
   </div>
   <div id="tip"></div>
-  <div class="toolbar" id="okBtn" style="position:fixed; left:87%; margin-left:20px; top:0px;">
+  <div class="toolbar" id="okBtn" style="position:fixed; left:83%; margin-left:20px; top:0px;">
      <a href="javascript:void(0)" id="ok" onclick="photoShop.draw()">
        <span id="tOk">OK</span>
      </a>
