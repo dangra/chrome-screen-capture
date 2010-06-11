@@ -98,12 +98,12 @@
   <a href="javascript:void(0)" id="highlight" class="selected"
       onclick="photoShop.toDo('highlight')">
     <img src="images/highlight.gif" alt="" />
-    <span id="tHighlight"> Highlight</span>
+    <span id="tHighlight">Highlight</span>
   </a>
   <a href="javascript:void(0)" id="blackout"
       onclick="photoShop.toDo('blackout')">
     <img src="images/blackout.gif" alt="" />
-    <span id="tRedact"> Redact</span>
+    <span id="tRedact">Redact</span>
   </a>
   <a href="javascript:void(0)" id="text" onclick="photoShop.toDo('text')">
     <img src="images/text.png" alt="" /><span id="tText">Text</span>
@@ -118,15 +118,23 @@
        <span id="tOption">Option</span>
      </a>
   </div>
+  <div id="saveBtn" class="toolbar" style="position:fixed; left:87%; top:0px; display:none">
+    <a href="javascript:void(0)" id="save" onclick="photoShop.save()">
+      <span id="tSave">Save</span>
+    </a>
+  </div>
   <div class="clear"></div>
   </div>
   <div id="showBox">
   <div id="photo">
   <canvas id="canvas" onSelectStart="return false"></canvas>
   <img id="pic" src="#" style="display:none">
+  <object id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px">
+    Failed to load np plugin. You might be using the old version of the extension.
+  </object>
   <div class="layer" id="layer0"></div>
   </div>
-  </div>  
+  </div>
    <script>
    var bg = chrome.extension.getBackgroundPage();
    var photoShop = {
@@ -170,6 +178,8 @@
       photoShop.i18nReplace('option', 'option', 'title');
       photoShop.i18nReplace('tOk', 'ok');
       photoShop.i18nReplace('ok', 'ok', 'title');
+      photoShop.i18nReplace('tSave', 'save');
+      photoShop.i18nReplace('save', 'save', 'title');
 
       $('showBox').style.height = window.innerHeight - photoShop.offsetY;
       $('canvas').width = $('photo').style.width = bg.screenshot.canvas.width;
@@ -257,6 +267,7 @@
       $('okBtn').style.display = 'none';
       $('canvas').style.display = 'none';
       $('pic').style.display = 'block';
+      $('saveBtn').style.display = 'block';
       $('photo').style.cursor = 'default';
     },
 
@@ -526,6 +537,10 @@
       }
       photoShop.finish();
       $('pic').src = $('canvas').toDataURL('image/jpeg');
+    },
+
+    save: function() {
+      pluginobj.SaveScreenshot($('pic').src);
     }
   };
    
