@@ -192,47 +192,46 @@ var page = {
   * Load the screenshot area interface
   */
   createSelectionArea: function() {
-    if (!page.isSelectionAreaTurnOn) {
-      var areaProtector = $('drag_area_protector');
+    var areaProtector = $('drag_area_protector');
 
-      page.createDiv(areaProtector, 'drag_shadow_top');
-      page.createDiv(areaProtector, 'drag_shadow_bottom');
-      page.createDiv(areaProtector, 'drag_shadow_left');
-      page.createDiv(areaProtector, 'drag_shadow_right');
+    page.createDiv(areaProtector, 'drag_shadow_top');
+    page.createDiv(areaProtector, 'drag_shadow_bottom');
+    page.createDiv(areaProtector, 'drag_shadow_left');
+    page.createDiv(areaProtector, 'drag_shadow_right');
 
-      var areaElement = page.createDiv(areaProtector, 'drag_area');
-      page.createDiv(areaElement, 'drag_container');
-      page.createDiv(areaElement, 'drag_size');
+    var areaElement = page.createDiv(areaProtector, 'drag_area');
+    page.createDiv(areaElement, 'drag_container');
+    page.createDiv(areaElement, 'drag_size');
 
-      var cancel = page.createDiv(areaElement, 'drag_cancel');
-      cancel.addEventListener('mousedown', function (){
-          page.removeSelectionArea();}, true);
-      cancel.innerHTML = chrome.i18n.getMessage("cancel");
+    var cancel = page.createDiv(areaElement, 'drag_cancel');
+    cancel.addEventListener('mousedown', function (){
+        page.removeSelectionArea();}, true);
+    cancel.innerHTML = chrome.i18n.getMessage("cancel");
 
-      var crop = page.createDiv(areaElement, 'drag_crop');
-      crop.addEventListener('mousedown', page.getSelectionSize, true);
-      crop.innerHTML = chrome.i18n.getMessage('crop');
+    var crop = page.createDiv(areaElement, 'drag_crop');
+    crop.addEventListener('mousedown', page.getSelectionSize, true);
+    crop.innerHTML = chrome.i18n.getMessage('crop');
 
-      page.createDiv(areaElement, 'drag_north_west');
-      page.createDiv(areaElement, 'drag_north_east');
-      page.createDiv(areaElement, 'drag_south_east');
-      page.createDiv(areaElement, 'drag_south_west');
+    page.createDiv(areaElement, 'drag_north_west');
+    page.createDiv(areaElement, 'drag_north_east');
+    page.createDiv(areaElement, 'drag_south_east');
+    page.createDiv(areaElement, 'drag_south_west');
 
-      document.addEventListener('mousedown', page.onMouseDown, false);
-      document.addEventListener('mousemove', page.onMouseMove, false);
-      document.addEventListener('mouseup', page.onMouseUp, false);
-      document.addEventListener('dblclick', page.getSelectionSize, false);
+    document.addEventListener('mousedown', page.onMouseDown, false);
+    document.addEventListener('mousemove', page.onMouseMove, false);
+    document.addEventListener('mouseup', page.onMouseUp, false);
+    document.addEventListener('dblclick', page.getSelectionSize, false);
 
-      page.pageHeight = $('drag_area_protector').clientHeight;
-      page.pageWidth = $('drag_area_protector').clientWidth;
+    page.pageHeight = $('drag_area_protector').clientHeight;
+    page.pageWidth = $('drag_area_protector').clientWidth;
 
-      var areaElement = $('drag_area');
-      areaElement.style.left = page.startX + 'px';
-      areaElement.style.top = page.startY + 'px';
-      areaElement.style.width = (page.endX - page.startX) + 'px';
-      areaElement.style.height = (page.endY - page.startY) + 'px';
-      page.isSelectionAreaTurnOn = true;
-    }
+    var areaElement = $('drag_area');
+    areaElement.style.left = page.startX + 'px';
+    areaElement.style.top = page.startY + 'px';
+    areaElement.style.width = (page.endX - page.startX) + 'px';
+    areaElement.style.height = (page.endY - page.startY) + 'px';
+    page.isSelectionAreaTurnOn = true;
+
     page.updateShadow(areaElement);
     page.updateSize();
   },
