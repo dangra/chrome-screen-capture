@@ -38,8 +38,6 @@
 #include "npcapture.h"
 
 NPNetscapeFuncs* npnfuncs = NULL;
-static NPObject* so = NULL;
-static HWND hWnd = NULL;
 
 const char* kSaveScreenshot = "SaveScreenshot";
 
@@ -101,7 +99,7 @@ void CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = hWnd;
+  Ofn.hwndOwner = ((CPlugin*)obj)->hWnd;
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);
@@ -114,7 +112,7 @@ void CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
   GetSaveFileNameA(&Ofn);
 
   if (szFile[0] != '\0') {
-    char* url = (char *)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+    char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
     char* base64 = strstr(url, "base64,") + 7;
     int startpos =  base64 - url;
     int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
@@ -157,13 +155,15 @@ static NPError GetValue(NPP instance, NPPVariable variable, void* value) {
     *((char **)value) = "ScreenCapturePlugin plugin.";
     break;
   case NPPVpluginScriptableNPObject:
-    if(!so) {
-      so = npnfuncs->createobject(instance, &plugin_ref_obj);
+    if (!instance->pdata) {
+      instance->pdata = (void*)npnfuncs->createobject(instance, &plugin_ref_obj);
+      ((CPlugin*)instance->pdata)->hWnd = (HWND)instance->ndata;
     }
+
     // Retain the object since we keep it in plugin code
     // so that it won't be freed by browser.
-    npnfuncs->retainobject(so);
-    *(NPObject **)value = so;
+    npnfuncs->retainobject((NPObject*)instance->pdata);
+    *(NPObject **)value = (NPObject*)instance->pdata;
     break;
 #if defined(XULRUNNER_SDK)
   case NPPVpluginNeedsXEmbed:
@@ -179,19 +179,22 @@ static NPError NewNPInstance(NPMIMEType pluginType, NPP instance,
                              char* argv[], NPSavedData* saved) {
   BOOL bWindowed = TRUE;
   npnfuncs->setvalue(instance, NPPVpluginWindowBool, (void *)bWindowed);
+  instance->pdata = NULL;
+  instance->ndata = NULL;
   return NPERR_NO_ERROR;
 }
 
 static NPError DestroyNPInstance(NPP instance, NPSavedData** save) {
-  if(so) {
-    npnfuncs->releaseobject(so);
+  if (instance->pdata) {
+    npnfuncs->releaseobject((NPObject*)instance->pdata);
   }
-  so = NULL;
+  instance->pdata = NULL;
+  instance->ndata = NULL;
   return NPERR_NO_ERROR;
 }
 
 NPError SetWindow(NPP instance, NPWindow* window) {
-  hWnd = (HWND)window->window;
+  instance->ndata = (HWND)window->window;
   return NPERR_NO_ERROR;
 }
 
