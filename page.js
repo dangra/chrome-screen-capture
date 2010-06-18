@@ -80,9 +80,6 @@ var page = {
   messageListener: function() {
     chrome.extension.onRequest.addListener(function(request, sender, response) {
       switch (request.msg) {
-        case 'content_script_is_load':
-          response(page.checkPageIsOnlyEmbedElement());
-          break;
         case 'capture_window': response(page.getWindowSize()); break;
         case 'show_selection_area': page.showSelectionArea(); break;
         case 'scroll_init': response(page.scrollInit()); break;
@@ -156,8 +153,9 @@ var page = {
   * Show the selection Area
   */
   showSelectionArea: function() {
+    this.injectCssResource('style.css');
     page.createFloatLayer();
-    setTimeout(page.createSelectionArea, 100);
+    setTimeout(page.createSelectionArea, 500);
   },
 
   getWindowSize: function() {
@@ -446,6 +444,13 @@ var page = {
       $(id).parentNode.removeChild($(id));
     }
   },
+
+  injectCssResource: function(cssResource) {
+    var css = document.createElement('link');
+    css.type = 'text/css';
+    css.href = chrome.extension.getURL(cssResource);
+    (document.head || document.body || document.documentElement).appendChild(css);
+  },
   
   injectJavaScriptResource: function(scriptResource) {
     var hasError = true;
@@ -480,10 +485,19 @@ var page = {
   * Remove an element
   */
   init: function() {
-    this.messageListener();  
+    if (isThisScriptLoad) {
+      chrome.extension.sendRequest({msg: 'isLoadCanCapturn'});    
+    } else {
+      chrome.extension.sendRequest({msg: 'isLoadCanNotCapturn'});
+    }
+    this.messageListener();
     this.injectJavaScriptResource("page_context.js");  
   }
 };
+
+isThisScriptLoad = function() {
+  return page.checkPageIsOnlyEmbedElement();
+}
 
 function $(id) {
   return document.getElementById(id);

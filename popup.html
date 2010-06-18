@@ -45,7 +45,19 @@ body {
 }
 </style>
 <script type='text/javascript'>
-  bg = chrome.extension.getBackgroundPage();
+  var bg = chrome.extension.getBackgroundPage();
+  var isScriptLoad = false;
+  chrome.extension.onRequest.addListener(function(request, sender, response) {
+    if (request && request.msg == 'isLoadCanCapturn') {
+      document.getElementById('tip').style.display = 'none';
+      document.getElementById('captureWindow').style.display = 'block';
+      document.getElementById('captureArea').style.display = 'block';
+      document.getElementById('captureWebpage').style.display = 'block';
+    } else if (request.msg == 'isLoadCanNotCapturn') {
+      i18nReplace('tip', 'tip2');
+    }
+  });
+
   function toDo(what) {
     switch(what) {
       case 'capture_window':
@@ -81,17 +93,31 @@ body {
       }
       chrome.tabs.sendRequest(tab.id, {msg: 'content_script_is_load'},
           function(response) {
-            if (response) {
-              i18nReplace('tip', 'tip2');
-
-            } else {
+            isScriptLoad = true;
+            if (response && response.msg == 'isLoadCanCapturn') {
               document.getElementById('tip').style.display = 'none';
               document.getElementById('captureWindow').style.display = 'block';
               document.getElementById('captureArea').style.display = 'block';
               document.getElementById('captureWebpage').style.display = 'block';
+            } else if (response.msg == 'isLoadCanNotCapturn'){
+              i18nReplace('tip', 'tip2');
+            } else if(response.msg == 'noLoad') {
+              i18nReplace('tip', 'tip3');
+            } else {
+              i18nReplace('tip', 'tip3');
             }
       });
     });
+    t = function() {
+      if (!isScriptLoad) {
+        document.getElementById('tip').innerText = isScriptLoad;
+        chrome.tabs.executeScript(null, {file: 'style.css'});        
+        chrome.tabs.executeScript(null, {file: 'page.js'});
+        chrome.tabs.executeScript(null, {file: 'isLoad.js'});
+       // chrome.tabs.executeScript(null, {code: 'checkScriptLoad()'});
+      }
+    }
+    setTimeout(t,500);
     i18nReplace('captureSpecialPage', 'captureSpecialWindow');
     i18nReplace('captureWindow', 'captureWindow');
     i18nReplace('captureArea', 'captureArea');

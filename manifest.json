@@ -8,12 +8,19 @@
     "default_title": "__MSG_default_title__",
     "popup": "popup.html"
   },
-  "content_scripts": [{
-    "matches": ["http://*/*", "https://*/*", "ftp://*/*"],
-    "js": ["page.js"],
-    "css": ["style.css"],
-    "run_at": "document_end"
-  }],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*"],
+      "js": ["page.js"],
+      "css": ["style.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*"],
+      "js": ["isLoad.js"],
+      "run_at": "document_start"
+    }
+  ],
   "icons": {
     "19": "icon_19.png",
     "48": "icon_48.png",
