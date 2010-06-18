@@ -62,17 +62,17 @@ bool CPlugin::Invoke(NPObject* obj, NPIdentifier methodName,
                      const NPVariant* args, uint32_t argCount,
                      NPVariant* result) {
   char* name = npnfuncs->utf8fromidentifier(methodName);
+  bool ret_val = false;
   if (!name) {
-    return false;
+    return ret_val;
   }
-  bool ret_val = true;
   if (!strncmp((const char*)name, kSaveScreenshot,
                strlen(kSaveScreenshot))) {
     SaveScreenshot(obj, args, argCount, result);
+    ret_val = true;
   } else {
     // Exception handling. 
     npnfuncs->setexception(obj, "exception during invocation");
-    ret_val = false;
   }
   if (name) {
     npnfuncs->memfree(name);
@@ -108,6 +108,7 @@ void CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
   Ofn.lpstrInitialDir = NULL;
   Ofn.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
   Ofn.lpstrTitle = NULL;
+  Ofn.lpstrDefExt = "png";
  
   GetSaveFileNameA(&Ofn);
 
