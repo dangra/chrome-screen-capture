@@ -108,22 +108,18 @@ body {
             }
       });
     });
-    t = function() {
+    insertScript = function() {
       if (!isScriptLoad) {
-        document.getElementById('tip').innerText = isScriptLoad;
-        chrome.tabs.executeScript(null, {file: 'style.css'});        
         chrome.tabs.executeScript(null, {file: 'page.js'});
         chrome.tabs.executeScript(null, {file: 'isLoad.js'});
-       // chrome.tabs.executeScript(null, {code: 'checkScriptLoad()'});
       }
     }
-    setTimeout(t,500);
+    setTimeout(insertScript,500);
     i18nReplace('captureSpecialPage', 'captureSpecialWindow');
     i18nReplace('captureWindow', 'captureWindow');
     i18nReplace('captureArea', 'captureArea');
     i18nReplace('captureWebpage', 'captureWebpage');
     i18nReplace('loading', 'loading');
-    i18nReplace('tip', 'tip1');
   }
 </script>
 </head>

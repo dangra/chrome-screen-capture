@@ -153,9 +153,8 @@ var page = {
   * Show the selection Area
   */
   showSelectionArea: function() {
-    this.injectCssResource('style.css');
     page.createFloatLayer();
-    setTimeout(page.createSelectionArea, 500);
+    setTimeout(page.createSelectionArea, 100);
   },
 
   getWindowSize: function() {
@@ -446,8 +445,9 @@ var page = {
   },
 
   injectCssResource: function(cssResource) {
-    var css = document.createElement('link');
+    var css = document.createElement('LINK');
     css.type = 'text/css';
+    css.rel = 'stylesheet';
     css.href = chrome.extension.getURL(cssResource);
     (document.head || document.body || document.documentElement).appendChild(css);
   },
@@ -490,6 +490,7 @@ var page = {
     } else {
       chrome.extension.sendRequest({msg: 'isLoadCanNotCapturn'});
     }
+    this.injectCssResource('style.css');
     this.messageListener();
     this.injectJavaScriptResource("page_context.js");  
   }
