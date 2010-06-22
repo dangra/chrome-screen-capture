@@ -1,5 +1,5 @@
 {
-  "version": "1.6",
+  "version": "1.8",
   "name": "__MSG_name__",
   "description": "__MSG_description__",
   "background_page": "background.html",
@@ -30,6 +30,6 @@
   "options_page": "options.html",
   "permissions": ["tabs", "http://*/*", "https://*/*"],
   "plugins": [ {
-     "path": "plugin\\npcapture.dll"
+     "path": "plugin/npcapture.dll"
   } ]
 }
