@@ -90,6 +90,7 @@ body {
       if (tab.url.indexOf('chrome') == 0) {
         document.getElementById('tip').style.display = 'none';
         document.getElementById('captureSpecialPage').style.display = 'block';
+        return;
       }
       chrome.tabs.sendRequest(tab.id, {msg: 'content_script_is_load'},
           function(response) {
@@ -110,7 +111,8 @@ body {
     });
     insertScript = function() {
       if (!isScriptLoad) {
-        chrome.tabs.executeScript(null, {file: 'page.js'});
+        chrome.tabs.executeScript(null, {file: 'page.js'}, function() {
+            i18nReplace('tip', 'tip2');});
         chrome.tabs.executeScript(null, {file: 'isLoad.js'});
       }
     }
