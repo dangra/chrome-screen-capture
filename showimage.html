@@ -30,13 +30,14 @@
   }
   #tip {
     color: #333333;
-    padding: 0 5px;
+    padding: 0 5px 0 40px;
     height: 36px;
     font-size: 13px;
     line-height: 36px;
     overflow: hidden;
     text-align: left;
-    margin: 0 120px 0 250px;
+    margin: 0 120px 0 0;
+    background:url(icon_19.png) no-repeat 15px 10px;
   }
   .toolbar {
     position:fixed;
@@ -97,24 +98,23 @@
  </head>
  <body>
   <div id="header">
-  <div id="toolbar" class="toolbar">
-  <a href="javascript:void(0)" id="highlight" class="selected"
+
+  <div id="tip"></div>
+  <div id="toolbar" class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
+    <a href="javascript:void(0)" id="highlight" class="selected"
       onclick="photoShop.toDo('highlight')">
     <img src="images/highlight.gif" alt="" />
     <span id="tHighlight">Highlight</span>
-  </a>
-  <a href="javascript:void(0)" id="blackout"
+    </a>
+    <a href="javascript:void(0)" id="blackout"
       onclick="photoShop.toDo('blackout')">
     <img src="images/blackout.gif" alt="" />
     <span id="tRedact">Redact</span>
-  </a>
-  <a href="javascript:void(0)" id="text" onclick="photoShop.toDo('text')">
+    </a>
+    <a href="javascript:void(0)" id="text" onclick="photoShop.toDo('text')">
     <img src="images/text.png" alt="" /><span id="tText">Text</span>
-  </a>
-  </div>
-  <div id="tip"></div>
-  <div class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
-     <a href="javascript:void(0)" id="save" onclick="photoShop.save()">
+    </a>
+    <a href="javascript:void(0)" id="save" onclick="photoShop.save()">
       <span id="tSave">Save</span>
      </a>
      <a href="javascript:void(0)" id="option" onclick="photoShop.openOptionPage()">
