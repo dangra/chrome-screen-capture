@@ -30,14 +30,13 @@
   }
   #tip {
     color: #333333;
-    padding: 0 5px 0 45px;
+    padding: 0 5px;
     height: 36px;
     font-size: 13px;
     line-height: 36px;
     overflow: hidden;
     text-align: left;
-    margin: 0 430px 0 0;
-    background:url(icon_19.png) no-repeat 15px 9px;
+    margin: 0 120px 0 250px;
   }
   .toolbar {
     position:fixed;
@@ -94,13 +93,11 @@
     clear: both;
   }
   </style>
- 
+
  </head>
  <body>
   <div id="header">
-
-  <div id="tip"></div>
-  <div id="toolbar" class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
+  <div id="toolbar" class="toolbar">
     <a href="javascript:void(0)" id="highlight" class="selected"
       onclick="photoShop.toDo('highlight')">
     <img src="images/highlight.gif" alt="" />
@@ -114,6 +111,10 @@
     <a href="javascript:void(0)" id="text" onclick="photoShop.toDo('text')">
     <img src="images/text.png" alt="" /><span id="tText">Text</span>
     </a>
+  </div>
+  <div id="tip"></div>
+  <div class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
+
     <a href="javascript:void(0)" id="save" onclick="photoShop.save()">
       <span id="tSave">Save</span>
      </a>

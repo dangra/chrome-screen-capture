@@ -16,7 +16,7 @@
   "ok": {"message": "Done"},
   "option": {"message": "Options"},
   "save": {"message": "Save"},
-  "tipStep1": {"message": "Below is the screenshot you captured. You can edit it with the tools on the right, or simply save it."},
+  "tipStep1": {"message": "Below is the screenshot you captured. You can edit it with the tools on the left, or simply save it."},
   "tipStep2": {"message": "Now you can right-click the image below and save it, or simply click on the Save button on the right."},
   "highlightSetting": {"message": "Highlight Settings："},
   "highlightMode": {"message": "Highlight Mode"},
