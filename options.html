@@ -63,10 +63,9 @@
     line-height: 25px;
   }
   .colorBox {
-    float: left;
     width: 60px;
     height: 20px;
-    margin: 3px 0 0 10px;
+    margin: 3px 0 0 2px;
   }
   #colorpad {
     position: absolute;
@@ -101,13 +100,28 @@
   .section-content {
     padding-left: 55px;
   }
-  #colorBox {
-    background: #ff0000;
-    position: relative;
-    width: 60px;
-    height: 20px;
-    top: -37px;
-    left: 260px;
+  .closeBtn {
+    margin: 20px 0 0 0;
+  }
+  .closeBtn a {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#dddddd));
+    border: 1px solid #999;
+    border-bottom-left-radius: 2px 2px;
+    border-bottom-right-radius: 2px 2px;
+    border-top-left-radius: 2px 2px;
+    border-top-right-radius: 2px 2px;
+    color:#333333;
+    height: 18px;
+    line-height: 18px;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 12px;
+    padding: 2px 8px 2px 8px;
+    text-decoration: none;
+
+  }
+  .closeBtn a:hover {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#cccccc), to(#dddddd));
   }
   </style>
   <script>
@@ -126,6 +140,7 @@
     i18nReplace('tFontColor', 'fontColor');
     i18nReplace('tFontSize', 'fontSize');
     i18nReplace('highlightMode', 'highlightMode');
+    i18nReplace('saveAndClose', 'saveAndClose');
     var highlightColor = document.getElementById('hColor');
     var fontColor = document.getElementById('fontColor');
     var fontSize = document.getElementById('fontSize');
@@ -144,10 +159,8 @@
         localStorage.fontColor : fontColor.value;
     fontSize.value = localStorage.fontSize = localStorage.fontSize ?
         localStorage.fontSize : fontSize.value;
-    document.getElementById('highlightColorBox').style.backgroundColor =
-        highlightColor.value;
-    document.getElementById('textColorBox').style.backgroundColor =
-        fontColor.value;
+    highlightColor.style.backgroundColor = highlightColor.value;
+    fontColor.style.backgroundColor = fontColor.value;
     color.value = localStorage.highlightColor = localStorage.highlightColor ?
         localStorage.highlightColor : color.value;
 
@@ -164,6 +177,13 @@
          checked ? 'border':'' || document.getElementById('rectMode').checked ?
          'rect' : '';
      localStorage.fontSize = document.getElementById('fontSize').value;
+  }
+
+  function saveAndClose() {
+    save();
+    chrome.tabs.getSelected(null, function(tab) {
+      chrome.tabs.remove(tab.id);
+    });
   }
 
   function colorPadLoad() {
@@ -212,13 +232,12 @@
   function colorPadPick(color) {
     targetObj.value = color;
     if(colorType == 'highlight') {
-      localStorage.highlightColor = document.getElementById('hColor').value;
-      document.getElementById('highlightColorBox').
-          style.backgroundColor = color;
+      localStorage.highlightColor = targetObj.value;
+      targetObj.style.backgroundColor = color;
     }
     if(colorType == 'text') {
-      localStorage.fontColor = document.getElementById('fontColor').value;
-      document.getElementById('textColorBox').style.backgroundColor = color;
+      localStorage.fontColor = targetObj.value;
+      targetObj.style.backgroundColor = color;
     }
     hideColorPad();
   }
@@ -258,10 +277,8 @@
      <div class="clear"></div>
      <div class="contentLeft"><span id="color"></span></div>
      <div class="contentRight">
-       <input id="hColor" value="#FF0000" size="10" type="text" readonly="true"
-           onclick="showColorPad(event, this,'highlight');">
+     <div id="hColor" value="#FF0000" onclick="showColorPad(event, this,'highlight');" class="colorBox"></div>
      </div>
-     <div id="highlightColorBox" class="colorBox"></div>
      <div class="clear"></div>
    </div>
 
@@ -281,12 +298,11 @@
      <div class="clear"></div>
      <div class="contentLeft"><span id="tFontColor"></span></div>
      <div class="contentRight">
-       <input id="fontColor" value="#FF0000" size="10" type="text"
-           readonly="true" onclick="showColorPad(event, this, 'text');">
+     <div id="fontColor" value="#FF0000" onclick="showColorPad(event, this, 'text');" class="colorBox"></div>
      </div>
-     <div id="textColorBox" class="colorBox"></div>
      <div class="clear"></div>
    </div>
+   <div class="closeBtn"><a href="javascript:void(0)" id="saveAndClose" onclick="saveAndClose()">±£´æ²¢¹Ø±Õ</a></div>
  </div>
  </body>
 </html>

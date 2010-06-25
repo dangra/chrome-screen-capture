@@ -30,5 +30,6 @@
   "optionTitle": {"message": "网页截图选项"},
   "tip1": {"message": "请先刷新当前页面再截图。"},
   "tip2": {"message": "此页面是特殊页面，无法进行截图。"},
-  "tip3": {"message": "页面正在加载，请稍等。"}
+  "tip3": {"message": "页面正在加载，请稍等。"},
+  "saveAndClose": {"message": "保存并关闭"}
 }

@@ -30,6 +30,7 @@
   "optionTitle": {"message": "Screen Capture Options"},
   "tip1": {"message": "Please refresh this page to perform screen capture actions."},
   "tip2": {"message": "This is a special page. Unable to perform screen capture actions on this page."},
-  "tip3": {"message": "The page is loading, please wait."}
+  "tip3": {"message": "The page is loading, please wait."},
+  "saveAndClose": {"message": "Save & Close"}
   
 }

@@ -12,6 +12,7 @@
     font-family: arial, Verdana;
     margin: 0;
     padding: 0;
+    background: #959595;
   }
   #header {
     background: url(images/toolbar_bg.png);
@@ -110,18 +111,16 @@
   </a>
   </div>
   <div id="tip"></div>
-  <div class="toolbar" id="okBtn" style="position:fixed; left:87%; top:0px;">
-     <a href="javascript:void(0)" id="ok" onclick="photoShop.draw()">
-       <span id="tOk">OK</span>
+  <div class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
+     <a href="javascript:void(0)" id="save" onclick="photoShop.save()">
+      <span id="tSave">Save</span>
      </a>
      <a href="javascript:void(0)" id="option" onclick="photoShop.openOptionPage()">
        <span id="tOption">Option</span>
      </a>
-  </div>
-  <div id="saveBtn" class="toolbar" style="position:fixed; left:87%; top:0px; display:none">
-    <a href="javascript:void(0)" id="save" onclick="photoShop.save()">
-      <span id="tSave">Save</span>
-    </a>
+     <a href="javascript:void(0)" id="cancel" onclick="photoShop.closeCurrentTab()">
+       <span id="tCancel">Option</span>
+     </a>
   </div>
   <div class="clear"></div>
   </div>
@@ -176,18 +175,18 @@
       photoShop.i18nReplace('text', 'text', 'title');
       photoShop.i18nReplace('tOption', 'option');
       photoShop.i18nReplace('option', 'option', 'title');
-      photoShop.i18nReplace('tOk', 'ok');
-      photoShop.i18nReplace('ok', 'ok', 'title');
       photoShop.i18nReplace('tSave', 'save');
       photoShop.i18nReplace('save', 'save', 'title');
+      photoShop.i18nReplace('tCancel', 'cancel');
+      photoShop.i18nReplace('cancel', 'cancel', 'title');
 
       $('showBox').style.height = window.innerHeight - photoShop.offsetY;
       $('canvas').width = $('photo').style.width = bg.screenshot.canvas.width;
       $('canvas').height = $('photo').style.height = bg.screenshot.canvas.height;
-      
       var context;
       context = $('canvas').getContext('2d');
       context.drawImage(bg.screenshot.canvas,0,0);
+      $('showBox').style.height = window.innerHeight - photoShop.offsetY;
       $('canvas').style.display = 'block';
     },
 
@@ -246,7 +245,7 @@
     },
 
     openOptionPage: function() {
-      chrome.tabs.create({url:chrome.extension.getURL("options.html")});
+      chrome.tabs.create({url: chrome.extension.getURL("options.html")});
     },
     
     closeCurrentTab: function() {
@@ -256,19 +255,20 @@
     },
      
     finish: function() {
-      $('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
-      photoShop.removeElement('floatDiv');
-      photoShop.markedArea = [];
-      photoShop.dragFlag = false;
-      photoShop.lastValidAction = 0;
-      photoShop.isDraw = false;
+      //$('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
+      //photoShop.removeElement('floatDiv');
+      //photoShop.markedArea = [];
+      //photoShop.dragFlag = false;
+      //photoShop.lastValidAction = 0;
+      //photoShop.isDraw = false;
       bg.screenshot.data = null;
-      $('toolbar').style.display = 'none';
-      $('okBtn').style.display = 'none';
-      $('canvas').style.display = 'none';
-      $('pic').style.display = 'block';
-      $('saveBtn').style.display = 'block';
-      $('photo').style.cursor = 'default';
+      var context;
+      context = $('canvas').getContext('2d');
+      context.drawImage(bg.screenshot.canvas,0,0);
+      //$('toolbar').style.display = 'none';
+      //$('canvas').style.display = 'none';
+      //$('pic').style.display = 'block';
+      //$('photo').style.cursor = 'default';
     },
 
     setButtonCheck: function(id) {
@@ -533,13 +533,14 @@
             }
             break;
         }
-        photoShop.removeElement(photoShop.markedArea[j].id);
+        //photoShop.removeElement(photoShop.markedArea[j].id);
       }
-      photoShop.finish();
       $('pic').src = $('canvas').toDataURL('image/jpeg');
+      photoShop.finish();
     },
 
     save: function() {
+      this.draw();
       pluginobj.SaveScreenshot($('pic').src);
     }
   };
@@ -547,7 +548,10 @@
   function $(id) {
     return document.getElementById(id);
   };
-  photoShop.init();
+  window.onload = function() {
+    photoShop.init();
+  }
+
   $('photo').addEventListener('mousemove', photoShop.onMouseMove, true);
   $('photo').addEventListener('mousedown', photoShop.onMouseDown, true);
   $('photo').addEventListener('mouseup', photoShop.onMouseUp, true);
