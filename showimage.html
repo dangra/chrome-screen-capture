@@ -121,8 +121,8 @@
      <a href="javascript:void(0)" id="option" onclick="photoShop.openOptionPage()">
        <span id="tOption">Option</span>
      </a>
-     <a href="javascript:void(0)" id="cancel" onclick="photoShop.closeCurrentTab()">
-       <span id="tCancel">Option</span>
+     <a href="javascript:void(0)" id="close" onclick="photoShop.closeCurrentTab()">
+       <span id="tClose">Option</span>
      </a>
   </div>
   <div class="clear"></div>
@@ -181,8 +181,8 @@
       photoShop.i18nReplace('option', 'option', 'title');
       photoShop.i18nReplace('tSave', 'save');
       photoShop.i18nReplace('save', 'save', 'title');
-      photoShop.i18nReplace('tCancel', 'cancel');
-      photoShop.i18nReplace('cancel', 'cancel', 'title');
+      photoShop.i18nReplace('tClose', 'close');
+      photoShop.i18nReplace('close', 'close', 'title');
 
       //$('showBox').style.height = window.innerHeight - photoShop.offsetY;
       $('canvas').width = $('photo').style.width = bg.screenshot.canvas.width;
