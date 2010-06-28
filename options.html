@@ -154,9 +154,9 @@
         break;
     }
     highlightColor.value = localStorage.highlightColor = localStorage.highlightColor ?
-        localStorage.highlightColor : highlightColor.value;
+        localStorage.highlightColor : '#ff0000';
     fontColor.value = localStorage.fontColor = localStorage.fontColor ?
-        localStorage.fontColor : fontColor.value;
+        localStorage.fontColor : '#ff0000';
     fontSize.value = localStorage.fontSize = localStorage.fontSize ?
         localStorage.fontSize : fontSize.value;
     highlightColor.style.backgroundColor = highlightColor.value;
@@ -302,7 +302,7 @@
      </div>
      <div class="clear"></div>
    </div>
-   <div class="closeBtn"><a href="javascript:void(0)" id="saveAndClose" onclick="saveAndClose()">保存并关闭</a></div>
+   <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()">保存并关闭</button></div>
  </div>
  </body>
 </html>
