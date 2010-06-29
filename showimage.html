@@ -122,7 +122,7 @@
        <span id="tOption">Option</span>
      </a>
      <a href="javascript:void(0)" id="close" onclick="photoShop.closeCurrentTab()">
-       <span id="tClose">Option</span>
+       <span id="tClose">Close</span>
      </a>
   </div>
   <div class="clear"></div>
@@ -550,7 +550,7 @@
     },
 
     save: function() {
-      this.draw();
+      photoShop.draw();
       if (!pluginobj.SaveScreenshot($('pic').src)) {
         alert(chrome.i18n.getMessage('saveerror'));
       }

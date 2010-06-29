@@ -183,6 +183,7 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
     int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
     int byteLength = Base64DecodeGetRequiredLength(base64size);
     BYTE* bytes = new BYTE[byteLength];
+    Base64Decode(base64, base64size, bytes, &byteLength);
     if (!SaveFile(szFile, (char*)bytes, byteLength)) {
       result->value.boolValue = FALSE;
     }
