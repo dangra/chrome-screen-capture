@@ -91,6 +91,9 @@ bool CPlugin::GetProperty(NPObject* obj, NPIdentifier propertyName,
 
 void CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
                              uint32_t argCount, NPVariant* result) {
+  result->type = NPVariantType_Bool;
+  result->value.boolValue = TRUE;
+
   if (argCount != 1 || !NPVARIANT_IS_STRING(args[0])) {
     return;
   }
@@ -122,9 +125,12 @@ void CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
     Base64Decode(base64, base64size, bytes, &byteLength);
 
     FILE* out = fopen(szFile, "wb");
-    fwrite(bytes, byteLength, 1, out);
-    fclose(out);
-
+    if (out) {
+      fwrite(bytes, byteLength, 1, out);
+      fclose(out);
+    } else {
+      result->value.boolValue = FALSE;
+    }
     delete [] bytes;
   }
 

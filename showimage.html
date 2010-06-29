@@ -551,7 +551,9 @@
 
     save: function() {
       this.draw();
-      pluginobj.SaveScreenshot($('pic').src);
+      if (!pluginobj.SaveScreenshot($('pic').src)) {
+        alert(chrome.i18n.getMessage('saveerror'));
+      }
     }
   };
    
