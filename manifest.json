@@ -30,6 +30,8 @@
   "options_page": "options.html",
   "permissions": ["tabs", "http://*/*", "https://*/*"],
   "plugins": [ {
-     "path": "plugin/npcapture.dll"
+    "path": "plugin/npcapture.dll"
+  }, {
+    "path": "plugin/npcapture.so"
   } ]
 }

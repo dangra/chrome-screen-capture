@@ -31,9 +31,18 @@
 
 #include <stdio.h>
 #include <prtypes.h>
+#include <plbase64.h>
+
+#ifdef WINDOWS
 #include <atlenc.h>
 #include <atlstr.h>
 #include <comutil.h>
+#endif
+
+#ifdef GTK
+#include <gtk/gtk.h>
+#endif
+
 #include <vector>
 #include "npcapture.h"
 
@@ -68,8 +77,7 @@ bool CPlugin::Invoke(NPObject* obj, NPIdentifier methodName,
   }
   if (!strncmp((const char*)name, kSaveScreenshot,
                strlen(kSaveScreenshot))) {
-    SaveScreenshot(obj, args, argCount, result);
-    ret_val = true;
+    ret_val = SaveScreenshot(obj, args, argCount, result);
   } else {
     // Exception handling. 
     npnfuncs->setexception(obj, "exception during invocation");
@@ -89,20 +97,81 @@ bool CPlugin::GetProperty(NPObject* obj, NPIdentifier propertyName,
   return false;
 }
 
-void CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
+static void SaveFile(char* fileName, char* bytes, int byteLength) {
+  FILE* out = fopen(fileName, "wb");
+  if (out) {
+    fwrite(bytes, byteLength, 1, out);
+    fclose(out);
+  }
+}
+
+static char* gLastData = NULL;
+static int gLastDataLength = 0;
+
+static void FreeLastData() {
+  if (gLastData)
+    free(gLastData);
+  gLastData = NULL;
+  gLastDataLength = 0;
+}
+
+#ifdef GTK
+GtkWidget *gLastDialog = NULL;
+
+static void OnDialogResponse(GtkDialog* dialog, gint response,
+                             gpointer userData) {
+  if (response == GTK_RESPONSE_OK) {
+    char *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (file && gLastData) {
+      SaveFile(file, gLastData, gLastDataLength);
+      g_free(file);
+    }
+  }
+  gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
+static void OnDialogDestroy(GtkObject* object, gpointer userData) {
+  FreeLastData();
+  gLastDialog = NULL;
+}
+
+#endif
+
+bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
                              uint32_t argCount, NPVariant* result) {
   result->type = NPVariantType_Bool;
   result->value.boolValue = TRUE;
 
-  if (argCount != 1 || !NPVARIANT_IS_STRING(args[0])) {
-    return;
-  }
+  if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
+    return false;
 
-  char szFile[1024] = "";
+  char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+  if (!url)
+    return false;
 
+  char* title = NULL;
+  if (argCount == 2 && NPVARIANT_IS_STRING(args[1]))
+    title = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+
+  char* base64 = strstr(url, "base64,");
+  if (!base64)
+    return false;
+  base64 += 7;
+  
+  FreeLastData();
+  int startpos =  base64 - url;
+  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
+  int byteLength =  (base64size * 3) / 4;
+  char* bytes = PL_Base64Decode(base64, base64size, NULL);
+  if (!bytes)
+    return false;
+  gLastData = bytes;
+  gLastDataLength = byteLength;
+
+#ifdef WINDOWS
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = ((CPlugin*)obj)->hWnd;
+  Ofn.hwndOwner = (HWND)((CPlugin*)obj)->hWnd;
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);
@@ -114,27 +183,38 @@ void CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
   Ofn.lpstrDefExt = "png";
  
   GetSaveFileNameA(&Ofn);
+#endif
 
-  if (szFile[0] != '\0') {
-    char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
-    char* base64 = strstr(url, "base64,") + 7;
-    int startpos =  base64 - url;
-    int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
-    int byteLength = Base64DecodeGetRequiredLength(base64size);
-    BYTE* bytes = new BYTE[byteLength];
-    Base64Decode(base64, base64size, bytes, &byteLength);
+#ifdef GTK
+  if (!gLastDialog) {
+    GtkWidget *dialog = gtk_file_chooser_dialog_new(
+        title, NULL,
+        GTK_FILE_CHOOSER_ACTION_SAVE,
+        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+        GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
+                                                   TRUE);
 
-    FILE* out = fopen(szFile, "wb");
-    if (out) {
-      fwrite(bytes, byteLength, 1, out);
-      fclose(out);
-    } else {
-      result->value.boolValue = FALSE;
-    }
-    delete [] bytes;
+    GtkFileFilter *file_filter = gtk_file_filter_new();
+    gtk_file_filter_set_name(file_filter, "PNG Image");
+    gtk_file_filter_add_pattern(file_filter, "*.png");
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+
+    file_filter = gtk_file_filter_new();
+    gtk_file_filter_set_name(file_filter, "All Files");
+    gtk_file_filter_add_pattern(file_filter, "*.*");
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+    g_signal_connect(dialog, "response", G_CALLBACK(OnDialogResponse), NULL);
+    g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy), NULL);
+    gtk_widget_show_all(dialog);
+    gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
+    gLastDialog = dialog;
   }
+  gtk_window_present(GTK_WINDOW(gLastDialog));
+#endif
 
-  return;
+  return true;
 }
 
 static NPClass plugin_ref_obj = {
@@ -164,7 +244,7 @@ static NPError GetValue(NPP instance, NPPVariable variable, void* value) {
   case NPPVpluginScriptableNPObject:
     if (!instance->pdata) {
       instance->pdata = (void*)npnfuncs->createobject(instance, &plugin_ref_obj);
-      ((CPlugin*)instance->pdata)->hWnd = (HWND)instance->ndata;
+      ((CPlugin*)instance->pdata)->hWnd = instance->ndata;
     }
 
     // Retain the object since we keep it in plugin code
@@ -172,11 +252,9 @@ static NPError GetValue(NPP instance, NPPVariable variable, void* value) {
     npnfuncs->retainobject((NPObject*)instance->pdata);
     *(NPObject **)value = (NPObject*)instance->pdata;
     break;
-#if defined(XULRUNNER_SDK)
   case NPPVpluginNeedsXEmbed:
-    *((PRBool *)value) = PR_FALSE;
+    *((char *)value) = 1;
     break;
-#endif
   }
   return NPERR_NO_ERROR;
 }
@@ -184,7 +262,7 @@ static NPError GetValue(NPP instance, NPPVariable variable, void* value) {
 static NPError NewNPInstance(NPMIMEType pluginType, NPP instance,
                              uint16_t mode, int16_t argc, char* argn[],
                              char* argv[], NPSavedData* saved) {
-  BOOL bWindowed = TRUE;
+  int bWindowed = 1;
   npnfuncs->setvalue(instance, NPPVpluginWindowBool, (void *)bWindowed);
   instance->pdata = NULL;
   instance->ndata = NULL;
@@ -201,7 +279,7 @@ static NPError DestroyNPInstance(NPP instance, NPSavedData** save) {
 }
 
 NPError SetWindow(NPP instance, NPWindow* window) {
-  instance->ndata = (HWND)window->window;
+  instance->ndata = window->window;
   return NPERR_NO_ERROR;
 }
 
@@ -262,7 +340,7 @@ NPError  OSCALL NP_Shutdown() {
 }
 
 char* NP_GetMIMEDescription(void) {
-  return "application/x-screencapture";
+  return "application/x-screencapture::Screen Capture Plugin";
 }
 
 // Needs to be present for WebKit based browsers.

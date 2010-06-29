@@ -48,8 +48,9 @@ public:
   static bool GetProperty(NPObject* obj, NPIdentifier propertyName,
                           NPVariant* result);
   NPP npp;
-  HWND hWnd;
-  static void SaveScreenshot(NPObject* obj, const NPVariant* args,
+  void *hWnd;
+
+  static bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                       uint32_t argCount, NPVariant* result);
 };
   
