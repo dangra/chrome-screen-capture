@@ -234,6 +234,7 @@
 				ShowProgress="0"
 				OutputFile="$(ProjectDir)\$(ProjectName).dll"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
 				GenerateManifest="false"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="npcapture.def"

@@ -33,7 +33,7 @@
 #include <prtypes.h>
 #include <plbase64.h>
 
-#ifdef WINDOWS
+#ifdef _WINDOWS
 #include <atlenc.h>
 #include <atlstr.h>
 #include <comutil.h>
@@ -97,14 +97,17 @@ bool CPlugin::GetProperty(NPObject* obj, NPIdentifier propertyName,
   return false;
 }
 
-static void SaveFile(char* fileName, char* bytes, int byteLength) {
+static bool SaveFile(char* fileName, char* bytes, int byteLength) {
   FILE* out = fopen(fileName, "wb");
   if (out) {
     fwrite(bytes, byteLength, 1, out);
     fclose(out);
+    return true;
   }
+  return false;
 }
 
+#ifdef GTK
 static char* gLastData = NULL;
 static int gLastDataLength = 0;
 
@@ -115,7 +118,6 @@ static void FreeLastData() {
   gLastDataLength = 0;
 }
 
-#ifdef GTK
 GtkWidget *gLastDialog = NULL;
 
 static void OnDialogResponse(GtkDialog* dialog, gint response,
@@ -134,7 +136,6 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
   FreeLastData();
   gLastDialog = NULL;
 }
-
 #endif
 
 bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
@@ -158,17 +159,8 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
     return false;
   base64 += 7;
   
-  FreeLastData();
-  int startpos =  base64 - url;
-  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
-  int byteLength =  (base64size * 3) / 4;
-  char* bytes = PL_Base64Decode(base64, base64size, NULL);
-  if (!bytes)
-    return false;
-  gLastData = bytes;
-  gLastDataLength = byteLength;
-
-#ifdef WINDOWS
+#ifdef _WINDOWS
+  char szFile[1024] = "";
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
   Ofn.hwndOwner = (HWND)((CPlugin*)obj)->hWnd;
@@ -183,9 +175,31 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
   Ofn.lpstrDefExt = "png";
  
   GetSaveFileNameA(&Ofn);
+
+  if (szFile[0] != '\0') {
+    char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+    char* base64 = strstr(url, "base64,") + 7;
+    int startpos =  base64 - url;
+    int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
+    int byteLength = Base64DecodeGetRequiredLength(base64size);
+    BYTE* bytes = new BYTE[byteLength];
+    if (!SaveFile(szFile, (char*)bytes, byteLength)) {
+      result->value.boolValue = FALSE;
+    }
+  }
 #endif
 
 #ifdef GTK
+  FreeLastData();
+  int startpos =  base64 - url;
+  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
+  int byteLength =  (base64size * 3) / 4;
+  char* bytes = PL_Base64Decode(base64, base64size, NULL);
+  if (!bytes)
+    return false;
+  gLastData = bytes;
+  gLastDataLength = byteLength;
+
   if (!gLastDialog) {
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
         title, NULL,
