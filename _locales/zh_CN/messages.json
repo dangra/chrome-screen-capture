@@ -16,6 +16,7 @@
   "done": {"message": "完成"},
   "option": {"message": "选项"},
   "save": {"message": "保存"},
+  "savetitle": {"message": "保存图片"},  
   "saveerror": {"message": "保存截图失败。"},
   "tipStep1": {"message": "以下是您的截图，您可以利用左边的工具进行编辑，或者直接保存。"},
   "tipStep2": {"message": "现在您可以在下面的图片上点击右键，选择“图片另存为”，即可保存图片，或直接点击右边的“保存”按钮。"},

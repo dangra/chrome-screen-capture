@@ -571,7 +571,8 @@
 
     save: function() {
       //photoShop.draw();
-      if (!pluginobj.SaveScreenshot($('pic').src)) {
+      if (!pluginobj.SaveScreenshot(
+              $('pic').src, chrome.i18n.getMessage('savetitle'))) {
         alert(chrome.i18n.getMessage('saveerror'));
       }
     }

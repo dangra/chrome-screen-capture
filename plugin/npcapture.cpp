@@ -151,7 +151,7 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
 
   char* title = NULL;
   if (argCount == 2 && NPVARIANT_IS_STRING(args[1]))
-    title = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+    title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
 
   char* base64 = strstr(url, "base64,");
   if (!base64)
