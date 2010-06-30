@@ -30,8 +30,6 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include <stdio.h>
-#include <prtypes.h>
-#include <plbase64.h>
 
 #ifdef _WINDOWS
 #include <atlenc.h>
@@ -97,7 +95,8 @@ bool CPlugin::GetProperty(NPObject* obj, NPIdentifier propertyName,
   return false;
 }
 
-static bool SaveFile(char* fileName, char* bytes, int byteLength) {
+static bool SaveFile(const char* fileName, const unsigned char* bytes,
+                     int byteLength) {
   FILE* out = fopen(fileName, "wb");
   if (out) {
     fwrite(bytes, byteLength, 1, out);
@@ -108,7 +107,7 @@ static bool SaveFile(char* fileName, char* bytes, int byteLength) {
 }
 
 #ifdef GTK
-static char* gLastData = NULL;
+static guchar* gLastData = NULL;
 static int gLastDataLength = 0;
 
 static void FreeLastData() {
@@ -158,7 +157,8 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
   if (!base64)
     return false;
   base64 += 7;
-  
+  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
+
 #ifdef _WINDOWS
   char szFile[1024] = "";
   OPENFILENAMEA Ofn = {0};
@@ -177,14 +177,10 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
   GetSaveFileNameA(&Ofn);
 
   if (szFile[0] != '\0') {
-    char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
-    char* base64 = strstr(url, "base64,") + 7;
-    int startpos =  base64 - url;
-    int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
     int byteLength = Base64DecodeGetRequiredLength(base64size);
     BYTE* bytes = new BYTE[byteLength];
     Base64Decode(base64, base64size, bytes, &byteLength);
-    if (!SaveFile(szFile, (char*)bytes, byteLength)) {
+    if (!SaveFile(szFile, bytes, byteLength)) {
       result->value.boolValue = FALSE;
     }
   }
@@ -192,14 +188,12 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
 
 #ifdef GTK
   FreeLastData();
-  int startpos =  base64 - url;
-  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - startpos;
-  int byteLength =  (base64size * 3) / 4;
-  char* bytes = PL_Base64Decode(base64, base64size, NULL);
-  if (!bytes)
-    return false;
-  gLastData = bytes;
-  gLastDataLength = byteLength;
+  gsize byteLength = (base64size * 3) / 4;
+  gLastData = (guchar*)malloc(byteLength);
+  gint state = 0;
+  guint save = 0;
+  gLastDataLength = g_base64_decode_step(base64, base64size, gLastData,
+                                         &state, &save);
 
   if (!gLastDialog) {
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
@@ -210,6 +204,9 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
                                                    TRUE);
+    const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_PICTURES);
+    if (dir)
+      gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), dir);
 
     GtkFileFilter *file_filter = gtk_file_filter_new();
     gtk_file_filter_set_name(file_filter, "PNG Image");
@@ -328,7 +325,7 @@ extern "C" {
   }
 
 #ifndef HIBYTE
-#define HIBYTE(x) ((((uint32)(x)) & 0xff00) >> 8)
+#define HIBYTE(x) ((((unsigned short)(x)) & 0xff00) >> 8)
 #endif
 
 NPError OSCALL NP_Initialize(NPNetscapeFuncs* npnf
