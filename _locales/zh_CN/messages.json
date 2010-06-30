@@ -20,6 +20,7 @@
   "saveerror": {"message": "保存截图失败。"},
   "tipStep1": {"message": "以下是您的截图，您可以利用左边的工具进行编辑，然后点击“完成” 按钮。"},
   "tipStep2": {"message": "现在您可以在下面的图片上点击右键，选择“图片另存为”，即可保存图片，或直接点击右边的“保存”按钮。"},
+  "tipStepMac": {"message": "现在您可以在下面的图片上点击右键，选择“图片另存为”，即可保存图片。"},
   "highlightSetting": {"message": "高亮标记设置："},
   "highlightMode": {"message": "高亮模式"},
   "border": {"message": "高亮区域只画边框"},
