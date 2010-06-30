@@ -32,6 +32,6 @@
   "plugins": [ {
     "path": "plugin/npcapture.dll"
   }, {
-    "path": "plugin/npcapture.so"
+    "path": "plugin/npcapture64.so"
   } ]
 }
