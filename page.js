@@ -182,47 +182,50 @@ var page = {
   * Create a float layer on the webpage
   */
   createFloatLayer: function() {
-    page.createDiv(document.body, 'drag_area_protector');
+    page.createDiv(document.body, 'sc_drag_area_protector');
   },
 
   /**
   * Load the screenshot area interface
   */
   createSelectionArea: function() {
-    var areaProtector = $('drag_area_protector');
+    var areaProtector = $('sc_drag_area_protector');
+    areaProtector.onclick = function() {
+      event.stopPropagation();
+      return false;
+    };
+    page.createDiv(areaProtector, 'sc_drag_shadow_top');
+    page.createDiv(areaProtector, 'sc_drag_shadow_bottom');
+    page.createDiv(areaProtector, 'sc_drag_shadow_left');
+    page.createDiv(areaProtector, 'sc_drag_shadow_right');
 
-    page.createDiv(areaProtector, 'drag_shadow_top');
-    page.createDiv(areaProtector, 'drag_shadow_bottom');
-    page.createDiv(areaProtector, 'drag_shadow_left');
-    page.createDiv(areaProtector, 'drag_shadow_right');
+    var areaElement = page.createDiv(areaProtector, 'sc_drag_area');
+    page.createDiv(areaElement, 'sc_drag_container');
+    page.createDiv(areaElement, 'sc_drag_size');
 
-    var areaElement = page.createDiv(areaProtector, 'drag_area');
-    page.createDiv(areaElement, 'drag_container');
-    page.createDiv(areaElement, 'drag_size');
-
-    var cancel = page.createDiv(areaElement, 'drag_cancel');
+    var cancel = page.createDiv(areaElement, 'sc_drag_cancel');
     cancel.addEventListener('mousedown', function (){
         page.removeSelectionArea();}, true);
     cancel.innerHTML = chrome.i18n.getMessage("cancel");
 
-    var crop = page.createDiv(areaElement, 'drag_crop');
+    var crop = page.createDiv(areaElement, 'sc_drag_crop');
     crop.addEventListener('mousedown', page.getSelectionSize, true);
     crop.innerHTML = chrome.i18n.getMessage('crop');
 
-    page.createDiv(areaElement, 'drag_north_west');
-    page.createDiv(areaElement, 'drag_north_east');
-    page.createDiv(areaElement, 'drag_south_east');
-    page.createDiv(areaElement, 'drag_south_west');
+    page.createDiv(areaElement, 'sc_drag_north_west');
+    page.createDiv(areaElement, 'sc_drag_north_east');
+    page.createDiv(areaElement, 'sc_drag_south_east');
+    page.createDiv(areaElement, 'sc_drag_south_west');
 
     document.addEventListener('mousedown', page.onMouseDown, false);
     document.addEventListener('mousemove', page.onMouseMove, false);
     document.addEventListener('mouseup', page.onMouseUp, false);
     document.addEventListener('dblclick', page.getSelectionSize, false);
 
-    page.pageHeight = $('drag_area_protector').clientHeight;
-    page.pageWidth = $('drag_area_protector').clientWidth;
+    page.pageHeight = $('sc_drag_area_protector').clientHeight;
+    page.pageWidth = $('sc_drag_area_protector').clientWidth;
 
-    var areaElement = $('drag_area');
+    var areaElement = $('sc_drag_area');
     areaElement.style.left = page.startX + 'px';
     areaElement.style.top = page.startY + 'px';
     areaElement.style.width = (page.endX - page.startX) + 'px';
@@ -247,28 +250,28 @@ var page = {
         } else if (elementName && document) {
           page.isMouseDown = true;
 
-          var areaElement = $('drag_area');
+          var areaElement = $('sc_drag_area');
           var xPosition = event.pageX - window.scrollX;
           var yPosition = event.pageY - window.scrollY;
 
           if (areaElement) {
-            if (element == $('drag_container')) {
+            if (element == $('sc_drag_container')) {
               page.moving = true;
               page.moveX = xPosition - areaElement.offsetLeft;
               page.moveY = yPosition - areaElement.offsetTop;
-            } else if (element == $('drag_north_east')) {
+            } else if (element == $('sc_drag_north_east')) {
               page.resizing = true;
               page.startX = areaElement.offsetLeft;
               page.startY = areaElement.offsetTop + areaElement.clientHeight;
-            } else if (element == $('drag_north_west')) {
+            } else if (element == $('sc_drag_north_west')) {
               page.resizing = true;
               page.startX = areaElement.offsetLeft + areaElement.clientWidth;
               page.startY = areaElement.offsetTop + areaElement.clientHeight;
-            } else if (element == $('drag_south_east')) {
+            } else if (element == $('sc_drag_south_east')) {
               page.resizing = true;
               page.startX = areaElement.offsetLeft;
               page.startY = areaElement.offsetTop;
-            } else if (element == $('drag_south_west')) {
+            } else if (element == $('sc_drag_south_west')) {
               page.resizing = true;
               page.startX = areaElement.offsetLeft + areaElement.clientWidth;
               page.startY = areaElement.offsetTop;
@@ -292,7 +295,7 @@ var page = {
   onMouseMove: function() {
     var element = event.target;
     if (element && page.isMouseDown) {
-      var areaElement = $('drag_area');
+      var areaElement = $('sc_drag_area');
       if (areaElement) {
         var xPosition = event.pageX - window.scrollX;
         var yPosition = event.pageY - window.scrollY;
@@ -375,12 +378,12 @@ var page = {
   * Update the location of the shadow layer
   */
   updateShadow: function(areaElement) {
-    $('drag_shadow_top').style.height = parseInt(areaElement.style.top) + 'px';
-    $('drag_shadow_top').style.width = (parseInt(areaElement.style.left) +
+    $('sc_drag_shadow_top').style.height = parseInt(areaElement.style.top) + 'px';
+    $('sc_drag_shadow_top').style.width = (parseInt(areaElement.style.left) +
         parseInt(areaElement.style.width) + 1) +'px';
-    $('drag_shadow_left').style.height = (page.pageHeight -
+    $('sc_drag_shadow_left').style.height = (page.pageHeight -
         parseInt(areaElement.style.top)) + 'px';
-    $('drag_shadow_left').style.width = parseInt(areaElement.style.left) + 'px';
+    $('sc_drag_shadow_left').style.width = parseInt(areaElement.style.left) + 'px';
 
     var height = (parseInt(areaElement.style.top) +
         parseInt(areaElement.style.height) + 1);
@@ -388,24 +391,24 @@ var page = {
     var width = (page.pageWidth) - 1 - (parseInt(areaElement.style.left) +
         parseInt(areaElement.style.width));
     width = (width < 0) ? 0 : width;
-    $('drag_shadow_right').style.height = height + 'px';
-    $('drag_shadow_right').style.width =  width + 'px';
+    $('sc_drag_shadow_right').style.height = height + 'px';
+    $('sc_drag_shadow_right').style.width =  width + 'px';
 
     height = (page.pageHeight - 1 - (parseInt(areaElement.style.top) +
         parseInt(areaElement.style.height)));
     height = (height < 0) ? 0 : height;
     width = (page.pageWidth) - parseInt(areaElement.style.left);
     width = (width < 0) ? 0 : width;
-    $('drag_shadow_bottom').style.height = height + 'px';
-    $('drag_shadow_bottom').style.width = width + 'px';
+    $('sc_drag_shadow_bottom').style.height = height + 'px';
+    $('sc_drag_shadow_bottom').style.width = width + 'px';
   },
 
   /**
   * Remove selection area
   */
   removeSelectionArea: function() {
-    page.removeElement('drag_area_protector');
-    page.removeElement('drag_area');
+    page.removeElement('sc_drag_area_protector');
+    page.removeElement('sc_drag_area');
 
     document.removeEventListener('mousedown', page.onMouseDown, false);
     document.removeEventListener('mousemove', page.onMouseMove, false);
@@ -422,7 +425,7 @@ var page = {
         (page.startX - page.endX);
     var height = (page.endY > page.startY) ? (page.endY - page.startY) :
         (page.startY - page.endY);
-    $('drag_size').innerText = width + ' x ' + height;
+    $('sc_drag_size').innerText = width + ' x ' + height;
   },
 
   /**

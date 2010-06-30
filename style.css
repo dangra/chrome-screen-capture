@@ -1,4 +1,11 @@
-#drag_area { 
+#sc_drag_area_protector div {
+  border-radius: 0px 0px;
+  margin:0;
+  max-width:100%;
+  min-width: 1px;
+}
+
+#sc_drag_area {
   height:100px; 
   left:150px; 
   position: absolute;   
@@ -6,7 +13,7 @@
   width:250px; 
   z-index: 9999; 
 }
-#drag_container {
+#sc_drag_container {
   border: 1px solid #0000FF; 
   cursor: move ; 
   height: 100% ; 
@@ -17,7 +24,8 @@
   width: 100%; 
   z-index:9997;
 }
-#drag_area_protector {
+#sc_drag_area_protector {
+  border-radius: 0px 0px;
   display:block; 
   height:100%;
   left:0; 
@@ -25,8 +33,12 @@
   position:fixed; 
   width:100%; 
   z-index:8500;
+  margin: 0;
+  max-width:100%;
+  min-width: 1px;
+
 }
-#drag_size {
+#sc_drag_size {
   background-color:#444444; 
   color:#ffffff; 
   font-family: verdana; 
@@ -43,7 +55,7 @@
   top: -13px; 
   z-index:9998; 
 }
-#drag_cancel, #drag_crop {
+#sc_drag_cancel, #sc_drag_crop {
   background:#000000; 
   cursor:pointer; 
   color:#ffffff; 
@@ -55,41 +67,42 @@
   position:absolute ; 
   z-index:9998
 }
-#drag_crop { 
+#sc_drag_crop {
   bottom:-25px; 
   padding-left:10px; 
   padding-right:10px;  
   right:10px; 
 }
-#drag_cancel {
+#sc_drag_cancel {
   bottom:-25px; 
   padding-left:10px; 
   padding-right:8px; 
   right:60px; 
 }
-#drag_shadow_top, #drag_shadow_bottom, #drag_shadow_left, #drag_shadow_right {
+#sc_drag_shadow_top, #sc_drag_shadow_bottom, #sc_drag_shadow_left, #sc_drag_shadow_right {
   background-color: #000000; 
   opacity: 0.5; 
   position: absolute; 
-  z-index:7000
+  z-index:7000;
+  border: 0px;
 }
-#drag_shadow_top {
+#sc_drag_shadow_top {
   left: 0px; 
   top: 0px; 
 } 
-#drag_shadow_bottom {
+#sc_drag_shadow_bottom {
   bottom: 0; 
   right: 0; 
 } 
-#drag_shadow_left {
+#sc_drag_shadow_left {
   bottom: 0; 
   left: 0; 
 } 
-#drag_shadow_right {
+#sc_drag_shadow_right {
   right: 0;
   top: 0; 
 }
-#drag_north_east, #drag_north_west, #drag_south_east, #drag_south_west  {
+#sc_drag_north_east, #sc_drag_north_west, #sc_drag_south_east, #sc_drag_south_west  {
   border:1px solid #FFFFFF; 
   background-color: #0000FF; 
   height: 5px; 
@@ -97,22 +110,22 @@
   width: 5px; 
   z-index:9998; 
 }
-#drag_north_east {
+#sc_drag_north_east {
   cursor: ne-resize ; 
   right: -4px ; 
   top: -3px; 
 } 
-#drag_north_west {
+#sc_drag_north_west {
   cursor: nw-resize ; 
   left: -3px ; 
   top: -3px; 
 } 
-#drag_south_east {
+#sc_drag_south_east {
   bottom: -4px; 
   cursor: se-resize ; 
   right: -4px ; 
 } 
-#drag_south_west {
+#sc_drag_south_west {
   bottom: -4px; 
   cursor: sw-resize ; 
   left: -3px ; 
