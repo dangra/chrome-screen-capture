@@ -13,7 +13,7 @@
   "highlight": {"message":" 高亮标记"},
   "redact": {"message": " 涂黑"},
   "text": {"message": "添加文字"},
-  "ok": {"message": "完成"},
+  "done": {"message": "完成"},
   "option": {"message": "选项"},
   "save": {"message": "保存"},
   "saveerror": {"message": "保存截图失败。"},
@@ -32,5 +32,6 @@
   "tip1": {"message": "请先刷新当前页面再截图。"},
   "tip2": {"message": "此页面是特殊页面，无法进行截图。"},
   "tip3": {"message": "页面正在加载，请稍等。"},
-  "saveAndClose": {"message": "保存并关闭"}
+  "saveAndClose": {"message": "保存并关闭"},
+  "editMore" : {"message": "返回编辑"}
 }

@@ -13,7 +13,7 @@
   "highlight": {"message": " Highlight"},
   "redact": {"message": " Redact"},
   "text": {"message": "Text"},
-  "ok": {"message": "Done"},
+  "done": {"message": "Done"},
   "option": {"message": "Options"},
   "save": {"message": "Save"},
   "saveerror": {"message": "Failed to save the screenshot."},
@@ -32,6 +32,7 @@
   "tip1": {"message": "Please refresh this page to perform screen capture actions."},
   "tip2": {"message": "This is a special page. Unable to perform screen capture actions on this page."},
   "tip3": {"message": "The page is loading, please wait."},
-  "saveAndClose": {"message": "Save & Close"}
+  "saveAndClose": {"message": "Save & Close"},
+  "editMore" : {"message": "Edit More"}
   
 }
