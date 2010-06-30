@@ -136,9 +136,9 @@
 
   <div class="layer" id="layer0"></div>
   </div>
-  <img id="pic" src="#" style="display:none">
-  </div>
 
+  </div>
+  <img id="pic" src="#" style="display:none">
   <object id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px">
     Failed to load np plugin. You might be using the old version of the extension.
   </object>
@@ -282,23 +282,24 @@
       context.drawImage(bg.screenshot.canvas,0,0);
       $('save').style.display = 'inline-block';
       $('toolbar').style.display = 'none';
-      $('photo').style.display = 'none';
+      $('showBox').style.display = 'none';
       $('pic').style.display = 'block';
       $('editMore').style.display = 'inline-block';
       $('done').style.display = 'none';
+      $('tip').style.margin = '0 210px 0 20px';
     },
 
     editMore: function() {
       $('tip').innerHTML = chrome.i18n.getMessage('tipStep1');
-      photoShop.dragFlag = true;
-      photoShop.isDraw = true;
+
       $('toolbar').style.display = 'block';
-      $('photo').style.display = 'block';
+      $('showBox').style.display = 'block';
       $('pic').style.display = 'none';
       $('save').style.display = 'none';
       $('editMore').style.display = 'none';
       $('done').style.display = 'inline-block';
-      $('pic').src = '';
+      $('tip').style.margin = '0 120px 0 250px';
+      photoShop.isDraw = true;
     },
 
     setButtonCheck: function(id) {
@@ -436,8 +437,8 @@
     onMouseUp: function(event) {
       photoShop.endX = event.pageX + $('showBox').scrollLeft - photoShop.offsetX ;
       photoShop.endY = event.pageY + $('showBox').scrollTop - photoShop.offsetY ;
-      if (photoShop.isDraw && photoShop.dragFlag && photoShop.endX !=
-          photoShop.startX && photoShop.endY != photoShop.startY) {
+      if (photoShop.isDraw && photoShop.dragFlag && (photoShop.endX !=
+          photoShop.startX || photoShop.endY != photoShop.startY)) {
         photoShop.markedArea.push({
           'id': photoShop.layerId,
           'x': (photoShop.startX < photoShop.endX) ? photoShop.startX :
@@ -460,7 +461,11 @@
         photoShop.createDiv();
         event.stopPropagation();
         event.preventDefault();
-      } 
+      } else if (photoShop.endX ==
+          photoShop.startX && photoShop.endY == photoShop.startY) {
+        photoShop.removeElement(photoShop.layerId);
+        photoShop.createDiv();
+      }
       photoShop.dragFlag = false;
 
     },
