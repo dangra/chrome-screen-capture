@@ -114,12 +114,14 @@
   </div>
   <div id="tip"></div>
   <div class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
-
+    <a href="javascript:void(0)" id="done" onclick="photoShop.draw()">
+      <span id="tDone">Done</span>
+     </a>
     <a href="javascript:void(0)" id="save" onclick="photoShop.save()">
       <span id="tSave">Save</span>
      </a>
-     <a href="javascript:void(0)" id="option" onclick="photoShop.openOptionPage()">
-       <span id="tOption">Option</span>
+     <a href="javascript:void(0)" id="editMore" onclick="photoShop.editMore()">
+       <span id="tEditMore">Edit More</span>
      </a>
      <a href="javascript:void(0)" id="close" onclick="photoShop.closeCurrentTab()">
        <span id="tClose">Close</span>
@@ -130,11 +132,13 @@
   <div id="showBox">
   <div id="photo">
   <canvas id="canvas" onSelectStart="return false"></canvas>
-  <img id="pic" src="#" style="display:none">
+
 
   <div class="layer" id="layer0"></div>
   </div>
+  <img id="pic" src="#" style="display:none">
   </div>
+
   <object id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px">
     Failed to load np plugin. You might be using the old version of the extension.
   </object>
@@ -177,26 +181,27 @@
       photoShop.i18nReplace('blackout', 'redact', 'title');
       photoShop.i18nReplace('tText', 'text');
       photoShop.i18nReplace('text', 'text', 'title');
-      photoShop.i18nReplace('tOption', 'option');
-      photoShop.i18nReplace('option', 'option', 'title');
+      photoShop.i18nReplace('tEditMore', 'editMore');
+      photoShop.i18nReplace('editMore', 'editMore', 'title');
       photoShop.i18nReplace('tSave', 'save');
       photoShop.i18nReplace('save', 'save', 'title');
       photoShop.i18nReplace('tClose', 'close');
       photoShop.i18nReplace('close', 'close', 'title');
+      photoShop.i18nReplace('tDone', 'done');
+      photoShop.i18nReplace('done', 'done', 'title');
 
-      //$('showBox').style.height = window.innerHeight - photoShop.offsetY;
       $('canvas').width = $('photo').style.width = bg.screenshot.canvas.width;
       $('canvas').height = $('photo').style.height = bg.screenshot.canvas.height;
-      //alert(bg.screenshot.canvas.height);
       var context;
       context = $('canvas').getContext('2d');
       context.drawImage(bg.screenshot.canvas,0,0);
-
 
       $('canvas').style.display = 'block';
       var showBoxHeight = function() {
         $('showBox').style.height = window.innerHeight - photoShop.offsetY - 1;
       }
+      $('save').style.display = 'none';
+      $('editMore').style.display = 'none';
       setTimeout(showBoxHeight, 50);
     },
 
@@ -265,20 +270,35 @@
     },
      
     finish: function() {
-      //$('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
+      $('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
       //photoShop.removeElement('floatDiv');
       //photoShop.markedArea = [];
-      //photoShop.dragFlag = false;
+      photoShop.dragFlag = false;
       //photoShop.lastValidAction = 0;
-      //photoShop.isDraw = false;
+      photoShop.isDraw = false;
       bg.screenshot.data = null;
       var context;
       context = $('canvas').getContext('2d');
       context.drawImage(bg.screenshot.canvas,0,0);
-      //$('toolbar').style.display = 'none';
-      //$('canvas').style.display = 'none';
-      //$('pic').style.display = 'block';
-      //$('photo').style.cursor = 'default';
+      $('save').style.display = 'inline-block';
+      $('toolbar').style.display = 'none';
+      $('photo').style.display = 'none';
+      $('pic').style.display = 'block';
+      $('editMore').style.display = 'inline-block';
+      $('done').style.display = 'none';
+    },
+
+    editMore: function() {
+      $('tip').innerHTML = chrome.i18n.getMessage('tipStep1');
+      photoShop.dragFlag = true;
+      photoShop.isDraw = true;
+      $('toolbar').style.display = 'block';
+      $('photo').style.display = 'block';
+      $('pic').style.display = 'none';
+      $('save').style.display = 'none';
+      $('editMore').style.display = 'none';
+      $('done').style.display = 'inline-block';
+      $('pic').src = '';
     },
 
     setButtonCheck: function(id) {
@@ -550,7 +570,7 @@
     },
 
     save: function() {
-      photoShop.draw();
+      //photoShop.draw();
       if (!pluginobj.SaveScreenshot($('pic').src)) {
         alert(chrome.i18n.getMessage('saveerror'));
       }
