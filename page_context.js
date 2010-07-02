@@ -2,8 +2,7 @@ var __screenCapturePageContext__ = {
   clone : function(object) {
     function StubObj() { }
     StubObj.prototype = object;
-    //var newObj = new StubObj();
-    var newObj = object;
+    var newObj = new StubObj();
     newObj.getInternalObject = function() {
       return this.__proto__;
     }
