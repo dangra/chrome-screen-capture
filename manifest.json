@@ -1,5 +1,5 @@
 {
-  "version": "1.12",
+  "version": "1.14",
   "name": "__MSG_name__",
   "description": "__MSG_description__",
   "background_page": "background.html",
@@ -22,6 +22,7 @@
     }
   ],
   "icons": {
+    "16": "icon_16.png",
     "19": "icon_19.png",
     "48": "icon_48.png",
     "128": "icon_128.png"
