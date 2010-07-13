@@ -54,7 +54,7 @@ var __screenCapturePageContext__ = {
       var This = this;
       try {
         document.__defineGetter__("body", function() {
-          return This.bodyWrapperDelegate_.getOriginal();
+          return This.bodyWrapperDelegate_.getWrapper().getInternalObject();
         });
       } catch (e) {
         window.console.log("error" + e);
@@ -96,7 +96,6 @@ var __screenCapturePageContext__ = {
 __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
                                         propertyNameFilter) {
   this.window_ = window;
-  this.originalObject_ = originalObject;
   // The wrapper is the object we use to wrap the 'originalObject'.
   this.wrapper_ = __screenCapturePageContext__.clone(originalObject);
   // This array saves all properties we set our getter/setter for them.
@@ -222,10 +221,6 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
   // Listen the unload event.
   this.window_.addEventListener("unload", this.cleanUp_, false);
 };
-
-__screenCapturePageContext__.ObjectWrapDelegate.prototype.getOriginal = function() {
-  return this.originalObject_;
-}
 
 __screenCapturePageContext__.ObjectWrapDelegate.prototype.getWrapper = function() {
   return this.wrapper_;
