@@ -38,11 +38,27 @@ var __screenCapturePageContext__ = {
     this.currentHookStatus_ = !this.currentHookStatus_;
     window.console.log("toggle hook staus " + this.currentHookStatus_);
     if (this.currentHookStatus_) {
+      var This = this;
+      try {
+        document.__defineGetter__("body", function() {
+          return This.bodyWrapperDelegate_.getWrapper();
+        });
+      } catch (e) {
+        window.console.log("error" + e);
+      }
       this.bodyWrapperDelegate_.watch("scrollLeft", this.scrollValueHooker);
       this.bodyWrapperDelegate_.watch("scrollTop", this.scrollValueHooker);
     } else {
       this.bodyWrapperDelegate_.unwatch("scrollLeft", this.scrollValueHooker);
       this.bodyWrapperDelegate_.unwatch("scrollTop", this.scrollValueHooker);
+      var This = this;
+      try {
+        document.__defineGetter__("body", function() {
+          return This.bodyWrapperDelegate_.getOriginal();
+        });
+      } catch (e) {
+        window.console.log("error" + e);
+      }
     }
   },
 
@@ -56,14 +72,6 @@ var __screenCapturePageContext__ = {
   init : function() {
     if (!this.bodyWrapperDelegate_) {
       this.bodyWrapperDelegate_ = new __screenCapturePageContext__.ObjectWrapDelegate(document.body, "^(DOCUMENT_[A-Z_]+|[A-Z_]+_NODE)$");
-      var This = this;
-      try {
-        document.__defineGetter__("body", function() {
-          return This.bodyWrapperDelegate_.getWrapper();
-        });
-      } catch (e) {
-        window.console.log("error" + e);
-      }
       window.setInterval(__screenCapturePageContext__.bind(this, this.checkHookStatus), 100)
     }
   }
@@ -88,6 +96,7 @@ var __screenCapturePageContext__ = {
 __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
                                         propertyNameFilter) {
   this.window_ = window;
+  this.originalObject_ = originalObject;
   // The wrapper is the object we use to wrap the 'originalObject'.
   this.wrapper_ = __screenCapturePageContext__.clone(originalObject);
   // This array saves all properties we set our getter/setter for them.
@@ -213,6 +222,10 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
   // Listen the unload event.
   this.window_.addEventListener("unload", this.cleanUp_, false);
 };
+
+__screenCapturePageContext__.ObjectWrapDelegate.prototype.getOriginal = function() {
+  return this.originalObject_;
+}
 
 __screenCapturePageContext__.ObjectWrapDelegate.prototype.getWrapper = function() {
   return this.wrapper_;

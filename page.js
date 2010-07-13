@@ -495,7 +495,7 @@ var page = {
     }
     this.injectCssResource('style.css');
     this.messageListener();
-    //this.injectJavaScriptResource("page_context.js");  
+    this.injectJavaScriptResource("page_context.js");  
   }
 };
 
