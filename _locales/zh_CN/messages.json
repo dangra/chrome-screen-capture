@@ -1,5 +1,5 @@
 {
-  "name": {"message": "网页截图"},
+  "name": {"message": "网页截图（由Google提供）"},
   "description": {"message": "截取网页为图片，支持窗口截图，区域截图和整个网页截图三种方式。"},
   "default_title": {"message": "网页截图"},
   "captureWindow": {"message": "可视区域截图"},

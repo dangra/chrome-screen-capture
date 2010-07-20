@@ -1,5 +1,5 @@
 {
-  "name": {"message": "Screen Capture"},
+  "name": {"message": "Screen Capture (by Google)"},
   "description": {"message": "Capture visible content of a tab, a region of a web page, or the whole page as a PNG image. Support horizontal and vertical scroll when capturing whole page."},
   "default_title": {"message": "Screen Capture"},
   "captureWindow": {"message": "Capture Visible Content"},
@@ -36,5 +36,4 @@
   "tip3": {"message": "The page is loading, please wait."},
   "saveAndClose": {"message": "Save & Close"},
   "editMore" : {"message": "Edit More"}
-  
 }
