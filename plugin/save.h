@@ -34,7 +34,7 @@
 
 #include "npfunctions.h"
 
-bool SaveScreenshot(HWND hWnd, const NPVariant* args,
+bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result);
 
 #endif  // NPCAPTURE__SAVE_H_

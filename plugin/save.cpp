@@ -33,6 +33,7 @@
 
 #ifdef _WINDOWS
 #include <atlenc.h>
+#include "npcapture.h"
 #endif
 
 #ifdef GTK
@@ -91,7 +92,7 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 const char* GetSaveFileName();
 #endif
 
-bool SaveScreenshot(HWND hWnd, const NPVariant* args,
+bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result) {
   if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
     return false;
@@ -117,7 +118,7 @@ bool SaveScreenshot(HWND hWnd, const NPVariant* args,
   char szFile[1024] = "";
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = hWnd;
+  Ofn.hwndOwner = (HWND)((CPlugin*)obj)->hWnd;
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);

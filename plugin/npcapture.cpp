@@ -63,8 +63,7 @@ bool CPlugin::Invoke(NPObject* obj, NPIdentifier methodName,
   }
   if (!strncmp((const char*)name, kSaveScreenshot,
                strlen(kSaveScreenshot))) {
-    ret_val = SaveScreenshot(
-        (HWND)((CPlugin*)obj)->hWnd, args, argCount, result);
+    ret_val = SaveScreenshot(obj, args, argCount, result);
   } else {
     // Exception handling. 
     npnfuncs->setexception(obj, "exception during invocation");
