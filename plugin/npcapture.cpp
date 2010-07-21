@@ -41,6 +41,10 @@
 #include <gtk/gtk.h>
 #endif
 
+#ifdef __APPLE__
+#include <resolv.h>
+#endif
+
 #include <vector>
 #include "npcapture.h"
 
@@ -137,11 +141,12 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 }
 #endif
 
+#ifdef __APPLE__
+const char* GetSaveFileName();
+#endif
+
 bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
                              uint32_t argCount, NPVariant* result) {
-  result->type = NPVariantType_Bool;
-  result->value.boolValue = TRUE;
-
   if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
     return false;
 
@@ -160,6 +165,9 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
 
 #ifdef _WINDOWS
+  result->type = NPVariantType_Bool;
+  result->value.boolValue = TRUE;
+
   char szFile[1024] = "";
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
@@ -224,6 +232,15 @@ bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
     gLastDialog = dialog;
   }
   gtk_window_present(GTK_WINDOW(gLastDialog));
+#endif
+
+#ifdef __APPLE__
+  size_t byteLength = (base64size * 3) / 4;
+  u_char* data = (u_char*)malloc(byteLength); 
+  int dataLength = b64_pton(base64, data, byteLength);
+
+  const char* file = GetSaveFileName();
+  SaveFile(file, data, dataLength);
 #endif
 
   return true;

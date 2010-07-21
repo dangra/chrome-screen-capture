@@ -37,5 +37,7 @@
     "path": "plugin/npcapture.so"
   }, {
     "path": "plugin/npcapture64.so"
+  }, {
+    "path": "plugin/npcapture.plugin"
   } ]
 }
