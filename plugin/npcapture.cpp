@@ -29,6 +29,9 @@
 * the terms of any one of the NPL, the GPL or the LGPL.
 * ***** END LICENSE BLOCK ***** */
 
+#include <stdio.h>
+#include <vector>
+
 #include "npcapture.h"
 #include "save.h"
 
@@ -97,7 +100,7 @@ static NPClass plugin_ref_obj = {
   NULL,
 };
 
-static NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
+NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
   switch(variable) {
   default:
     return NPERR_GENERIC_ERROR;
@@ -125,7 +128,7 @@ static NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
   return NPERR_NO_ERROR;
 }
 
-static NPError NPP_New(NPMIMEType pluginType, NPP instance,
+NPError NPP_New(NPMIMEType pluginType, NPP instance,
                              uint16_t mode, int16_t argc, char* argn[],
                              char* argv[], NPSavedData* saved) {
   int bWindowed = 1;
@@ -135,7 +138,7 @@ static NPError NPP_New(NPMIMEType pluginType, NPP instance,
   return NPERR_NO_ERROR;
 }
 
-static NPError NPP_Destroy(NPP instance, NPSavedData** save) {
+NPError NPP_Destroy(NPP instance, NPSavedData** save) {
   if (instance->pdata) {
     npnfuncs->releaseobject((NPObject*)instance->pdata);
   }

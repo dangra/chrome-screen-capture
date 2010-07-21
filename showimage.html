@@ -139,39 +139,37 @@
 
   </div>
   <img id="pic" src="#" style="display:none">
-  <object id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px">
-    Failed to load np plugin. You might be using the old version of the extension.
-  </object>
-   <script>
-   var bg = chrome.extension.getBackgroundPage();
-   var photoShop = {
-     startX: 0,
-     startY: 0,
-     endX: 0,
-     endY: 0,
-     dragFlag: false,
-     flag: 'highlight',
-     layerId: 'layer0',
-     color: '',
-     highlightColor: '',
-     lastValidAction: 0,
-     markedArea: [],
-     isDraw: true,
-     offsetX: 0,
-     offsetY: 36,
-     nowHeight: 0,
-     nowWidth: 0,
-     picWidth: 0,
-     pciHeight: 0,
-     highlightType: 'border',
-     text: '',
+  <embed id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px"/>
+  <script>
+  var bg = chrome.extension.getBackgroundPage();
+  var photoShop = {
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+    dragFlag: false,
+    flag: 'highlight',
+    layerId: 'layer0',
+    color: '',
+    highlightColor: '',
+    lastValidAction: 0,
+    markedArea: [],
+    isDraw: true,
+    offsetX: 0,
+    offsetY: 36,
+    nowHeight: 0,
+    nowWidth: 0,
+    picWidth: 0,
+    pciHeight: 0,
+    highlightType: 'border',
+    text: '',
 
-     i18nReplace: function(id,name,type) {
-       if(type == 'title') {
-         return $(id).title = chrome.i18n.getMessage(name);
-       }
-	   return $(id).innerHTML = chrome.i18n.getMessage(name);
-	 },
+    i18nReplace: function(id,name,type) {
+      if(type == 'title') {
+        return $(id).title = chrome.i18n.getMessage(name);
+      }
+      return $(id).innerHTML = chrome.i18n.getMessage(name);
+    },
 
     init: function() {
       photoShop.i18nReplace('tip', 'tipStep1');
