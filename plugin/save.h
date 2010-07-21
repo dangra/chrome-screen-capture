@@ -29,28 +29,12 @@
 * the terms of any one of the NPL, the GPL or the LGPL.
 * ***** END LICENSE BLOCK ***** */
 
-#ifndef NPCAPTURE__NPCAPTURE_H_
-#define NPCAPTURE__NPCAPTURE_H_
+#ifndef NPCAPTURE__SAVE_H_
+#define NPCAPTURE__SAVE_H_
 
 #include "npfunctions.h"
 
-class CPlugin: NPObject {
-public:
-  static NPObject* Allocate(NPP instance, NPClass* npclass);
-  static void Deallocate(NPObject* obj);
-  static bool HasMethod(NPObject* obj, NPIdentifier methodName);
-  static bool InvokeDefault(NPObject* obj, const NPVariant* args,
-                            uint32_t argCount, NPVariant* result);
-  static bool Invoke(NPObject* obj, NPIdentifier methodName,
-                     const NPVariant* args, uint32_t argCount,
-                     NPVariant* result);
-  static bool HasProperty(NPObject* obj, NPIdentifier propertyName);
-  static bool GetProperty(NPObject* obj, NPIdentifier propertyName,
-                          NPVariant* result);
-  NPP npp;
-  void *hWnd;
-};
-  
-extern NPNetscapeFuncs* npnfuncs;
+bool SaveScreenshot(HWND hWnd, const NPVariant* args,
+                    uint32_t argCount, NPVariant* result);
 
-#endif  // NPCAPTURE__NPCAPTURE_H_
+#endif  // NPCAPTURE__SAVE_H_
