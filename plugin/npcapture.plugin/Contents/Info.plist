@@ -17,15 +17,15 @@
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>WebPluginName</key>
-	<string>Screen Capture Chrome Extension</string>
+	<string>Screen Capture Extension Plugin</string>
 	<key>WebPluginDescription</key>
-	<string>Screen Capture Chrome Extension</string>
+	<string>Screen Capture Extension Plugin</string>
 	<key>WebPluginMIMETypes</key>
 	<dict>
 		<key>application/x-screencapture</key>
 		<dict>
 			<key>WebPluginTypeDescription</key>
-			<string>Screen Capture Chrome Extension</string>
+			<string>Screen Capture Extension Plugin</string>
 		</dict>
 	</dict>
 </dict>
