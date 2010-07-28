@@ -8,7 +8,7 @@ var page = {
   endY: 300,
   moveX: 0,
   moveY: 0,
-  scrollbar: 17,
+  scrollbar: 50,
   pageWidth: 0,
   pageHeight: 0,
   visibleWidth: 0,
@@ -108,8 +108,12 @@ var page = {
     page.winWidth = window.innerWidth;
     page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
         (window.innerWidth - page.scrollbar) : window.innerWidth;
+    window.console.log("window.innerHeight: " + window.innerHeight);
+    window.console.log("document.body.scrollHeight: " + document.body.scrollHeight);
     page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
         (window.innerHeight - page.scrollbar) : window.innerHeight;
+    window.console.log("window.innerWidth: " + window.innerWidth);
+    window.console.log("document.body.scrollWidth: " + document.body.scrollWidth);
     page.startY = window.scrollY;
     page.startX = window.scrollX;
     window.scrollTo(0,0);
@@ -456,31 +460,11 @@ var page = {
   },
   
   injectJavaScriptResource: function(scriptResource) {
-    var hasError = true;
-    var request = new XMLHttpRequest();
-    // open the request
-    request.open("get", chrome.extension.getURL(scriptResource), false);
-    // send the request
-    try {
-      request.send(null);
-    } catch (e) {
-      hasError = true;
-      window.console.log(e);
-    }
-    var contents = request.responseText;
-    request = null;
-  
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.charset = "utf-8";
-    if (hasError) {
-      script.src = chrome.extension.getURL(scriptResource);
-      window.console.log("inject script tag: " + script.src);      
-    } else {
-      var scriptContents = document.createTextNode(contents);
-      script.appendChild(scriptContents);
-      window.console.log("inject script contents: " + script.src);            
-    }
+    script.src = chrome.extension.getURL(scriptResource);
+    window.console.log("inject script tag: " + script.src);      
     (document.head || document.body || document.documentElement).appendChild(script);
   },
   
