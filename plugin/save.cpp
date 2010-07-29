@@ -34,7 +34,7 @@
 
 #ifdef _WINDOWS
 #include <atlenc.h>
-#include "npcapture.h"
+#include "plugin.h"
 #endif
 
 #ifdef GTK
@@ -119,7 +119,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   char szFile[1024] = "";
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = (HWND)((CPlugin*)obj)->hWnd;
+  Ofn.hwndOwner = (HWND)((ScriptablePluginObject*)obj)->hWnd;
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);
