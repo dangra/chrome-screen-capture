@@ -40,6 +40,7 @@
 // CPlugin class implementation
 //
 
+#include <vector>
 #include "plugin.h"
 #include "save.h"
 
@@ -144,7 +145,9 @@ NPBool CPlugin::isInitialized() {
 ScriptablePluginObject * CPlugin::GetScriptableObject() {
   if (!m_pScriptableObject) {
     m_pScriptableObject = (ScriptablePluginObject*)npnfuncs->createobject(m_pNPInstance, &plugin_ref_obj);
+#ifdef _WINDOWS
     m_pScriptableObject->hWnd = m_hWnd;
+#endif
   }
 
   // Retain the object since we keep it in plugin code

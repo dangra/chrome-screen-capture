@@ -39,6 +39,7 @@
 //
 // Main plugin entry point implementation
 //
+#include <stdio.h>
 #include "npapi.h"
 #include "npfunctions.h"
 
