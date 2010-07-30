@@ -267,16 +267,8 @@
       });
     },
 
-    isMac: function() {
-      return navigator.userAgent.indexOf("Mac OS") > 0;
-    },
-
     finish: function() {
-      if (photoShop.isMac()) {
-        $('tip').innerHTML = chrome.i18n.getMessage('tipStep2Mac');
-      } else {
-        $('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
-      }
+      $('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
       //photoShop.removeElement('floatDiv');
       //photoShop.markedArea = [];
       photoShop.dragFlag = false;
@@ -286,9 +278,7 @@
       var context;
       context = $('canvas').getContext('2d');
       context.drawImage(bg.screenshot.canvas,0,0);
-      if (!photoShop.isMac()) {
-        $('save').style.display = 'inline-block';
-      }
+      $('save').style.display = 'inline-block';
       $('toolbar').style.display = 'none';
       $('showBox').style.display = 'none';
       $('pic').style.display = 'block';

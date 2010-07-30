@@ -112,10 +112,10 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   base64 += 7;
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
 
-#ifdef _WINDOWS
   result->type = NPVariantType_Bool;
-  result->value.boolValue = TRUE;
+  result->value.boolValue = 1;
 
+#ifdef _WINDOWS
   char szFile[1024] = "";
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
@@ -136,9 +136,8 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
     int byteLength = Base64DecodeGetRequiredLength(base64size);
     BYTE* bytes = new BYTE[byteLength];
     Base64Decode(base64, base64size, bytes, &byteLength);
-    if (!SaveFile(szFile, bytes, byteLength)) {
-      result->value.boolValue = FALSE;
-    }
+    if (!SaveFile(szFile, bytes, byteLength))
+      result->value.boolValue = 0;
   }
 #endif
 
@@ -183,12 +182,15 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
 #endif
 
 #ifdef __APPLE__
-  size_t byteLength = (base64size * 3) / 4;
-  u_char* data = (u_char*)malloc(byteLength); 
-  int dataLength = b64_pton(base64, data, byteLength);
-
   const char* file = GetSaveFileName();
-  SaveFile(file, data, dataLength);
+  if (file) {
+    size_t byteLength = (base64size * 3) / 4;
+    u_char* data = (u_char*)malloc(byteLength); 
+    int dataLength = b64_pton(base64, data, byteLength);
+
+    if (!SaveFile(file, data, dataLength))
+      result->value.boolValue = 0;
+  }
 #endif
 
   return true;

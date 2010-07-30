@@ -67,11 +67,15 @@ NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
 NPError NPP_New(NPMIMEType pluginType, NPP instance,
                 uint16_t mode, int16_t argc, char* argn[],
                 char* argv[], NPSavedData* saved) {
-  int bWindowed = 1;
-  npnfuncs->setvalue(instance, NPPVpluginWindowBool, (void *)bWindowed);
-
   if(instance == NULL)
     return NPERR_INVALID_INSTANCE_ERROR;
+
+#ifdef _WINDOWS
+  int bWindowed = 1;
+#else
+  int bWindowed = 0;
+#endif
+  npnfuncs->setvalue(instance, NPPVpluginWindowBool, (void *)bWindowed);
 
   CPlugin * pPlugin = new CPlugin(instance);
   if(pPlugin == NULL)
