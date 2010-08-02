@@ -8,7 +8,7 @@ var page = {
   endY: 300,
   moveX: 0,
   moveY: 0,
-  scrollbar: 50,
+  scrollbar: 17,
   pageWidth: 0,
   pageHeight: 0,
   visibleWidth: 0,
@@ -108,12 +108,8 @@ var page = {
     page.winWidth = window.innerWidth;
     page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
         (window.innerWidth - page.scrollbar) : window.innerWidth;
-    window.console.log("window.innerHeight: " + window.innerHeight);
-    window.console.log("document.body.scrollHeight: " + document.body.scrollHeight);
     page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
         (window.innerHeight - page.scrollbar) : window.innerHeight;
-    window.console.log("window.innerWidth: " + window.innerWidth);
-    window.console.log("document.body.scrollWidth: " + document.body.scrollWidth);
     page.startY = window.scrollY;
     page.startX = window.scrollX;
     window.scrollTo(0,0);
