@@ -148,12 +148,11 @@ ScriptablePluginObject * CPlugin::GetScriptableObject() {
 #ifdef _WINDOWS
     m_pScriptableObject->hWnd = m_hWnd;
 #endif
-  }
 
-  // Retain the object since we keep it in plugin code
-  // so that it won't be freed by browser.
-  if (m_pScriptableObject)
+    // Retain the object since we keep it in plugin code
+    // so that it won't be freed by browser.
     npnfuncs->retainobject((NPObject*)m_pScriptableObject);
+  }
 
   return m_pScriptableObject;
 }

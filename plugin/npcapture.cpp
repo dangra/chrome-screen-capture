@@ -38,9 +38,6 @@ NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
   if(instance == NULL)
     return NPERR_INVALID_INSTANCE_ERROR;
 
-  if(instance == NULL)
-    return NPERR_GENERIC_ERROR;
-
   CPlugin * pPlugin = (CPlugin *)instance->pdata;
   if(pPlugin == NULL)
     return NPERR_GENERIC_ERROR;
