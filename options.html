@@ -127,6 +127,9 @@
     i18nReplace('tFontSize', 'fontSize');
     i18nReplace('highlightMode', 'highlightMode');
     i18nReplace('saveAndClose', 'saveAndClose');
+    i18nReplace('screenshootQualitySetting', 'screenshootQualitySetting');
+    i18nReplace('lossyScreenShot', 'lossyScreenShot');
+    i18nReplace('losslessScreenShot', 'losslessScreenShot');
     var highlightColor = document.getElementById('hColor');
     var fontColor = document.getElementById('fontColor');
     var fontSize = document.getElementById('fontSize');
@@ -147,6 +150,7 @@
         localStorage.fontSize : fontSize.value;
     highlightColor.style.backgroundColor = localStorage.highlightColor;
     fontColor.style.backgroundColor = localStorage.fontColor;
+    initScreenCaptureQuality();
 
 
   }
@@ -158,8 +162,11 @@
      localStorage.fontSize = document.getElementById('fontSize').value;
      localStorage.highlightColor = document.getElementById('hHighlineColor').value;
      localStorage.fontColor = document.getElementById('hFontColor').value;
+     localStorage.screenshootQuality =
+         document.getElementById('lossy').checked ? 'jpeg' : '' ||
+         document.getElementById('lossless').checked ? 'png' : '';
   }
-
+  
   function saveAndClose() {
     save();
     chrome.tabs.getSelected(null, function(tab) {
@@ -232,6 +239,23 @@
     return position;
   }
 
+  function initScreenCaptureQuality() {
+    var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
+    if (localStorage.screenshootQuality) {
+      document.getElementById('lossy').checked =
+          (localStorage.screenshootQuality == 'jpeg' ? true : false);
+      document.getElementById('lossless').checked =
+          (localStorage.screenshootQuality == 'png' ? true : false);
+    } else if (isWindowsPlatform) {
+      document.getElementById('lossy').checked = true;
+      localStorage.screenshootQuality = 'jpeg';
+    } else {
+      document.getElementById('lossless').checked = true;
+      localStorage.screenshootQuality = 'png';
+    }
+
+  }
+
   function i18nReplace(id, name) {
     return document.getElementById(id).innerText = chrome.i18n.getMessage(name);
   }
@@ -284,6 +308,14 @@
      <div class="contentRight">
      <div id="fontColor" value="#FF0000" onclick="showColorPad(event, this, 'text');" class="colorBox"></div>
      <input type="hidden" id="hFontColor">
+     </div>
+     <div class="clear"></div>
+   </div>
+   <h4 id="screenshootQualitySetting"></h4>
+   <div class="section-content">
+     <div>
+       <label></label><input id="lossy" type="radio" name="quality"><span id="lossyScreenShot"></span></label>
+       &nbsp; <label></label><input id="lossless" type="radio" name="quality"><span id="losslessScreenShot"></span></label>
      </div>
      <div class="clear"></div>
    </div>

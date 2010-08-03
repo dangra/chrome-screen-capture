@@ -35,5 +35,9 @@
   "tip2": {"message": "This is a special page. Unable to perform screen capture actions on this page."},
   "tip3": {"message": "The page is loading, please wait."},
   "saveAndClose": {"message": "Save & Close"},
-  "editMore" : {"message": "Edit More"}
+  "editMore" : {"message": "Edit More"},
+  "screenshootQualitySetting" : {"message" : "Screenshoot Quality Settings"},
+  "screenshootQuality" : {"message" : "Screenshoot Quality:"},
+  "lossyScreenShot" : {"message" : "Lossy Screenshot"},
+  "losslessScreenShot" : {"message" : "Lossless Screenshot"}
 }

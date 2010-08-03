@@ -69,7 +69,9 @@ var screenshot = {
   },
 
   captureSpecialPage: function() {
-    chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data) {
+    var formatParam  = localStorage.screenshootQuality ?
+        localStorage.screenshootQuality : 'jpeg';
+    chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
         screenshot.canvas.width = image.width;
@@ -87,7 +89,9 @@ var screenshot = {
   * the canvas
   */
   capturePortion: function(x, y, width, height) {
-    chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data) {
+    var formatParam  = localStorage.screenshootQuality ?
+        localStorage.screenshootQuality : 'jpeg';
+    chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
         screenshot.canvas.width = width;
@@ -104,7 +108,9 @@ var screenshot = {
   * Use the drawImage method to stitching images, and render to canvas
   */
   captureAndScroll: function() {
-    chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data) {
+    var formatParam  = localStorage.screenshootQuality ?
+        localStorage.screenshootQuality : 'jpeg';
+    chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
         var context = screenshot.canvas.getContext('2d');
