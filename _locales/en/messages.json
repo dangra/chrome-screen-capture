@@ -36,8 +36,8 @@
   "tip3": {"message": "The page is loading, please wait."},
   "saveAndClose": {"message": "Save & Close"},
   "editMore" : {"message": "Edit More"},
-  "screenshootQualitySetting" : {"message" : "Screenshoot Quality Settings"},
-  "screenshootQuality" : {"message" : "Screenshoot Quality:"},
+  "screenshootQualitySetting" : {"message" : "Screenshot Quality Settings:"},
+  "screenshootQuality" : {"message" : "Screenshot Quality"},
   "lossyScreenShot" : {"message" : "Lossy Screenshot"},
   "losslessScreenShot" : {"message" : "Lossless Screenshot"}
 }

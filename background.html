@@ -70,7 +70,7 @@ var screenshot = {
 
   captureSpecialPage: function() {
     var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : 'jpeg';
+        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -90,7 +90,7 @@ var screenshot = {
   */
   capturePortion: function(x, y, width, height) {
     var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : 'jpeg';
+        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -109,7 +109,7 @@ var screenshot = {
   */
   captureAndScroll: function() {
     var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : 'jpeg';
+        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -171,7 +171,8 @@ var screenshot = {
     var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
     if (!localStorage.screenshootQuality) {
       localStorage.screenshootQuality = (isWindowsPlatform ? 'jpeg' : 'png');
-    } 
+    }
+    return localStorage.screenshootQuality;
   }
 
 };
