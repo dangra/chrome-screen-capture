@@ -127,7 +127,7 @@
     i18nReplace('tFontSize', 'fontSize');
     i18nReplace('highlightMode', 'highlightMode');
     i18nReplace('saveAndClose', 'saveAndClose');
-    i18nReplace('screenshootQualitySetting', 'screenshootQualitySetting');
+    i18nReplace('screenshotQualitySetting', 'screenshotQualitySetting');
     i18nReplace('lossyScreenShot', 'lossyScreenShot');
     i18nReplace('losslessScreenShot', 'losslessScreenShot');
     var highlightColor = document.getElementById('hColor');
@@ -160,7 +160,7 @@
      localStorage.fontSize = document.getElementById('fontSize').value;
      localStorage.highlightColor = document.getElementById('hHighlineColor').value;
      localStorage.fontColor = document.getElementById('hFontColor').value;
-     localStorage.screenshootQuality =
+     localStorage.screenshotQuality =
          document.getElementById('lossy').checked ? 'jpeg' : '' ||
          document.getElementById('lossless').checked ? 'png' : '';
   }
@@ -240,9 +240,9 @@
   function initScreenCaptureQuality() {
     bg.screenshot.setScreenshotQualityByOS();
     document.getElementById('lossy').checked =
-        (localStorage.screenshootQuality == 'jpeg' ? true : false);
+        (localStorage.screenshotQuality == 'jpeg' ? true : false);
     document.getElementById('lossless').checked =
-        (localStorage.screenshootQuality == 'png' ? true : false);
+        (localStorage.screenshotQuality == 'png' ? true : false);
   }
 
   function i18nReplace(id, name) {
@@ -300,11 +300,11 @@
      </div>
      <div class="clear"></div>
    </div>
-   <h4 id="screenshootQualitySetting"></h4>
+   <h4 id="screenshotQualitySetting"></h4>
    <div class="section-content">
      <div>
-       <label></label><input id="lossy" type="radio" name="quality"><span id="lossyScreenShot"></span></label>
-       &nbsp; <label></label><input id="lossless" type="radio" name="quality"><span id="losslessScreenShot"></span></label>
+       <label></label><input id="lossless" type="radio" name="quality"><span id="losslessScreenShot"></span></label>
+       &nbsp; <label></label><input id="lossy" type="radio" name="quality"><span id="lossyScreenShot"></span></label>
      </div>
      <div class="clear"></div>
    </div>

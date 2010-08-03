@@ -69,8 +69,8 @@ var screenshot = {
   },
 
   captureSpecialPage: function() {
-    var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshotQuality ?
+        localStorage.screenshotQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -89,8 +89,8 @@ var screenshot = {
   * the canvas
   */
   capturePortion: function(x, y, width, height) {
-    var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshotQuality ?
+        localStorage.screenshotQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -108,8 +108,8 @@ var screenshot = {
   * Use the drawImage method to stitching images, and render to canvas
   */
   captureAndScroll: function() {
-    var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshotQuality ?
+        localStorage.screenshotQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -169,10 +169,10 @@ var screenshot = {
 
   setScreenshotQualityByOS: function() {
     var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
-    if (!localStorage.screenshootQuality) {
-      localStorage.screenshootQuality = (isWindowsPlatform ? 'jpeg' : 'png');
+    if (!localStorage.screenshotQuality) {
+      localStorage.screenshotQuality = (isWindowsPlatform ? 'jpeg' : 'png');
     }
-    return localStorage.screenshootQuality;
+    return localStorage.screenshotQuality;
   }
 
 };

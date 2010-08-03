@@ -36,8 +36,8 @@
   "tip3": {"message": "页面正在加载，请稍等。"},
   "saveAndClose": {"message": "保存并关闭"},
   "editMore" : {"message": "返回编辑"},
-  "screenshootQualitySetting" : {"message" : "图像质量设定："},
-  "screenshootQuality" : {"message" : "图像质量"},
+  "screenshotQualitySetting" : {"message" : "图像质量设定："},
+  "screenshotQuality" : {"message" : "图像质量"},
   "lossyScreenShot" : {"message" : "有损截图"},
   "losslessScreenShot" : {"message" : "无损截图"}
 }
