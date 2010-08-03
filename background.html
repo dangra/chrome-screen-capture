@@ -68,8 +68,18 @@ var screenshot = {
     }
   },
 
+  getImageFormat: function() {
+    if (navigator.userAgent.indexOf('Windows') >= 0) {
+      var version = navigator.userAgent.match(/Chrome\/([\w.]+)/i)[1];
+      if (version < "6.0.472.0")
+        return "jpeg";
+    }
+    return "png";
+  },
+  
   captureSpecialPage: function() {
-    chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data) {
+    imageformat = screenshot.getImageFormat();
+    chrome.tabs.captureVisibleTab(null, {format: imageformat}, function(data) {
       var image = new Image();
       image.onload = function() {
         screenshot.canvas.width = image.width;
@@ -87,7 +97,8 @@ var screenshot = {
   * the canvas
   */
   capturePortion: function(x, y, width, height) {
-    chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data) {
+    imageformat = screenshot.getImageFormat();
+    chrome.tabs.captureVisibleTab(null, {format: imageformat}, function(data) {
       var image = new Image();
       image.onload = function() {
         screenshot.canvas.width = width;
@@ -104,7 +115,8 @@ var screenshot = {
   * Use the drawImage method to stitching images, and render to canvas
   */
   captureAndScroll: function() {
-    chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data) {
+    imageformat = screenshot.getImageFormat();
+    chrome.tabs.captureVisibleTab(null, {format: imageformat}, function(data) {
       var image = new Image();
       image.onload = function() {
         var context = screenshot.canvas.getContext('2d');
