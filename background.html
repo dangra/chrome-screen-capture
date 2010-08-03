@@ -163,10 +163,6 @@ var screenshot = {
     chrome.tabs.create({'url': 'showimage.html'}, function() {});
   },
 
-  isWindowsPlatform: function() {
-    return navigator.userAgent.toLowerCase().indexOf('windows') > -1;
-  },
-
   setScreenshotQualityByOS: function() {
     var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
     if (!localStorage.screenshotQuality) {
