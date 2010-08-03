@@ -161,11 +161,23 @@ var screenshot = {
   */
   postImage: function() {
     chrome.tabs.create({'url': 'showimage.html'}, function() {});
+  },
+
+  isWindowsPlatform: function() {
+    return navigator.userAgent.toLowerCase().indexOf('windows') > -1;
+  },
+
+  setScreenshotQualityByOS: function() {
+    var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
+    if (!localStorage.screenshootQuality) {
+      localStorage.screenshootQuality = (isWindowsPlatform ? 'jpeg' : 'png');
+    } 
   }
 
 };
 
 screenshot.messageListener();
+screenshot.setScreenshotQualityByOS();
 
 </script>
 </head>

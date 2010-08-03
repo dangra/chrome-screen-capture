@@ -114,7 +114,7 @@
   var isColorPadLoad = false;
   var targetObj = false;
   var colorType;
-
+  var bg = chrome.extension.getBackgroundPage();
 
   function init() {
     i18nReplace('optionTitle', 'optionTitle');
@@ -240,20 +240,11 @@
   }
 
   function initScreenCaptureQuality() {
-    var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
-    if (localStorage.screenshootQuality) {
-      document.getElementById('lossy').checked =
-          (localStorage.screenshootQuality == 'jpeg' ? true : false);
-      document.getElementById('lossless').checked =
-          (localStorage.screenshootQuality == 'png' ? true : false);
-    } else if (isWindowsPlatform) {
-      document.getElementById('lossy').checked = true;
-      localStorage.screenshootQuality = 'jpeg';
-    } else {
-      document.getElementById('lossless').checked = true;
-      localStorage.screenshootQuality = 'png';
-    }
-
+    bg.screenshot.setScreenshotQualityByOS();
+    document.getElementById('lossy').checked =
+        (localStorage.screenshootQuality == 'jpeg' ? true : false);
+    document.getElementById('lossless').checked =
+        (localStorage.screenshootQuality == 'png' ? true : false);
   }
 
   function i18nReplace(id, name) {
