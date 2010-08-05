@@ -8,13 +8,15 @@
 <script>
 
 var screenshot = {
-  tabid: 0,
+  tab: 0,
   data: '',
   canvas: document.createElement("canvas"),
   visibleHeight: 0,
   visibleWidth: 0,
   scrollXCount: 0,
   scrollYCount: 0,
+  scrollBarX: 17,
+  scrollBarY: 17,
 
   /**
   * Receive messages from content_script, and then decide what to do next
@@ -32,27 +34,29 @@ var screenshot = {
   },
 
   showSelectionArea: function() {
-    screenshot.sendMessage('show_selection_area', null);
+    screenshot.sendMessage({msg: 'show_selection_area'}, null);
   },
 
   captureWindow: function() {
-    screenshot.sendMessage('capture_window', screenshot.onResponseVisibleSize);
+    screenshot.sendMessage({msg: 'capture_window'},
+        screenshot.onResponseVisibleSize);
   },
 
   captureWebpage: function() {
-    screenshot.sendMessage('scroll_init', screenshot.onResponseVisibleSize);
+    screenshot.sendMessage({msg: 'scroll_init'},
+        screenshot.onResponseVisibleSize);
   },
 
   onResponseVisibleSize: function(response) {
     switch(response.msg) {
       case 'capture_window':
-        screenshot.capturePortion(0, 0, response.width, response.height);
+        screenshot.captureVisible(response.docWidth, response.docHeight);
         break;
       case 'scroll_init_done':
         screenshot.canvas.width = response.width;
         screenshot.canvas.height = response.height;
-        screenshot.visibleHeight = response.visibleHeight;
-        screenshot.visibleWidth = response.visibleWidth;
+//        screenshot.visibleHeight = response.visibleHeight;
+//        screenshot.visibleWidth = response.visibleWidth;
         screenshot.scrollXCount = response.scrollXCount;
         screenshot.scrollYCount = response.scrollYCount;
         setTimeout("screenshot.captureAndScroll()",100);
@@ -69,8 +73,8 @@ var screenshot = {
   },
 
   captureSpecialPage: function() {
-    var formatParam  = localStorage.screenshotQuality ?
-        localStorage.screenshotQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshootQuality ?
+        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -89,8 +93,8 @@ var screenshot = {
   * the canvas
   */
   capturePortion: function(x, y, width, height) {
-    var formatParam  = localStorage.screenshotQuality ?
-        localStorage.screenshotQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshootQuality ?
+        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -104,42 +108,67 @@ var screenshot = {
     });
   },
 
+  captureVisible: function(docWidth, docHeight) {
+    var formatParam  = localStorage.screenshootQuality ?
+        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
+      var image = new Image();
+      image.onload = function() {
+        var width = image.height < docHeight ?
+            image.width - screenshot.scrollBarY : image.width;
+        var height = image.width < docWidth ?
+            image.height - screenshot.scrollBarX : image.height;
+        screenshot.canvas.width = width;
+        screenshot.canvas.height = height;
+        var context = screenshot.canvas.getContext("2d");
+        context.drawImage(image, 0, 0, width, height, 0, 0, width, height);
+        screenshot.postImage();
+      };
+      image.src = data;
+    });
+  },
+
   /**
   * Use the drawImage method to stitching images, and render to canvas
   */
   captureAndScroll: function() {
-    var formatParam  = localStorage.screenshotQuality ?
-        localStorage.screenshotQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshootQuality ?
+        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
         var context = screenshot.canvas.getContext('2d');
         var width = 0;
         var height = 0;
+        var visibleWidth = image.height < screenshot.canvas.height ?
+            image.width - screenshot.scrollBarY : image.width;
+        var visibleHeight = image.width < screenshot.canvas.width ?
+            image.height - screenshot.scrollBarX : image.height;
         var x1 = 0;
         var x2 = 0;
         var y1 = 0;
         var y2 = 0;
-        if ((screenshot.scrollYCount + 1) * screenshot.visibleWidth >
+        if ((screenshot.scrollYCount + 1) * visibleWidth >
             screenshot.canvas.width) {
-          width = screenshot.canvas.width % screenshot.visibleWidth ;
-          x1 = (screenshot.scrollYCount + 1) * screenshot.visibleWidth -
+          width = screenshot.canvas.width % visibleWidth ;
+          x1 = (screenshot.scrollYCount + 1) * visibleWidth -
               screenshot.canvas.width ;
         } else {
-          width = screenshot.visibleWidth;
+          width = visibleWidth;
         }
-        if ((screenshot.scrollXCount + 1) * screenshot.visibleHeight >
+        if ((screenshot.scrollXCount + 1) * visibleHeight >
             screenshot.canvas.height) {
-          height = screenshot.canvas.height % screenshot.visibleHeight;
-          y1 = (screenshot.scrollXCount + 1) * screenshot.visibleHeight -
+          height = screenshot.canvas.height % visibleHeight;
+          y1 = (screenshot.scrollXCount + 1) * visibleHeight -
               screenshot.canvas.height;
         } else {
-          height = screenshot.visibleHeight ;
+          height = visibleHeight ;
         }
-        x2 = screenshot.scrollYCount * screenshot.visibleWidth ;
-        y2 = screenshot.scrollXCount * screenshot.visibleHeight ;
+        x2 = screenshot.scrollYCount * visibleWidth ;
+        y2 = screenshot.scrollXCount * visibleHeight ;
         context.drawImage(image, x1, y1, width, height, x2, y2, width, height);
-        screenshot.sendMessage('scroll_next', screenshot.onResponseVisibleSize);
+        screenshot.sendMessage({msg: 'scroll_next', visibleWidth: visibleWidth,
+            visibleHeight: visibleHeight}, screenshot.onResponseVisibleSize);
       };
       image.src = data;
     });
@@ -153,22 +182,38 @@ var screenshot = {
   * Send the Message to content-script
   */
   sendMessage: function(message, callback) {
-    chrome.tabs.sendRequest(screenshot.tabid, {msg: message}, callback);
+    chrome.tabs.sendRequest(screenshot.tab.id, message, callback);
   },
 
   /**
   * Post image to 'showimage.html'
   */
   postImage: function() {
+    if (eval(localStorage.autoSave)) { // auto save picture
+      var pluginobj = document.getElementById('pluginobj');
+      var data = screenshot.canvas.toDataURL('image/png');
+      var message;
+      if (pluginobj.AutoSave(data, screenshot.tab.title)) {
+        status = 'saveSuccess';
+      } else {
+        status = 'saveFail'
+      }
+      screenshot.sendMessage({msg: 'auto_save_done', status: status}, null);
+      return;
+    }
     chrome.tabs.create({'url': 'showimage.html'}, function() {});
+  },
+
+  isWindowsPlatform: function() {
+    return navigator.userAgent.toLowerCase().indexOf('windows') > -1;
   },
 
   setScreenshotQualityByOS: function() {
     var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
-    if (!localStorage.screenshotQuality) {
-      localStorage.screenshotQuality = (isWindowsPlatform ? 'jpeg' : 'png');
+    if (!localStorage.screenshootQuality) {
+      localStorage.screenshootQuality = (isWindowsPlatform ? 'jpeg' : 'png');
     }
-    return localStorage.screenshotQuality;
+    return localStorage.screenshootQuality;
   }
 
 };
@@ -178,5 +223,6 @@ screenshot.messageListener();
 </script>
 </head>
 <body>
+<embed id="pluginobj" type="application/x-screencapture" />
 </body>
 </html>

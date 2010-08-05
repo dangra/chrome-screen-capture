@@ -85,7 +85,7 @@ body {
 
   function init() {
     chrome.tabs.getSelected(null, function(tab) {
-      bg.screenshot.tabid = tab.id;
+      bg.screenshot.tab = tab;
       if (tab.url.indexOf('chrome') == 0) {
         document.getElementById('tip').style.display = 'none';
         document.getElementById('captureSpecialPage').style.display = 'block';

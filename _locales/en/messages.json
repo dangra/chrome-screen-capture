@@ -36,8 +36,16 @@
   "tip3": {"message": "The page is loading, please wait."},
   "saveAndClose": {"message": "Save & Close"},
   "editMore" : {"message": "Edit More"},
-  "screenshotQualitySetting" : {"message" : "Screenshot Quality Settings:"},
-  "screenshotQuality" : {"message" : "Screenshot Quality"},
+  "blur" : {"message": " Blur"},
+  "arrow": {"message": " Arrow"},
+  "line": {"message": " Line"},
+  "screenshootQualitySetting" : {"message" : "Screenshot Quality Settings:"},
+  "screenshootQuality" : {"message" : "Screenshot Quality"},
   "lossyScreenShot" : {"message" : "Lossy Screenshot"},
-  "losslessScreenShot" : {"message" : "Lossless Screenshot"}
+  "losslessScreenShot" : {"message" : "Lossless Screenshot"},
+  "autoSaveSetting": {"message": "Auto Save setting:"},
+  "autoSave" : {"message" : "Auto Save - After capture, bypass editing screen and directly save the capture image to the following path with the web page title as default file name."},
+  "setSavePath" : {"message" : "Browse..."},
+  "openSavePath" : {"message" : "Show in folder"},
+  "defaultPath" : {"message": "Set as default path"}
 }

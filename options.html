@@ -127,9 +127,14 @@
     i18nReplace('tFontSize', 'fontSize');
     i18nReplace('highlightMode', 'highlightMode');
     i18nReplace('saveAndClose', 'saveAndClose');
-    i18nReplace('screenshotQualitySetting', 'screenshotQualitySetting');
+    i18nReplace('screenshootQualitySetting', 'screenshootQualitySetting');
     i18nReplace('lossyScreenShot', 'lossyScreenShot');
     i18nReplace('losslessScreenShot', 'losslessScreenShot');
+    i18nReplace('autoSaveText', 'autoSave');
+    i18nReplace('setSavePath', 'setSavePath');
+    i18nReplace('openSavePath', 'openSavePath');
+    i18nReplace('defaultPathText', 'defaultPath');
+    i18nReplace('autoSaveSetting', 'autoSaveSetting');
     var highlightColor = document.getElementById('hColor');
     var fontColor = document.getElementById('fontColor');
     var fontSize = document.getElementById('fontSize');
@@ -142,6 +147,8 @@
         document.getElementById('rectMode').checked = true;
         break;
     }
+    document.getElementById('autoSave').checked = eval(localStorage.autoSave);
+    document.getElementById('defaultPath').checked = eval(localStorage.defaultPath);
     localStorage.highlightColor = localStorage.highlightColor ?
         localStorage.highlightColor : '#ff0000';
     localStorage.fontColor = localStorage.fontColor ?
@@ -150,7 +157,16 @@
         localStorage.fontSize : fontSize.value;
     highlightColor.style.backgroundColor = localStorage.highlightColor;
     fontColor.style.backgroundColor = localStorage.fontColor;
-    initScreenCaptureQuality();
+    document.getElementById('filePath').value = localStorage.savePath ? localStorage.savePath : '';
+    document.getElementById('setSavePath').addEventListener('click', function() {
+      var savePath = setSavePath();
+      document.getElementById('filePath').value = localStorage.savePath = savePath;
+    });
+    document.getElementById('openSavePath').addEventListener('click', function() {
+      var pluginobj = document.getElementById('pluginobj');
+      pluginobj.OpenSavePath();
+    })
+    initScreenCaptureQuality()
   }
 
   function save() {
@@ -160,11 +176,15 @@
      localStorage.fontSize = document.getElementById('fontSize').value;
      localStorage.highlightColor = document.getElementById('hHighlineColor').value;
      localStorage.fontColor = document.getElementById('hFontColor').value;
-     localStorage.screenshotQuality =
+     localStorage.screenshootQuality =
          document.getElementById('lossy').checked ? 'jpeg' : '' ||
          document.getElementById('lossless').checked ? 'png' : '';
+     localStorage.autoSave = document.getElementById('autoSave').checked ?
+         'true' : 'false';
+     localStorage.defaultPath = document.getElementById('defaultPath').checked ?
+         'true' : 'false';
   }
-  
+
   function saveAndClose() {
     save();
     chrome.tabs.getSelected(null, function(tab) {
@@ -178,7 +198,7 @@
                      '#0080FF', '#004080', '#8000FF', '#804000', '#FFFFFF',
                      '#C0C0C0', '#FF0000', '#FFF000', '#00FF00', '#00FFFF',
                      '#0000FF', '#FF00FF', '#FFFF80', '#00FF80', '#80FFFF',
-                     '#8080FF', '#FF0080', '#FF8040'];   
+                     '#8080FF', '#FF0080', '#FF8040'];
     var  colorPadStr = '';
     colorPadStr += '<div id="colorpad">';
     colorPadStr += '<div style="text-align:right; cursor:pointer;"' +
@@ -198,7 +218,7 @@
 
   function showColorPad(event, obj, type) {
     if (!isColorPadLoad) {
-      colorPadLoad(); 
+      colorPadLoad();
     }
     var position = colorPadPostion(event, obj);
     document.getElementById('colorpad').style.top   = (position.y + 20) + 'px';
@@ -240,10 +260,22 @@
   function initScreenCaptureQuality() {
     bg.screenshot.setScreenshotQualityByOS();
     document.getElementById('lossy').checked =
-        (localStorage.screenshotQuality == 'jpeg' ? true : false);
+        (localStorage.screenshootQuality == 'jpeg' ? true : false);
     document.getElementById('lossless').checked =
-        (localStorage.screenshotQuality == 'png' ? true : false);
+        (localStorage.screenshootQuality == 'png' ? true : false);
   }
+
+
+  function setSavePath() {
+    var pluginobj = document.getElementById('pluginobj');
+    return pluginobj.SetSavePath();
+  }
+
+  function openSavePath() {
+    pluginobj.OpenSavePath();
+  }
+
+
 
   function i18nReplace(id, name) {
     return document.getElementById(id).innerText = chrome.i18n.getMessage(name);
@@ -300,16 +332,31 @@
      </div>
      <div class="clear"></div>
    </div>
-   <h4 id="screenshotQualitySetting"></h4>
+   <h4 id="screenshootQualitySetting"></h4>
    <div class="section-content">
      <div>
-       <label></label><input id="lossless" type="radio" name="quality"><span id="losslessScreenShot"></span></label>
-       &nbsp; <label></label><input id="lossy" type="radio" name="quality"><span id="lossyScreenShot"></span></label>
+       <label></label><input id="lossy" type="radio" name="quality"><span id="lossyScreenShot"></span></label>
+       &nbsp; <label></label><input id="lossless" type="radio" name="quality"><span id="losslessScreenShot"></span></label>
      </div>
      <div class="clear"></div>
    </div>
-   <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()">±£´æ²¢¹Ø±Õ</button></div>
+   <h4 id="autoSaveSetting"></h4>
+   <div class="section-content">
+     <div class="clear"></div>
+     <div><label><input type="checkbox" id="autoSave"><span id="autoSaveText"></span></label></div>
+     <div ><input type="text" id="filePath" size="40">
+       <button id="setSavePath"></button>
+       <button id="openSavePath"></button>
+     </div>
+     <div><label><input id="defaultPath" type="checkbox" ><span id="defaultPathText"></span></label></div>
+     <div class="clear"></div>
+   </div>
+   <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()"></button></div>
+ </div>
+
+
  </div>
  <div id="footer">&copy;2010 Google</div>
+ <embed id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px"/>
  </body>
 </html>

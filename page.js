@@ -24,12 +24,14 @@ var page = {
   winHeight: 0,
   winWidth: 0,
   isSelectionAreaTurnOn: false,
+  isScrollBarX: false,
+  isScrollBarY: false,
   fixedElements_ : [],
-  
+
   hookBodyScrollValue: function(needHook) {
     document.documentElement.setAttribute("__screen_capture_need_hook_scroll_value__", needHook);
   },
-  
+
   enableFixedPosition: function(enableFlag) {
     if (enableFlag) {
       for (var i = 0, l = this.fixedElements_.length; i < l; ++i) {
@@ -73,7 +75,7 @@ var page = {
     }
     return isOnlyEmbed;
   },
-  
+
   /**
   * Receive messages from background page, and then decide what to do next
   */
@@ -83,7 +85,13 @@ var page = {
         case 'capture_window': response(page.getWindowSize()); break;
         case 'show_selection_area': page.showSelectionArea(); break;
         case 'scroll_init': response(page.scrollInit()); break;
-        case 'scroll_next': response(page.scrollNext()); break;
+        case 'scroll_next':
+          page.visibleWidth = request.visibleWidth;
+          page.visibleHeight = request.visibleHeight;
+          response(page.scrollNext());
+          break;
+        case 'auto_save_done':
+          page.showPromptMessage(request.status);
 
       }
     });
@@ -102,25 +110,27 @@ var page = {
   scrollInit: function() {
     this.enableFixedPosition(false);
     this.hookBodyScrollValue(true);
-    page.docHeight = document.body.scrollHeight;
-    page.docWidth = document.body.scrollWidth;
+    page.docHeight = document.height;
+    page.docWidth = document.width;
     page.winHeight = window.innerHeight;
     page.winWidth = window.innerWidth;
-    page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
-        (window.innerWidth - page.scrollbar) : window.innerWidth;
-    page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
-        (window.innerHeight - page.scrollbar) : window.innerHeight;
+//    page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
+//        (window.innerWidth - page.scrollbar) : window.innerWidth;
+//    page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
+//        (window.innerHeight - page.scrollbar) : window.innerHeight;
+//    page.visibleWidth = document.documentElement.clientWidth;
+//    page.visibleHeight = document.documentElement.clientHeight;
     page.startY = window.scrollY;
     page.startX = window.scrollX;
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
     page.scrollXCount = 0;
     page.scrollYCount = 1;
     return {
         'msg': 'scroll_init_done',
         'height': page.docHeight,
         'width': page.docWidth,
-        'visibleHeight': page.visibleHeight,
-        'visibleWidth': page.visibleWidth,
+//        'visibleHeight': page.visibleHeight,
+//        'visibleWidth': page.visibleWidth,
         'scrollXCount': 0,
         'scrollYCount': 0};
   },
@@ -134,14 +144,13 @@ var page = {
       page.scrollYCount = 0;
     }
     if (page.scrollXCount * page.visibleHeight < page.docHeight) {
-      window.scrollTo(page.scrollYCount * page.visibleWidth,
-                      page.scrollXCount * page.visibleHeight);
+      window.scrollTo(page.scrollYCount * document.documentElement.clientWidth,
+                      page.scrollXCount * document.documentElement.clientHeight);
       var x = page.scrollXCount;
       var y = page.scrollYCount;
       page.scrollYCount++;
-      return { msg: 'scroll_next_done',scrollXCount: x, scrollYCount:y };
-    }
-    else {
+      return { msg: 'scroll_next_done',scrollXCount: x, scrollYCount: y };
+    }  else {
       window.scrollTo(page.startX, page.startY);
       this.enableFixedPosition(true);
       this.hookBodyScrollValue(false);
@@ -158,13 +167,13 @@ var page = {
   },
 
   getWindowSize: function() {
-    page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
-        (window.innerWidth - page.scrollbar) : window.innerWidth;
-    page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
-        (window.innerHeight - page.scrollbar) : window.innerHeight;
+//    page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
+//        (window.innerWidth - page.scrollbar) : window.innerWidth;
+//    page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
+//        (window.innerHeight - page.scrollbar) : window.innerHeight;
     return {'msg':'capture_window',
-            'width': page.visibleWidth,
-            'height':page.visibleHeight};
+            'docWidth': document.width,
+            'docHeight': document.height};
   },
 
   getSelectionSize: function() {
@@ -454,28 +463,59 @@ var page = {
     css.href = chrome.extension.getURL(cssResource);
     (document.head || document.body || document.documentElement).appendChild(css);
   },
-  
+
   injectJavaScriptResource: function(scriptResource) {
+    var hasError = true;
+    var request = new XMLHttpRequest();
+    // open the request
+    request.open("get", chrome.extension.getURL(scriptResource), false);
+    // send the request
+    try {
+      request.send(null);
+    } catch (e) {
+      hasError = true;
+      window.console.log(e);
+    }
+    var contents = request.responseText;
+    request = null;
+
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.charset = "utf-8";
-    script.src = chrome.extension.getURL(scriptResource);
-    window.console.log("inject script tag: " + script.src);      
+    if (hasError) {
+      script.src = chrome.extension.getURL(scriptResource);
+      window.console.log("inject script tag: " + script.src);
+    } else {
+      var scriptContents = document.createTextNode(contents);
+      script.appendChild(scriptContents);
+      window.console.log("inject script contents: " + script.src);
+    }
     (document.head || document.body || document.documentElement).appendChild(script);
   },
-  
+
+  showPromptMessage: function(status) {
+    var msgDiv = document.createElement('div');
+    msgDiv.style.position = 'fixed';
+    msgDiv.style.bottom = 0;
+    msgDiv.style.height = '40px';
+    msgDiv.style.width = '100%';
+    msgDiv.style.backgroundColor = '#555';
+    msgDiv.innerHTML = chrome.extension.i18nRepalce()
+    document.body.appendChild(msgDiv);
+  },
+
   /**
   * Remove an element
   */
   init: function() {
     if (isThisScriptLoad) {
-      chrome.extension.sendRequest({msg: 'isLoadCanCapturn'});    
+      chrome.extension.sendRequest({msg: 'isLoadCanCapturn'});
     } else {
       chrome.extension.sendRequest({msg: 'isLoadCanNotCapturn'});
     }
     this.injectCssResource('style.css');
     this.messageListener();
-    this.injectJavaScriptResource("page_context.js");  
+    this.injectJavaScriptResource("page_context.js");
   }
 };
 
