@@ -23,8 +23,8 @@
   "tipStep2Mac": {"message": "Now you can right-click on the image below and save it."},
   "highlightSetting": {"message": "Highlight Settings:"},
   "highlightMode": {"message": "Highlight Mode"},
-  "border": {"message": "Draw border only for highlighted area"},
-  "rect": {"message": "Fill the entire highlighted area"},
+  "border": {"message": "Draw Border Only"},
+  "rect": {"message": "Fill Entire Area"},
   "color": {"message": "Highlight Color"},
   "fontSetting": {"message": "Text Font Settings:"},
   "fontColor": {"message": "Font Color"},
@@ -47,5 +47,10 @@
   "autoSave" : {"message" : "Auto Save - After capture, bypass editing screen and directly save the capture image to the following path with the web page title as default file name."},
   "setSavePath" : {"message" : "Browse..."},
   "openSavePath" : {"message" : "Show in folder"},
-  "defaultPath" : {"message": "Set as default path"}
+  "defaultPath" : {"message": "Set as default path"},
+  "size_small": {"message": "Small"},
+  "size_normal": {"message": "Normal"},
+  "size_large": {"message": "Large"},
+  "size_huge": {"message": "Huge"},
+  "solidBlack": {"message": "Solid Black"}
 }

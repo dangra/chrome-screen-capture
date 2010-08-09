@@ -47,5 +47,10 @@
   "autoSaveSetting": {"message": "自动保存设置："},
   "setSavePath" : {"message" : "浏览..."},
   "openSavePath" : {"message" : "在文件夹中显示"},
-  "defaultPath" : {"message": "设置为默认路径"}
+  "defaultPath" : {"message": "设置为默认路径"},
+  "size_small": {"message": "小"},
+  "size_normal": {"message": "正常"},
+  "size_large": {"message": "大"},
+  "size_huge": {"message": "最大"},
+  "solidBlack": {"message": "纯黑"}
 }
