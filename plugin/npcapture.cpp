@@ -13,8 +13,8 @@
 * License.
 *
 * Contributor(s):
-*   Bo Chen   <chen_bo-bj@vanceinfo.com>
 *   Jing Zhao <jingzhao@google.com>
+*   Xianzhu Wang <wangxianzhu@google.com>
 *
 * Alternatively, the contents of this file may be used under the terms of
 * either the GNU General Public License Version 2 or later (the "GPL"), or 
@@ -30,380 +30,18 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include <stdio.h>
-#include <io.h>
-
-#ifdef _WINDOWS
-#include <atlenc.h>
-#include <atlstr.h>
-#include <comutil.h>
-#include <ShlObj.h>
-#include <Userenv.h>
-#pragma comment(lib, "Userenv.lib")
-#endif
-
-#ifdef GTK
-#include <gtk/gtk.h>
-#endif
-
 #include <vector>
-#include "npcapture.h"
 
-NPNetscapeFuncs* npnfuncs = NULL;
+#include "plugin.h"
 
-const char* kSaveScreenshot = "SaveScreenshot";
-TCHAR szConfigFileName[MAX_PATH]=L"npCaptureConfig.ini";
+NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
+  if(instance == NULL)
+    return NPERR_INVALID_INSTANCE_ERROR;
 
-NPObject* CPlugin::Allocate(NPP instance, NPClass* npclass) {
-  TCHAR szFileName[MAX_PATH];
-  GetModuleFileName(GetModuleHandle(L"npcapture.dll"),szFileName,MAX_PATH);
-  std::wstring str = szFileName;
-  int nPos = str.rfind('\\');
-  if (nPos != -1) {
-    str.erase(nPos+1,str.length());
-    str.append(L"npCaptureConfig.ini");
-    wcscpy(szConfigFileName,str.c_str());
-  }
+  CPlugin * pPlugin = (CPlugin *)instance->pdata;
+  if(pPlugin == NULL)
+    return NPERR_GENERIC_ERROR;
 
-  return (NPObject*)(new CPlugin);
-}
-
-void CPlugin::Deallocate(NPObject* obj) {
-  delete (CPlugin*)obj;
-}
-
-bool CPlugin::HasMethod(NPObject* obj, NPIdentifier methodName) {
-  return true;
-}
-
-bool CPlugin::InvokeDefault(NPObject* obj, const NPVariant* args,
-                            uint32_t argCount, NPVariant* result) {
-  return true;
-}
-
-bool CPlugin::Invoke(NPObject* obj, NPIdentifier methodName,
-                     const NPVariant* args, uint32_t argCount,
-                     NPVariant* result) {
-  char* name = npnfuncs->utf8fromidentifier(methodName);
-  bool ret_val = false;
-  if (!name) {
-    return ret_val;
-  }
-  if (!strncmp((const char*)name, kSaveScreenshot,
-               strlen(kSaveScreenshot))) {
-    ret_val = SaveScreenshot(obj, args, argCount, result);
-  } else if (strcmp(name,"AutoSave")==0) {
-    ret_val = AutoSave(obj, args, argCount, result);
-  } else if (strcmp(name,"SetSavePath") ==0 ) {
-    ret_val = SetSavePath(obj, args, argCount, result);
-  } else if (strcmp(name,"OpenSavePath") == 0) {
-    ret_val = OpenSavePath(obj, args, argCount, result);
-  } else {
-    // Exception handling. 
-    npnfuncs->setexception(obj, "exception during invocation");
-  }
-  if (name) {
-    npnfuncs->memfree(name);
-  }
-  return ret_val;
-}
-
-bool CPlugin::HasProperty(NPObject* obj, NPIdentifier propertyName) {
-  return false;
-}
-
-bool CPlugin::GetProperty(NPObject* obj, NPIdentifier propertyName,
-                          NPVariant* result) {
-  return false;
-}
-
-static bool SaveFile(const char* fileName, const unsigned char* bytes,
-                     int byteLength) {
-  FILE* out = fopen(fileName, "wb");
-  if (out) {
-    fwrite(bytes, byteLength, 1, out);
-    fclose(out);
-    return true;
-  }
-  return false;
-}
-
-#ifdef GTK
-static guchar* gLastData = NULL;
-static int gLastDataLength = 0;
-
-static void FreeLastData() {
-  if (gLastData)
-    free(gLastData);
-  gLastData = NULL;
-  gLastDataLength = 0;
-}
-
-GtkWidget *gLastDialog = NULL;
-
-static void OnDialogResponse(GtkDialog* dialog, gint response,
-                             gpointer userData) {
-  if (response == GTK_RESPONSE_OK) {
-    char *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    if (file && gLastData) {
-      SaveFile(file, gLastData, gLastDataLength);
-      g_free(file);
-    }
-  }
-  gtk_widget_destroy(GTK_WIDGET(dialog));
-}
-
-static void OnDialogDestroy(GtkObject* object, gpointer userData) {
-  FreeLastData();
-  gLastDialog = NULL;
-}
-#endif
-
-bool GenerateUniqueFileName(char* scrFile,char* destFile) {
-  strcpy(destFile,scrFile);  
-  char* pPostfix = strrchr(scrFile,'.');
-  for (int i=1;i<1000;i++)
-  {
-    if (access(destFile,0)) {
-      return true;
-    } else {
-      if (pPostfix) {
-        strncpy(destFile,scrFile,pPostfix-scrFile);
-        destFile[pPostfix-scrFile]=0;
-        sprintf(destFile,"%s(%d)%s",destFile,i,pPostfix);
-      } else {
-        sprintf(destFile,"%s(%d)",scrFile,i);
-      }
-    }
-  }
-  return false;
-}
-
-bool CPlugin::AutoSave(NPObject* obj, const NPVariant* args, 
-                       unsigned int argCount, NPVariant* result) {
-  result->type = NPVariantType_Bool;
-  result->value.boolValue = TRUE;
-
-  if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
-   return false;
-
-  char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
-  if (!url)
-   return false;
-
-  char* title = NULL;
-  if (argCount == 2 && NPVARIANT_IS_STRING(args[1]))
-   title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
-
-  char* base64 = strstr(url, "base64,");
-  if (!base64)
-   return false;
-  base64 += 7;
-  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
-
-  #ifdef _WINDOWS
-  TCHAR szFileName[MAX_PATH];
-  char szFile[MAX_PATH]="";
-  char szSaveFile[MAX_PATH];
-  TCHAR szUserDefaultPath[MAX_PATH];
-  DWORD nLen = MAX_PATH;
-  HANDLE hToken;
-  OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&hToken);
-  GetUserProfileDirectory(hToken,szUserDefaultPath,&nLen);
-  GetPrivateProfileString(L"Path",L"SavePath",szUserDefaultPath,szFileName,
-                          MAX_PATH,szConfigFileName);
-
-  if (!PathIsDirectory(szFileName))
-    wcscpy(szFileName,szUserDefaultPath);
-
-  TCHAR szTitle[MAX_PATH];
-  std::wstring szInvalidWord = L"\\/:*?\"<>|";
-
-  MultiByteToWideChar(CP_UTF8,0,title,-1,szTitle,MAX_PATH);
-  nLen = wcslen(szTitle);
-  for(int i=0;i<nLen;i++) {
-    if (szInvalidWord.find(szTitle[i])!= std::wstring::npos)
-      szTitle[i] = ' ';
-  }
-  wsprintf(szFileName,L"%s\\%s.png",szFileName,szTitle);
-  WideCharToMultiByte(CP_ACP,0,szFileName,-1,szFile,MAX_PATH,0,0);
-
-  if (GenerateUniqueFileName(szFile,szSaveFile)) {
-   int byteLength = Base64DecodeGetRequiredLength(base64size);
-   BYTE* bytes = new BYTE[byteLength];
-   Base64Decode(base64, base64size, bytes, &byteLength);
-   if (!SaveFile(szSaveFile, bytes, byteLength)) {
-     result->value.boolValue = FALSE;
-   }
-  }
-  #endif
-
-return true;
-}
-
-int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
-  switch (uMsg) {
-  case BFFM_INITIALIZED:
-    SendMessage(hwnd,BFFM_SETSELECTION,TRUE,lpData);
-    break;
-  }
-  return 0;
-}
-
-bool CPlugin::SetSavePath(NPObject* obj, const NPVariant* args, 
-                          uint32_t argCount, NPVariant* result) {
-  TCHAR szDisplayName[MAX_PATH];
-  HANDLE hToken;
-  TCHAR szSavePath[MAX_PATH];
-  TCHAR szUserDefaultPath[MAX_PATH];
-  DWORD nLen = MAX_PATH;
-  OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&hToken);
-  GetUserProfileDirectory(hToken,szUserDefaultPath,&nLen);
-  GetPrivateProfileString(L"Path",L"SavePath",szUserDefaultPath,szSavePath,
-                          MAX_PATH,szConfigFileName);
-
-  BROWSEINFO info={0};
-  info.hwndOwner = (HWND)((CPlugin*)obj)->hWnd;
-  info.lpszTitle = L"select default picture path";
-  info.pszDisplayName = szDisplayName;
-  info.lpfn = BrowserCallBack;
-  info.ulFlags = BIF_RETURNONLYFSDIRS;
-  info.lParam = (LPARAM)szSavePath;
-  BOOL bRet = SHGetPathFromIDList(SHBrowseForFolder(&info),szDisplayName);
-  LPSTR p = (LPSTR)npnfuncs->memalloc(MAX_PATH);
-  if (bRet) {
-    WritePrivateProfileString(L"Path",L"SavePath",szDisplayName,szConfigFileName);
-    WideCharToMultiByte(CP_UTF8,0,szDisplayName,-1,p,MAX_PATH,0,0);
-    STRINGZ_TO_NPVARIANT(p,*result);
-  } else {
-    WideCharToMultiByte(CP_UTF8,0,szSavePath,-1,p,MAX_PATH,0,0);
-    STRINGZ_TO_NPVARIANT(p,*result);
-  }
-
-  return true;
-}
-
-bool CPlugin::OpenSavePath(NPObject* obj, const NPVariant* args, 
-                           unsigned int argCount, NPVariant* result) {
-  TCHAR szSavePath[MAX_PATH];
-  TCHAR szUserDefaultPath[MAX_PATH];
-  DWORD nLen = MAX_PATH;
-  HANDLE hToken;
-  OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&hToken);
-  GetUserProfileDirectory(hToken,szUserDefaultPath,&nLen);
-  GetPrivateProfileString(L"Path",L"SavePath",szUserDefaultPath,szSavePath,
-                          MAX_PATH,szConfigFileName);
-
-  ShellExecute(NULL,L"open",szSavePath,NULL,NULL,SW_SHOWNORMAL);
-  return true;
-}
-
-bool CPlugin::SaveScreenshot(NPObject* obj, const NPVariant* args,
-                             uint32_t argCount, NPVariant* result) {
-  result->type = NPVariantType_Bool;
-  result->value.boolValue = TRUE;
-
-  if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
-    return false;
-
-  char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
-  if (!url)
-    return false;
-
-  char* title = NULL;
-  if (argCount == 2 && NPVARIANT_IS_STRING(args[1]))
-    title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
-
-  char* base64 = strstr(url, "base64,");
-  if (!base64)
-    return false;
-  base64 += 7;
-  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
-
-#ifdef _WINDOWS
-  char szFile[1024] = "";
-  OPENFILENAMEA Ofn = {0};
-  Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = (HWND)((CPlugin*)obj)->hWnd;
-  Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
-  Ofn.lpstrFile = szFile;
-  Ofn.nMaxFile = sizeof(szFile);
-  Ofn.lpstrFileTitle = NULL;
-  Ofn.nMaxFileTitle = 0;
-  Ofn.lpstrInitialDir = NULL;
-  Ofn.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
-  Ofn.lpstrTitle = NULL;
-  Ofn.lpstrDefExt = "png";
- 
-  GetSaveFileNameA(&Ofn);
-
-  if (szFile[0] != '\0') {
-    int byteLength = Base64DecodeGetRequiredLength(base64size);
-    BYTE* bytes = new BYTE[byteLength];
-    Base64Decode(base64, base64size, bytes, &byteLength);
-    if (!SaveFile(szFile, bytes, byteLength)) {
-      result->value.boolValue = FALSE;
-    }
-  }
-#endif
-
-#ifdef GTK
-  FreeLastData();
-  gsize byteLength = (base64size * 3) / 4;
-  gLastData = (guchar*)malloc(byteLength);
-  gint state = 0;
-  guint save = 0;
-  gLastDataLength = g_base64_decode_step(base64, base64size, gLastData,
-                                         &state, &save);
-
-  if (!gLastDialog) {
-    GtkWidget *dialog = gtk_file_chooser_dialog_new(
-        title, NULL,
-        GTK_FILE_CHOOSER_ACTION_SAVE,
-        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
-    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
-                                                   TRUE);
-    const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_PICTURES);
-    if (dir)
-      gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), dir);
-
-    GtkFileFilter *file_filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(file_filter, "PNG Image");
-    gtk_file_filter_add_pattern(file_filter, "*.png");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
-
-    file_filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(file_filter, "All Files");
-    gtk_file_filter_add_pattern(file_filter, "*.*");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
-    g_signal_connect(dialog, "response", G_CALLBACK(OnDialogResponse), NULL);
-    g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy), NULL);
-    gtk_widget_show_all(dialog);
-    gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
-    gLastDialog = dialog;
-  }
-  gtk_window_present(GTK_WINDOW(gLastDialog));
-#endif
-
-  return true;
-}
-
-static NPClass plugin_ref_obj = {
-  NP_CLASS_STRUCT_VERSION,
-  CPlugin::Allocate,
-  CPlugin::Deallocate,
-  NULL,
-  CPlugin::HasMethod,
-  CPlugin::Invoke,
-  CPlugin::InvokeDefault,
-  CPlugin::HasProperty,
-  CPlugin::GetProperty,
-  NULL,
-  NULL,
-};
-
-static NPError GetValue(NPP instance, NPPVariable variable, void* value) {
   switch(variable) {
   default:
     return NPERR_GENERIC_ERROR;
@@ -414,15 +52,7 @@ static NPError GetValue(NPP instance, NPPVariable variable, void* value) {
     *((char **)value) = "ScreenCapturePlugin plugin.";
     break;
   case NPPVpluginScriptableNPObject:
-    if (!instance->pdata) {
-      instance->pdata = (void*)npnfuncs->createobject(instance, &plugin_ref_obj);
-      ((CPlugin*)instance->pdata)->hWnd = instance->ndata;
-    }
-
-    // Retain the object since we keep it in plugin code
-    // so that it won't be freed by browser.
-    npnfuncs->retainobject((NPObject*)instance->pdata);
-    *(NPObject **)value = (NPObject*)instance->pdata;
+    *(NPObject **)value = (NPObject*)pPlugin->GetScriptableObject();
     break;
   case NPPVpluginNeedsXEmbed:
     *((char *)value) = 1;
@@ -431,27 +61,58 @@ static NPError GetValue(NPP instance, NPPVariable variable, void* value) {
   return NPERR_NO_ERROR;
 }
 
-static NPError NewNPInstance(NPMIMEType pluginType, NPP instance,
-                             uint16_t mode, int16_t argc, char* argn[],
-                             char* argv[], NPSavedData* saved) {
+NPError NPP_New(NPMIMEType pluginType, NPP instance,
+                uint16_t mode, int16_t argc, char* argn[],
+                char* argv[], NPSavedData* saved) {
+  if(instance == NULL)
+    return NPERR_INVALID_INSTANCE_ERROR;
+
+#ifdef _WINDOWS
   int bWindowed = 1;
+#else
+  int bWindowed = 0;
+#endif
   npnfuncs->setvalue(instance, NPPVpluginWindowBool, (void *)bWindowed);
-  instance->pdata = NULL;
-  instance->ndata = NULL;
+
+  CPlugin * pPlugin = new CPlugin(instance);
+  if(pPlugin == NULL)
+    return NPERR_OUT_OF_MEMORY_ERROR;
+
+  instance->pdata = (void *)pPlugin;
+
   return NPERR_NO_ERROR;
 }
 
-static NPError DestroyNPInstance(NPP instance, NPSavedData** save) {
-  if (instance->pdata) {
-    npnfuncs->releaseobject((NPObject*)instance->pdata);
+NPError NPP_Destroy(NPP instance, NPSavedData** save) {
+  if(instance == NULL)
+    return NPERR_INVALID_INSTANCE_ERROR;
+
+  CPlugin * pPlugin = (CPlugin *)instance->pdata;
+  if(pPlugin != NULL)
+    delete pPlugin;
+  return NPERR_NO_ERROR;
+}
+
+NPError NPP_SetWindow(NPP instance, NPWindow* window) {
+  if(instance == NULL)
+    return NPERR_INVALID_INSTANCE_ERROR;
+
+  if(window == NULL)
+    return NPERR_GENERIC_ERROR;
+
+  CPlugin * pPlugin = (CPlugin *)instance->pdata;
+  if(pPlugin == NULL) 
+    return NPERR_GENERIC_ERROR;
+
+  // window just created
+  if(!pPlugin->isInitialized() && (window->window != NULL)) { 
+    if(!pPlugin->init(window)) {
+      delete pPlugin;
+      pPlugin = NULL;
+      return NPERR_MODULE_LOAD_FAILED_ERROR;
+    }
   }
-  instance->pdata = NULL;
-  instance->ndata = NULL;
-  return NPERR_NO_ERROR;
-}
 
-NPError SetWindow(NPP instance, NPWindow* window) {
-  instance->ndata = window->window;
   return NPERR_NO_ERROR;
 }
 
@@ -469,56 +130,3 @@ int16_t NPP_HandleEvent(NPP instance, void* event) {
   return 0;
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-  NPError OSCALL NP_GetEntryPoints(NPPluginFuncs* nppfuncs) {
-    nppfuncs->version = (NP_VERSION_MAJOR << 8) | NP_VERSION_MINOR;
-    nppfuncs->newp = NewNPInstance;
-    nppfuncs->destroy = DestroyNPInstance;
-    nppfuncs->getvalue = GetValue;
-    nppfuncs->setwindow = SetWindow;
-    nppfuncs->event = NPP_HandleEvent;
-    nppfuncs->newstream = NPP_NewStream;
-    nppfuncs->destroystream = NPP_DestroyStream;
-    return NPERR_NO_ERROR;
-  }
-
-#ifndef HIBYTE
-#define HIBYTE(x) ((((unsigned short)(x)) & 0xff00) >> 8)
-#endif
-
-NPError OSCALL NP_Initialize(NPNetscapeFuncs* npnf
-#if !defined(_WINDOWS) && !defined(WEBKIT_DARWIN_SDK)
-               , NPPluginFuncs *nppfuncs) {
-#else
-               ) {
-#endif
-                 if(npnf == NULL) {
-                   return NPERR_INVALID_FUNCTABLE_ERROR;
-                 }
-                 if(HIBYTE(npnf->version) > NP_VERSION_MAJOR) {
-                   return NPERR_INCOMPATIBLE_VERSION_ERROR;
-                 }
-                 npnfuncs = npnf;
-#if !defined(_WINDOWS) && !defined(WEBKIT_DARWIN_SDK)
-                 NP_GetEntryPoints(nppfuncs);
-#endif
-                 return NPERR_NO_ERROR;
-}
-
-NPError  OSCALL NP_Shutdown() {
-  return NPERR_NO_ERROR;
-}
-
-char* NP_GetMIMEDescription(void) {
-  return "application/x-screencapture::Screen Capture Plugin";
-}
-
-// Needs to be present for WebKit based browsers.
-NPError OSCALL NP_GetValue(void* npp, NPPVariable variable, void* value) {
-  return GetValue((NPP)npp, variable, value);
-}
-#ifdef __cplusplus
-}
-#endif
