@@ -111,7 +111,9 @@ body {
     insertScript = function() {
       if (!isScriptLoad) {
         chrome.tabs.executeScript(null, {file: 'page.js'}, function() {
-            i18nReplace('tip', 'tip2');});
+          document.getElementById('tip').style.display = 'none';
+          document.getElementById('captureSpecialPage').style.display = 'block';
+        });
         chrome.tabs.executeScript(null, {file: 'isLoad.js'});
       }
     }
