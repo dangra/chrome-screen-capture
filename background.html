@@ -109,8 +109,8 @@ var screenshot = {
             image.width - screenshot.scrollBarX : image.width;
         var zoomX = curWidth / visibleWidth;
         var zoomY = curHeight / visibleHeight;
-        screenshot.canvas.width = curWidth;
-        screenshot.canvas.height = curHeight;
+        screenshot.canvas.width = width * zoomX;
+        screenshot.canvas.height = height * zoomY;
         var context = screenshot.canvas.getContext("2d");
         context.drawImage(image, x * zoomX, y * zoomY, width * zoomX,
             height * zoomY, 0, 0, width * zoomX, height * zoomY);
