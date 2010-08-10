@@ -43,14 +43,16 @@
   "screenshootQuality" : {"message" : "图像质量"},
   "lossyScreenShot" : {"message" : "有损截图"},
   "losslessScreenShot" : {"message" : "无损截图"},
-  "autoSave" : {"message" : "自动截图 - 截图后不进行编辑，直接以页面标题为文件名保存到以下路径。"},
+  "autoSave" : {"message" : "截图后不进行编辑，直接保存"},
   "autoSaveSetting": {"message": "自动保存设置："},
   "setSavePath" : {"message" : "浏览..."},
   "openSavePath" : {"message" : "在文件夹中显示"},
-  "defaultPath" : {"message": "设置为默认路径"},
+  "defaultPath" : {"message": "默认以页面标题为文件名，保存截图到以下路径"},
   "size_small": {"message": "小"},
   "size_normal": {"message": "正常"},
   "size_large": {"message": "大"},
   "size_huge": {"message": "最大"},
-  "solidBlack": {"message": "纯黑"}
+  "solidBlack": {"message": "纯黑"},
+  "saveSuccess": {"message": "截图保存成功.   "},
+  "saveFail": {"message": "截图保存失败."}
 }

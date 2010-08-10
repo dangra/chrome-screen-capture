@@ -44,13 +44,15 @@
   "lossyScreenShot" : {"message" : "Lossy Screenshot"},
   "losslessScreenShot" : {"message" : "Lossless Screenshot"},
   "autoSaveSetting": {"message": "Auto Save setting:"},
-  "autoSave" : {"message" : "Auto Save - After capture, bypass editing screen and directly save the capture image to the following path with the web page title as default file name."},
+  "autoSave" : {"message" : "After capture, bypass editing screen and directly save it"},
   "setSavePath" : {"message" : "Browse..."},
   "openSavePath" : {"message" : "Show in folder"},
-  "defaultPath" : {"message": "Set as default path"},
+  "defaultPath" : {"message": "Save the capture image to the following path with the web page title as default file name"},
   "size_small": {"message": "Small"},
   "size_normal": {"message": "Normal"},
   "size_large": {"message": "Large"},
   "size_huge": {"message": "Huge"},
-  "solidBlack": {"message": "Solid Black"}
+  "solidBlack": {"message": "Solid Black"},
+  "saveSuccess": {"message": "Screenshot saved.   "},
+  "saveFail": {"message": "Failed to save the screenshot."}
 }

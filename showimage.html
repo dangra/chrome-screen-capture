@@ -259,11 +259,11 @@
   <div id="tip"></div>
   <div class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
    <ul>
-    <li id="done" onclick="photoShop.save()">
-      <span id="tDone">Done</span>
-    </li>
     <li id="save" onclick="photoShop.save()">
-      <span id="tSave">Save</span>
+      <span id="tSave"></span>
+    </li>
+    <li id="done" onclick="photoShop.save()">
+      <span id="tDone"></span>
     </li>
      <li id="editMore" onclick="photoShop.editMore()">
        <span id="tEditMore">Edit More</span>
@@ -333,7 +333,8 @@
       var showBoxHeight = function() {
         $('showBox').style.height = window.innerHeight - photoShop.offsetY - 1;
       }
-      $('save').style.display = 'none';
+      $('save').style.display = 'block';
+      $('done').style.display = 'none';
       $('editMore').style.display = 'none';
       setTimeout(showBoxHeight, 50);
     },
@@ -415,10 +416,10 @@
       }
       //photoShop.removeElement('floatDiv');
       //photoShop.markedArea = [];
-      photoShop.dragFlag = false;
+      //photoShop.dragFlag = false;
       //photoShop.lastValidAction = 0;
-      photoShop.isDraw = false;
-      bg.screenshot.data = null;
+      //photoShop.isDraw = false;
+      //bg.screenshot.data = null;
       var context;
       context = $('canvas').getContext('2d');
       context.drawImage(bg.screenshot.canvas,0,0);
@@ -793,13 +794,14 @@
         //photoShop.removeElement(photoShop.markedArea[j].id);
       }
       $('pic').src = $('canvas').toDataURL('image/png');
-      photoShop.finish();
+      //photoShop.finish();
     },
 
     save: function() {
       photoShop.draw();
       if (localStorage.defaultPath == 'true') {
-        if (!pluginobj.AutoSave($('pic').src, bg.screenshot.tab.title)) {
+        if (!pluginobj.AutoSave($('pic').src,
+            bg.screenshot.tab.title, localStorage.savePath)) {
         alert(chrome.i18n.getMessage('saveerror'));
       }
       } else if (!pluginobj.SaveScreenshot(

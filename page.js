@@ -91,7 +91,7 @@ var page = {
           response(page.scrollNext());
           break;
         case 'auto_save_done':
-          page.showPromptMessage(request.status);
+          page.showPromptMessage(request.status, request.open, response);
 
       }
     });
@@ -184,7 +184,12 @@ var page = {
         'x': page.startX,
         'y': page.startY,
         'width': page.endX - page.startX,
-        'height': page.endY - page.startY})}, 100);
+        'height': page.endY - page.startY,
+        'visibleWidth': document.documentElement.clientWidth,
+        'visibleHeight': document.documentElement.clientHeight,
+        'docWidth': document.width,
+        'docHeight': document.height
+      })}, 100);
   },
 
   /**
@@ -493,15 +498,24 @@ var page = {
     (document.head || document.body || document.documentElement).appendChild(script);
   },
 
-  showPromptMessage: function(status) {
+  showPromptMessage: function(status, open, response) {
     var msgDiv = document.createElement('div');
-    msgDiv.style.position = 'fixed';
-    msgDiv.style.bottom = 0;
-    msgDiv.style.height = '40px';
-    msgDiv.style.width = '100%';
-    msgDiv.style.backgroundColor = '#555';
-    msgDiv.innerHTML = chrome.extension.i18nRepalce()
+    msgDiv.className = 'sc_tip_save_status';
+    msgDiv.innerHTML = status;
+    if (!!open) {
+      var openFolder = function() {
+        response({msg: 'openFolder'});
+      }
+      var aElement = document.createElement('a');
+      aElement.innerText = open;
+      aElement.href = 'javascript:void(0)';
+      aElement.addEventListener('click', openFolder, false);
+      msgDiv.appendChild(aElement);
+    }
     document.body.appendChild(msgDiv);
+    window.setTimeout(function(){
+      document.body.removeChild(msgDiv);
+    }, 5000);
   },
 
   /**

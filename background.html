@@ -26,7 +26,8 @@ var screenshot = {
       port.onMessage.addListener(function(obj) {
         switch(obj.msg) {
           case 'capture_selected':
-            screenshot.capturePortion(obj.x, obj.y, obj.width, obj.height);
+            screenshot.capturePortion(obj.x, obj.y, obj.width, obj.height,
+                obj.visibleWidth, obj.visibleHeight, obj.docWidth, obj.docHeight);
             break;
         }
       });
@@ -69,6 +70,9 @@ var screenshot = {
       case 'scroll_finished':
         screenshot.captureAndScrollDone();
         break;
+      case 'openFolder':
+        screenshot.openSavePath();
+        break;
     }
   },
 
@@ -92,16 +96,24 @@ var screenshot = {
   * Use drawImage method to slice parts of a source image and draw them to
   * the canvas
   */
-  capturePortion: function(x, y, width, height) {
+  capturePortion: function(x, y, width, height,
+                           visibleWidth, visibleHeight, docWidth, docHeight) {
     var formatParam  = localStorage.screenshootQuality ?
         localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
-        screenshot.canvas.width = width;
-        screenshot.canvas.height = height;
+        var curHeight = image.width < docWidth ?
+            image.height - screenshot.scrollBarY : image.height;
+        var curWidth = image.height < docHeight ?
+            image.width - screenshot.scrollBarX : image.width;
+        var zoomX = curWidth / visibleWidth;
+        var zoomY = curHeight / visibleHeight;
+        screenshot.canvas.width = curWidth;
+        screenshot.canvas.height = curHeight;
         var context = screenshot.canvas.getContext("2d");
-        context.drawImage(image, x, y, width, height, 0, 0, width, height);
+        context.drawImage(image, x * zoomX, y * zoomY, width * zoomX,
+            height * zoomY, 0, 0, width * zoomX, height * zoomY);
         screenshot.postImage();
       };
       image.src = data;
@@ -189,16 +201,24 @@ var screenshot = {
   * Post image to 'showimage.html'
   */
   postImage: function() {
-    if (eval(localStorage.autoSave)) { // auto save picture
+    // auto save picture
+    if (eval(localStorage.autoSave) && eval(localStorage.defaultPath)) {
       var pluginobj = document.getElementById('pluginobj');
       var data = screenshot.canvas.toDataURL('image/png');
       var message;
-      if (pluginobj.AutoSave(data, screenshot.tab.title)) {
+      var status;
+      var open;
+      if (pluginobj.AutoSave(data, screenshot.tab.title,
+          localStorage.savePath)) {
         status = 'saveSuccess';
+        open = chrome.i18n.getMessage('openSavePath');
       } else {
-        status = 'saveFail'
+        status = 'saveFail';
+        open = false;
       }
-      screenshot.sendMessage({msg: 'auto_save_done', status: status}, null);
+      screenshot.sendMessage({msg: 'auto_save_done',
+          status: chrome.i18n.getMessage(status), open: open}, 
+          screenshot.onResponseVisibleSize);
       return;
     }
     chrome.tabs.create({'url': 'showimage.html'}, function() {});
@@ -214,6 +234,11 @@ var screenshot = {
       localStorage.screenshootQuality = (isWindowsPlatform ? 'jpeg' : 'png');
     }
     return localStorage.screenshootQuality;
+  },
+
+  openSavePath: function() {
+    var pluginobj = document.getElementById('pluginobj');
+    pluginobj.OpenSavePath(localStorage.savePath);
   }
 
 };

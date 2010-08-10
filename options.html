@@ -111,21 +111,10 @@
   }
   </style>
   <script>
-  var isColorPadLoad = false;
-  var targetObj = false;
-  var colorType;
   var bg = chrome.extension.getBackgroundPage();
 
   function init() {
     i18nReplace('optionTitle', 'optionTitle');
-    i18nReplace('highlightSetting', 'highlightSetting');
-    i18nReplace('border', 'border');
-    i18nReplace('rect', 'rect');
-    i18nReplace('color', 'color');
-    i18nReplace('fontSetting', 'fontSetting');
-    i18nReplace('tFontColor', 'fontColor');
-    i18nReplace('tFontSize', 'fontSize');
-    i18nReplace('highlightMode', 'highlightMode');
     i18nReplace('saveAndClose', 'saveAndClose');
     i18nReplace('screenshootQualitySetting', 'screenshootQualitySetting');
     i18nReplace('lossyScreenShot', 'lossyScreenShot');
@@ -135,47 +124,23 @@
     i18nReplace('openSavePath', 'openSavePath');
     i18nReplace('defaultPathText', 'defaultPath');
     i18nReplace('autoSaveSetting', 'autoSaveSetting');
-    var highlightColor = document.getElementById('hColor');
-    var fontColor = document.getElementById('fontColor');
-    var fontSize = document.getElementById('fontSize');
-
-    switch(localStorage.highlightType) {
-      case 'border':
-        document.getElementById('borderMode').checked = true;
-        break;
-      case 'rect':
-        document.getElementById('rectMode').checked = true;
-        break;
-    }
+    setCheckBoxStatus();
     document.getElementById('autoSave').checked = eval(localStorage.autoSave);
     document.getElementById('defaultPath').checked = eval(localStorage.defaultPath);
-    localStorage.highlightColor = localStorage.highlightColor ?
-        localStorage.highlightColor : '#ff0000';
-    localStorage.fontColor = localStorage.fontColor ?
-        localStorage.fontColor : '#ff0000';
-    fontSize.value = localStorage.fontSize = localStorage.fontSize ?
-        localStorage.fontSize : fontSize.value;
-    highlightColor.style.backgroundColor = localStorage.highlightColor;
-    fontColor.style.backgroundColor = localStorage.fontColor;
     document.getElementById('filePath').value = localStorage.savePath ? localStorage.savePath : '';
     document.getElementById('setSavePath').addEventListener('click', function() {
       var savePath = setSavePath();
       document.getElementById('filePath').value = localStorage.savePath = savePath;
     });
+    document.getElementById('defaultPath').addEventListener('change', setCheckBoxStatus, false);
     document.getElementById('openSavePath').addEventListener('click', function() {
-      var pluginobj = document.getElementById('pluginobj');
-      pluginobj.OpenSavePath();
+      bg.screenshot.openSavePath();
     })
-    initScreenCaptureQuality()
+    setCheckBoxStatus();
+    initScreenCaptureQuality();
   }
 
   function save() {
-     localStorage.highlightType = document.getElementById('borderMode').
-         checked ? 'border':'' || document.getElementById('rectMode').checked ?
-         'rect' : '';
-     localStorage.fontSize = document.getElementById('fontSize').value;
-     localStorage.highlightColor = document.getElementById('hHighlineColor').value;
-     localStorage.fontColor = document.getElementById('hFontColor').value;
      localStorage.screenshootQuality =
          document.getElementById('lossy').checked ? 'jpeg' : '' ||
          document.getElementById('lossless').checked ? 'png' : '';
@@ -192,69 +157,14 @@
     });
   }
 
-  function colorPadLoad() {
-    var colorList = ['#000000', '#808080', '#800000', '#808000', '#008000',
-                     '#008080', '#000080', '#800080', '#808040', '#004040',
-                     '#0080FF', '#004080', '#8000FF', '#804000', '#FFFFFF',
-                     '#C0C0C0', '#FF0000', '#FFF000', '#00FF00', '#00FFFF',
-                     '#0000FF', '#FF00FF', '#FFFF80', '#00FF80', '#80FFFF',
-                     '#8080FF', '#FF0080', '#FF8040'];
-    var  colorPadStr = '';
-    colorPadStr += '<div id="colorpad">';
-    colorPadStr += '<div style="text-align:right; cursor:pointer;"' +
-        'onclick="hideColorPad();">' + chrome.i18n.getMessage('close') +
-        '</div>';
-    for(var i = 0; i < colorList.length; i++) {
-      colorList[i]= '<a href="javascript:colorPadPick(\'' + colorList[i] +
-          '\');" style="background:' + colorList[i] + ';"></a>';
+  function setCheckBoxStatus() {
+    var defaultPath = document.getElementById('defaultPath');
+    var autoSave = document.getElementById('autoSave');
+    if (defaultPath.checked) {
+      autoSave.disabled = false;
+    } else {
+      autoSave.disabled = true;
     }
-    colorPadStr = colorPadStr + colorList.join("\n") + '</div>';
-    var container = document.createElement('div');
-    container.id = 'container';
-    container.innerHTML = colorPadStr;
-    document.body.appendChild(container);
-    isColorPadLoad = true;
-  }
-
-  function showColorPad(event, obj, type) {
-    if (!isColorPadLoad) {
-      colorPadLoad();
-    }
-    var position = colorPadPostion(event, obj);
-    document.getElementById('colorpad').style.top   = (position.y + 20) + 'px';
-    document.getElementById('colorpad').style.left = (position.x - 30) + 'px';
-    document.getElementById('colorpad').style.display = 'block';
-    targetObj = obj;
-    colorType = type;
-  }
-
-  function hideColorPad() {
-    if (!isColorPadLoad) {
-      return false;
-    }
-    document.getElementById('colorpad').style.display = 'none';
-  }
-
-  function colorPadPick(color) {
-    targetObj.value = color;
-    if(colorType == 'highlight') {
-      //localStorage.highlightColor = targetObj.value;
-      document.getElementById('hHighlineColor').value = color;
-      targetObj.style.backgroundColor = color;
-    }
-    if(colorType == 'text') {
-      //localStorage.fontColor = targetObj.value;
-      document.getElementById('hFontColor').value = color;
-      targetObj.style.backgroundColor = color;
-    }
-    hideColorPad();
-  }
-
-  function colorPadPostion(event, obj) {
-    var position = new Object();
-    position.x = event.clientX;
-    position.y = event.clientY;
-    return position;
   }
 
   function initScreenCaptureQuality() {
@@ -265,17 +175,11 @@
         (localStorage.screenshootQuality == 'png' ? true : false);
   }
 
-
   function setSavePath() {
     var pluginobj = document.getElementById('pluginobj');
-    return pluginobj.SetSavePath();
+    return pluginobj.SetSavePath(localStorage.savePath);
+
   }
-
-  function openSavePath() {
-    pluginobj.OpenSavePath();
-  }
-
-
 
   function i18nReplace(id, name) {
     return document.getElementById(id).innerText = chrome.i18n.getMessage(name);
@@ -289,49 +193,6 @@
    <div id="header">
      <h1 id="optionTitle"></h1>
    </div>
-   <h4 id="highlightSetting"></h4>
-   <div class="section-content">
-     <div class="contentLeft"><span id="highlightMode"></span> </div>
-     <div class="contentRight">
-       <label>
-         <input type="radio" id="borderMode" checked="true" name="highlight">
-         <span id="border"></span>
-       </label>
-       <label>
-         <input type="radio" id="rectMode" name="highlight">
-         <span id="rect"></span>
-       </label>
-     </div>
-     <div class="clear"></div>
-     <div class="contentLeft"><span id="color"></span></div>
-     <div class="contentRight">
-     <div id="hColor" value="#FF0000" onclick="showColorPad(event, this,'highlight');" class="colorBox"></div>
-     <input type="hidden" id="hHighlineColor">
-     </div>
-     <div class="clear"></div>
-   </div>
-
-   <h4 id="fontSetting"></h4>
-   <div class="section-content">
-     <div class="contentLeft"><span id="tFontSize"></span></div>
-     <div class="contentRight">
-       <select id="fontSize">
-         <option value="10">10</option>
-         <option value="12" selected>12</option>
-         <option value="14">14</option>
-         <option value="18">18</option>
-         <option value="20">20</option>
-         <option value="24">24</option>
-       </select>
-     </div>
-     <div class="clear"></div>
-     <div class="contentLeft"><span id="tFontColor"></span></div>
-     <div class="contentRight">
-     <div id="fontColor" value="#FF0000" onclick="showColorPad(event, this, 'text');" class="colorBox"></div>
-     <input type="hidden" id="hFontColor">
-     </div>
-     <div class="clear"></div>
-   </div>
    <h4 id="screenshootQualitySetting"></h4>
    <div class="section-content">
      <div>
@@ -343,12 +204,12 @@
    <h4 id="autoSaveSetting"></h4>
    <div class="section-content">
      <div class="clear"></div>
-     <div><label><input type="checkbox" id="autoSave"><span id="autoSaveText"></span></label></div>
-     <div ><input type="text" id="filePath" size="40">
+     <div><label><input id="defaultPath" type="checkbox" ><span id="defaultPathText"></span></label></div>
+     <div ><input type="text" id="filePath" readonly="true" size="40">
        <button id="setSavePath"></button>
        <button id="openSavePath"></button>
      </div>
-     <div><label><input id="defaultPath" type="checkbox" ><span id="defaultPathText"></span></label></div>
+     <div><label><input type="checkbox" id="autoSave"><span id="autoSaveText"></span></label></div>
      <div class="clear"></div>
    </div>
    <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()"></button></div>
@@ -357,6 +218,6 @@
 
  </div>
  <div id="footer">&copy;2010 Google</div>
- <embed id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px"/>
+ <embed id="pluginobj" width="0" height="0" type="application/x-screencapture" />
  </body>
 </html>
