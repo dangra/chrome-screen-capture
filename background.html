@@ -202,7 +202,7 @@ var screenshot = {
   */
   postImage: function() {
     // auto save picture
-    if (eval(localStorage.autoSave) && eval(localStorage.defaultPath)) {
+    if (eval(localStorage.autoSave)) {
       var pluginobj = document.getElementById('pluginobj');
       var data = screenshot.canvas.toDataURL('image/png');
       var message;
