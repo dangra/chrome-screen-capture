@@ -195,7 +195,8 @@ bool SetSavePath(NPObject* obj, const NPVariant* args,
     return false;
 
   const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
-  if (path)
+
+  if (NPVARIANT_TO_STRING(args[0]).UTF8Length > 0)
     MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
 
   BROWSEINFO info={0};
