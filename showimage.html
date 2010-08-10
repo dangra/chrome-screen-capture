@@ -404,39 +404,14 @@
       });
     },
 
-    isMac: function() {
-      return navigator.userAgent.indexOf("Mac OS") > 0;
-    },
-
     finish: function() {
-      if (photoShop.isMac()) {
-        $('tip').innerHTML = chrome.i18n.getMessage('tipStep2Mac');
-      } else {
-       // $('tip').innerHTML = chrome.i18n.getMessage('tipStep2');
-      }
-      //photoShop.removeElement('floatDiv');
-      //photoShop.markedArea = [];
-      //photoShop.dragFlag = false;
-      //photoShop.lastValidAction = 0;
-      //photoShop.isDraw = false;
-      //bg.screenshot.data = null;
       var context;
       context = $('canvas').getContext('2d');
       context.drawImage(bg.screenshot.canvas,0,0);
-//      if (!photoShop.isMac()) {
-//        $('save').style.display = 'inline-block';
-//      }
-      //$('toolbar').style.display = 'none';
-      //$('showBox').style.display = 'none';
-      //$('pic').style.display = 'block';
-      //$('editMore').style.display = 'inline-block';
-      //$('done').style.display = 'none';
-      //$('tip').style.margin = '0 210px 0 20px';
     },
 
     editMore: function() {
       $('tip').innerHTML = chrome.i18n.getMessage('tipStep1');
-
       $('toolbar').style.display = 'block';
       $('showBox').style.display = 'block';
       $('pic').style.display = 'none';
@@ -791,19 +766,18 @@
                                            photoShop.markedArea[j].flag);
             break;
         }
-        //photoShop.removeElement(photoShop.markedArea[j].id);
       }
-      $('pic').src = $('canvas').toDataURL('image/png');
-      photoShop.finish();
     },
 
     save: function() {
       photoShop.draw();
       var pluginobj = document.getElementById('pluginobj');
+      var dataurl = $('canvas').toDataURL('image/png');
       if (!pluginobj.SaveScreenshot(
-          $('pic').src, bg.screenshot.tab.title, localStorage.savePath)) {
+          dataurl, bg.screenshot.tab.title, localStorage.savePath)) {
         alert(chrome.i18n.getMessage('saveerror'));
       }
+      photoShop.finish();
     },
 
     drawLine: function(endX, endY, type, layerId) {
