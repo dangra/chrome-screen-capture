@@ -122,21 +122,18 @@
     i18nReplace('autoSaveText', 'autoSave');
     i18nReplace('setSavePath', 'setSavePath');
     i18nReplace('openSavePath', 'openSavePath');
-    i18nReplace('defaultPathText', 'defaultPath');
     i18nReplace('autoSaveSetting', 'autoSaveSetting');
-    setCheckBoxStatus();
+    i18nReplace('defaultPath', 'defaultPath');
     document.getElementById('autoSave').checked = eval(localStorage.autoSave);
-    document.getElementById('defaultPath').checked = eval(localStorage.defaultPath);
-    document.getElementById('filePath').value = localStorage.savePath ? localStorage.savePath : '';
+    document.getElementById('filePath').value = localStorage.savePath =
+        localStorage.savePath ? localStorage.savePath : getDefaultSavePath(); 
     document.getElementById('setSavePath').addEventListener('click', function() {
       var savePath = setSavePath();
       document.getElementById('filePath').value = localStorage.savePath = savePath;
     });
-    document.getElementById('defaultPath').addEventListener('change', setCheckBoxStatus, false);
     document.getElementById('openSavePath').addEventListener('click', function() {
       bg.screenshot.openSavePath();
     })
-    setCheckBoxStatus();
     initScreenCaptureQuality();
   }
 
@@ -146,8 +143,6 @@
          document.getElementById('lossless').checked ? 'png' : '';
      localStorage.autoSave = document.getElementById('autoSave').checked ?
          'true' : 'false';
-     localStorage.defaultPath = document.getElementById('defaultPath').checked ?
-         'true' : 'false';
   }
 
   function saveAndClose() {
@@ -155,16 +150,6 @@
     chrome.tabs.getSelected(null, function(tab) {
       chrome.tabs.remove(tab.id);
     });
-  }
-
-  function setCheckBoxStatus() {
-    var defaultPath = document.getElementById('defaultPath');
-    var autoSave = document.getElementById('autoSave');
-    if (defaultPath.checked) {
-      autoSave.disabled = false;
-    } else {
-      autoSave.disabled = true;
-    }
   }
 
   function initScreenCaptureQuality() {
@@ -178,7 +163,11 @@
   function setSavePath() {
     var pluginobj = document.getElementById('pluginobj');
     return pluginobj.SetSavePath(localStorage.savePath);
+  }
 
+  function getDefaultSavePath() {
+    var pluginobj = document.getElementById('pluginobj');
+    return pluginobj.GetDefaultSavePath();
   }
 
   function i18nReplace(id, name) {
@@ -204,12 +193,12 @@
    <h4 id="autoSaveSetting"></h4>
    <div class="section-content">
      <div class="clear"></div>
-     <div><label><input id="defaultPath" type="checkbox" ><span id="defaultPathText"></span></label></div>
-     <div ><input type="text" id="filePath" readonly="true" size="40">
+     <div id="defaultPath"></div>
+     <div ><input type="text" id="filePath" disabled="true" size="40">
        <button id="setSavePath"></button>
        <button id="openSavePath"></button>
      </div>
-     <div><label><input type="checkbox" id="autoSave"><span id="autoSaveText"></span></label></div>
+     <div style="margin:5px 0 0 10px;"><label><input type="checkbox" id="autoSave"><span id="autoSaveText"></span></label></div>
      <div class="clear"></div>
    </div>
    <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()"></button></div>
