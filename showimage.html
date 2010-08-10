@@ -799,13 +799,9 @@
 
     save: function() {
       photoShop.draw();
-      if (localStorage.defaultPath == 'true') {
-        if (!pluginobj.AutoSave($('pic').src,
-            bg.screenshot.tab.title, localStorage.savePath)) {
-        alert(chrome.i18n.getMessage('saveerror'));
-      }
-      } else if (!pluginobj.SaveScreenshot(
-            $('pic').src, bg.screenshot.tab.title)) {
+      var pluginobj = document.getElementById('pluginobj');
+      if (!pluginobj.SaveScreenshot(
+          $('pic').src, bg.screenshot.tab.title, localStorage.savePath)) {
         alert(chrome.i18n.getMessage('saveerror'));
       }
     },
