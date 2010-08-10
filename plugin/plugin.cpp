@@ -45,6 +45,9 @@
 #include "save.h"
 
 const char* kSaveScreenshot = "SaveScreenshot";
+const char* kAutoSave = "AutoSave";
+const char* kSetSavePath = "SetSavePath";
+const char* kOpenSavePath = "OpenSavePath";
 
 static NPClass plugin_ref_obj = {
   NP_CLASS_STRUCT_VERSION,
@@ -88,6 +91,15 @@ bool ScriptablePluginObject::Invoke(NPObject* obj, NPIdentifier methodName,
   if (!strncmp((const char*)name, kSaveScreenshot,
                strlen(kSaveScreenshot))) {
     ret_val = SaveScreenshot(obj, args, argCount, result);
+  } else if (!strncmp((const char*)name, kAutoSave,
+             strlen(kAutoSave))) {
+    ret_val = AutoSave(obj, args, argCount, result);
+  } else if (!strncmp((const char*)name, kOpenSavePath,
+             strlen(kOpenSavePath))) {
+    ret_val = OpenSavePath(obj, args, argCount, result);
+  } else if (!strncmp((const char*)name, kSetSavePath,
+             strlen(kSetSavePath))) {
+    ret_val = SetSavePath(obj, args, argCount, result);
   } else {
     // Exception handling. 
     npnfuncs->setexception(obj, "exception during invocation");

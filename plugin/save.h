@@ -37,4 +37,15 @@
 bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result);
 
+bool GenerateUniqueFileName(char* scrFile,char* destFile);
+
+bool AutoSave(NPObject* obj, const NPVariant* args, 
+              unsigned int argCount, NPVariant* result);
+
+bool SetSavePath(NPObject* obj, const NPVariant* args, 
+                 uint32_t argCount, NPVariant* result);
+
+bool OpenSavePath(NPObject* obj, const NPVariant* args, 
+                  unsigned int argCount, NPVariant* result);
+
 #endif  // NPCAPTURE__SAVE_H_

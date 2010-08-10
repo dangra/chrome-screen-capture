@@ -31,10 +31,12 @@
 
 #include <vector>
 #include "save.h"
+#include <io.h>
 
 #ifdef _WINDOWS
 #include <atlenc.h>
 #include "plugin.h"
+#include <ShlObj.h>
 #endif
 
 #ifdef GTK
@@ -92,6 +94,149 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 #ifdef __APPLE__
 const char* GetSaveFileName();
 #endif
+
+bool GenerateUniqueFileName(char* scrFile,char* destFile) {
+  strcpy(destFile,scrFile);  
+  char* pPostfix = strrchr(scrFile,'.');
+  for (int i=1;i<1000;i++)
+  {
+    if (access(destFile,0)) {
+      return true;
+    } else {
+      if (pPostfix) {
+        strncpy(destFile,scrFile,pPostfix-scrFile);
+        destFile[pPostfix-scrFile]=0;
+        sprintf(destFile,"%s(%d)%s",destFile,i,pPostfix);
+      } else {
+        sprintf(destFile,"%s(%d)",scrFile,i);
+      }
+    }
+  }
+  return false;
+}
+
+bool AutoSave(NPObject* obj, const NPVariant* args, 
+              unsigned int argCount, NPVariant* result) {
+  result->type = NPVariantType_Bool;
+  result->value.boolValue = TRUE;
+
+  if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
+    return false;
+
+  char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+  if (!url)
+    return false;
+
+  char* title = NULL;
+  if (argCount > 2 && NPVARIANT_IS_STRING(args[1]))
+    title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
+  else
+    return false;
+
+  char* base64 = strstr(url, "base64,");
+  if (!base64)
+    return false;
+  base64 += 7;
+  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
+
+  const char* path = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
+
+#ifdef _WINDOWS
+  TCHAR szFileName[MAX_PATH];
+  MultiByteToWideChar(CP_UTF8,0,path,-1,szFileName,MAX_PATH);
+
+  if (!PathIsDirectory(szFileName))
+    return false;
+
+  TCHAR szTitle[MAX_PATH]=L"";
+  char szFile[MAX_PATH]="";
+  char szSaveFile[MAX_PATH]="";
+  int nLen = 0;
+  std::wstring szInvalidWord = L"\\/:*?\"<>|";
+
+  MultiByteToWideChar(CP_UTF8,0,title,-1,szTitle,MAX_PATH);
+  nLen = wcslen(szTitle);
+  for(int i=0;i<nLen;i++) {
+    if (szInvalidWord.find(szTitle[i])!= std::wstring::npos)
+      szTitle[i] = ' ';
+  }
+  wsprintf(szFileName,L"%s\\%s.png",szFileName,szTitle);
+  WideCharToMultiByte(CP_ACP,0,szFileName,-1,szFile,MAX_PATH,0,0);
+
+  if (GenerateUniqueFileName(szFile,szSaveFile)) {
+    int byteLength = Base64DecodeGetRequiredLength(base64size);
+    BYTE* bytes = new BYTE[byteLength];
+    Base64Decode(base64, base64size, bytes, &byteLength);
+    if (!SaveFile(szSaveFile, bytes, byteLength)) {
+      result->value.boolValue = FALSE;
+    }
+  }
+#endif
+
+  return true;
+}
+
+int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
+  switch (uMsg) {
+  case BFFM_INITIALIZED:
+    SendMessage(hwnd,BFFM_SETSELECTION,TRUE,lpData);
+    break;
+  }
+  return 0;
+}
+
+bool SetSavePath(NPObject* obj, const NPVariant* args, 
+                 uint32_t argCount, NPVariant* result) {
+#ifdef _WINDOWS
+  TCHAR szDisplayName[MAX_PATH]={0};
+  TCHAR szSavePath[MAX_PATH]={0};
+
+  if (argCount<1 && !NPVARIANT_IS_STRING(args[0]))
+    return false;
+
+  const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+  if (path)
+    MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
+
+  BROWSEINFO info={0};
+  info.hwndOwner = (HWND)((ScriptablePluginObject*)obj)->hWnd;
+  info.lpszTitle = L"select default picture path";
+  info.pszDisplayName = szDisplayName;
+  info.lpfn = BrowserCallBack;
+  info.ulFlags = BIF_RETURNONLYFSDIRS;
+  info.lParam = (LPARAM)szSavePath;
+  BOOL bRet = SHGetPathFromIDList(SHBrowseForFolder(&info),szDisplayName);
+  LPSTR p = (LPSTR)npnfuncs->memalloc(MAX_PATH);
+  if (bRet) {
+    WideCharToMultiByte(CP_UTF8,0,szDisplayName,-1,p,MAX_PATH,0,0);
+    STRINGZ_TO_NPVARIANT(p,*result);
+  } else {
+    WideCharToMultiByte(CP_UTF8,0,szSavePath,-1,p,MAX_PATH,0,0);
+    STRINGZ_TO_NPVARIANT(p,*result);
+  }
+#endif
+
+  return true;
+}
+
+bool OpenSavePath(NPObject* obj, const NPVariant* args, 
+                  unsigned int argCount, NPVariant* result) {
+#ifdef _WINDOWS
+  TCHAR szSavePath[MAX_PATH]=L"";
+
+  if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
+    return false;
+
+  const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+
+  MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
+
+  ShellExecute(NULL,L"open",szSavePath,NULL,NULL,SW_SHOWNORMAL);
+#endif
+
+  return true;
+}
+
 
 bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result) {
