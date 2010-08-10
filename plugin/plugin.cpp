@@ -48,6 +48,7 @@ const char* kSaveScreenshot = "SaveScreenshot";
 const char* kAutoSave = "AutoSave";
 const char* kSetSavePath = "SetSavePath";
 const char* kOpenSavePath = "OpenSavePath";
+const char* kGetDefaultSavePath = "GetDefaultSavePath";
 
 static NPClass plugin_ref_obj = {
   NP_CLASS_STRUCT_VERSION,
@@ -100,6 +101,9 @@ bool ScriptablePluginObject::Invoke(NPObject* obj, NPIdentifier methodName,
   } else if (!strncmp((const char*)name, kSetSavePath,
              strlen(kSetSavePath))) {
     ret_val = SetSavePath(obj, args, argCount, result);
+  } else if (!strncmp(name,kGetDefaultSavePath,
+             strlen(kGetDefaultSavePath))) {
+    ret_val = GetDefaultSavePath(obj, args, argCount, result);
   } else {
     // Exception handling. 
     npnfuncs->setexception(obj, "exception during invocation");

@@ -48,4 +48,7 @@ bool SetSavePath(NPObject* obj, const NPVariant* args,
 bool OpenSavePath(NPObject* obj, const NPVariant* args, 
                   unsigned int argCount, NPVariant* result);
 
+bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
+                        unsigned int argCount, NPVariant* result);
+
 #endif  // NPCAPTURE__SAVE_H_

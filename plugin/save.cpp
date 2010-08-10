@@ -115,6 +115,21 @@ bool GenerateUniqueFileName(char* scrFile,char* destFile) {
   return false;
 }
 
+bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
+                        unsigned int argCount, NPVariant* result) {
+  TCHAR szDisplayName[MAX_PATH];
+
+  PIDLIST_ABSOLUTE pIdList;
+  SHGetSpecialFolderLocation(NULL,CSIDL_MYPICTURES,&pIdList);
+  if (SHGetPathFromIDList(pIdList,szDisplayName)) {
+    char* p = (char*)npnfuncs->memalloc(MAX_PATH);
+    WideCharToMultiByte(CP_UTF8,0,szDisplayName,-1,p,MAX_PATH,0,0);
+    STRINGZ_TO_NPVARIANT(p,*result);
+  }
+
+  return true;
+}
+
 bool AutoSave(NPObject* obj, const NPVariant* args, 
               unsigned int argCount, NPVariant* result) {
   result->type = NPVariantType_Bool;
@@ -249,8 +264,10 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
     return false;
 
   char* title = NULL;
-  if (argCount == 2 && NPVARIANT_IS_STRING(args[1]))
+  if (argCount > 2 && NPVARIANT_IS_STRING(args[1]))
     title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
+  else
+    return false;
 
   char* base64 = strstr(url, "base64,");
   if (!base64)
@@ -262,6 +279,17 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   result->value.boolValue = 1;
 
 #ifdef _WINDOWS
+  TCHAR szSavePath[MAX_PATH]=L"";
+  char szInitPath[MAX_PATH];
+
+  if (argCount != 3 || !NPVARIANT_IS_STRING(args[2]))
+    return false;
+
+  const char* path = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
+
+  MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
+  WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
+
   char szFile[1024] = "";
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
@@ -271,7 +299,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   Ofn.nMaxFile = sizeof(szFile);
   Ofn.lpstrFileTitle = NULL;
   Ofn.nMaxFileTitle = 0;
-  Ofn.lpstrInitialDir = NULL;
+  Ofn.lpstrInitialDir = szInitPath;
   Ofn.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
   Ofn.lpstrTitle = NULL;
   Ofn.lpstrDefExt = "png";
