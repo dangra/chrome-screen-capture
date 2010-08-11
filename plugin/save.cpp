@@ -282,18 +282,29 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   TCHAR szSavePath[MAX_PATH]=L"";
   char szInitPath[MAX_PATH];
 
-  if (argCount != 3 || !NPVARIANT_IS_STRING(args[2]))
+  if (argCount != 3)
     return false;
 
   const char* path = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
-
-  MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
-  WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
+  if (NPVARIANT_TO_STRING(args[2]).UTF8Length > 0) {
+    MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
+    WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
+  } else {
+    PIDLIST_ABSOLUTE pIdList;
+    SHGetSpecialFolderLocation(NULL,CSIDL_MYPICTURES,&pIdList);
+    if (SHGetPathFromIDList(pIdList,szSavePath)) {
+      WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
+    }
+  }
 
   char szFile[1024] = "";
+  TCHAR szTitle[MAX_PATH];
+  MultiByteToWideChar(CP_UTF8,0,title,-1,szTitle,MAX_PATH);
+  WideCharToMultiByte(CP_ACP,0,szTitle,-1,szFile,MAX_PATH,0,0);
+
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = (HWND)((ScriptablePluginObject*)obj)->hWnd;
+  Ofn.hwndOwner = NULL;
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);
@@ -304,9 +315,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   Ofn.lpstrTitle = NULL;
   Ofn.lpstrDefExt = "png";
  
-  GetSaveFileNameA(&Ofn);
-
-  if (szFile[0] != '\0') {
+  if (GetSaveFileNameA(&Ofn)) {
     int byteLength = Base64DecodeGetRequiredLength(base64size);
     BYTE* bytes = new BYTE[byteLength];
     Base64Decode(base64, base64size, bytes, &byteLength);
