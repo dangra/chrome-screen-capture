@@ -52,6 +52,7 @@ body {
       document.getElementById('captureWindow').style.display = 'block';
       document.getElementById('captureArea').style.display = 'block';
       document.getElementById('captureWebpage').style.display = 'block';
+      document.getElementById('captureSpecialPage').style.display = 'none';
     } else if (request.msg == 'isLoadCanNotCapturn') {
       i18nReplace('tip', 'tip2');
     }
@@ -96,6 +97,7 @@ body {
             isScriptLoad = true;
             if (response && response.msg == 'isLoadCanCapturn') {
               document.getElementById('tip').style.display = 'none';
+              document.getElementById('captureSpecialPage').style.display = 'none';
               document.getElementById('captureWindow').style.display = 'block';
               document.getElementById('captureArea').style.display = 'block';
               document.getElementById('captureWebpage').style.display = 'block';
@@ -108,11 +110,11 @@ body {
             }
       });
     });
-    insertScript = function() {
+    var insertScript = function() {
       if (!isScriptLoad) {
+        document.getElementById('captureSpecialPage').style.display = 'block';
         chrome.tabs.executeScript(null, {file: 'page.js'}, function() {
           document.getElementById('tip').style.display = 'none';
-          document.getElementById('captureSpecialPage').style.display = 'block';
         });
         chrome.tabs.executeScript(null, {file: 'isLoad.js'});
       }

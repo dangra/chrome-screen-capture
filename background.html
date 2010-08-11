@@ -5,8 +5,11 @@
 -->
 <html>
 <head>
-<script>
 
+</head>
+<body>
+<embed id="pluginobj" type="application/x-screencapture" />
+<script>
 var screenshot = {
   tab: 0,
   data: '',
@@ -56,8 +59,6 @@ var screenshot = {
       case 'scroll_init_done':
         screenshot.canvas.width = response.width;
         screenshot.canvas.height = response.height;
-//        screenshot.visibleHeight = response.visibleHeight;
-//        screenshot.visibleWidth = response.visibleWidth;
         screenshot.scrollXCount = response.scrollXCount;
         screenshot.scrollYCount = response.scrollYCount;
         setTimeout("screenshot.captureAndScroll()",100);
@@ -217,7 +218,7 @@ var screenshot = {
         open = false;
       }
       screenshot.sendMessage({msg: 'auto_save_done',
-          status: chrome.i18n.getMessage(status), open: open}, 
+          status: chrome.i18n.getMessage(status), open: open},
           screenshot.onResponseVisibleSize);
       return;
     }
@@ -239,15 +240,21 @@ var screenshot = {
   openSavePath: function() {
     var pluginobj = document.getElementById('pluginobj');
     pluginobj.OpenSavePath(localStorage.savePath);
-  }
+  },
 
+  init: function() {
+    var pluginobj = document.getElementById('pluginobj');
+    var savePath = pluginobj.GetDefaultSavePath();
+    localStorage.savePath = localStorage.savePath ?
+        localStorage.savePath : savePath;
+    screenshot.messageListener();
+  }
 };
 
-screenshot.messageListener();
+screenshot.init();
+
+
 
 </script>
-</head>
-<body>
-<embed id="pluginobj" type="application/x-screencapture" />
 </body>
 </html>

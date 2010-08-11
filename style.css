@@ -1,8 +1,9 @@
-#sc_drag_area_protector div {
+#sc_drag_area_protector div{
   border-radius: 0px 0px;
   margin:0;
   max-width:100%;
   min-width: 1px;
+
 }
 
 #sc_drag_area {
@@ -26,17 +27,17 @@
 }
 #sc_drag_area_protector {
   border-radius: 0px 0px;
-  display:block;
+  display: block;
   height:100%;
   left:0;
   top:0;
-  position:fixed;
+  position: fixed;
   width:100%;
   z-index:8500;
   margin: 0;
   max-width:100%;
   min-width: 1px;
-
+  overflow: hidden;
 }
 #sc_drag_size {
   background-color:#444444;
