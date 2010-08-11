@@ -470,31 +470,10 @@ var page = {
   },
 
   injectJavaScriptResource: function(scriptResource) {
-    var hasError = true;
-    var request = new XMLHttpRequest();
-    // open the request
-    request.open("get", chrome.extension.getURL(scriptResource), false);
-    // send the request
-    try {
-      request.send(null);
-    } catch (e) {
-      hasError = true;
-      window.console.log(e);
-    }
-    var contents = request.responseText;
-    request = null;
-
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.charset = "utf-8";
-    if (hasError) {
-      script.src = chrome.extension.getURL(scriptResource);
-      window.console.log("inject script tag: " + script.src);
-    } else {
-      var scriptContents = document.createTextNode(contents);
-      script.appendChild(scriptContents);
-      window.console.log("inject script contents: " + script.src);
-    }
+    script.src = chrome.extension.getURL(scriptResource);
     (document.head || document.body || document.documentElement).appendChild(script);
   },
 
