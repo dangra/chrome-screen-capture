@@ -304,7 +304,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = NULL;
+  Ofn.hwndOwner = (HWND)((ScriptablePluginObject*)obj)->hWnd;
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);
