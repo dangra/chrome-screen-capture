@@ -598,6 +598,7 @@
     },
 
     onMouseUp: function(event) {
+      $('mask-canvas').style.zIndex = 10;
       photoShop.endX = event.pageX + $('showBox').scrollLeft - photoShop.offsetX;
       photoShop.endY = event.pageY + $('showBox').scrollTop - photoShop.offsetY;
       if (photoShop.isDraw && photoShop.dragFlag && (photoShop.endX !=
@@ -645,6 +646,7 @@
     */
     onMouseMove: function(event) {
       if(photoShop.dragFlag) {
+        $('mask-canvas').style.zIndex = 200;
         photoShop.endX = event.pageX + $('showBox').scrollLeft -
              photoShop.offsetX;
         if (photoShop.endX > bg.screenshot.canvas.width) {
