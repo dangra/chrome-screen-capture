@@ -30,13 +30,13 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include <vector>
+#include "plugin.h"
 #include "save.h"
-#include <io.h>
 
 #ifdef _WINDOWS
 #include <atlenc.h>
-#include "plugin.h"
 #include <ShlObj.h>
+#include <io.h>
 #endif
 
 #ifdef GTK
@@ -45,6 +45,7 @@
 
 #ifdef __APPLE__
 #include <resolv.h>
+#define MAX_PATH 260
 #endif
 
 class CPlugin;
@@ -92,14 +93,17 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 #endif
 
 #ifdef __APPLE__
-const char* GetSaveFileName();
+const char* GetSaveFileName(const char* path);
+const char* GetPictureFolder();
+const char* SetSaveFolder(const char* path);
+bool OpenSaveFolder(const char* path);
+bool IsFolder(const char* path);
 #endif
 
 bool GenerateUniqueFileName(char* scrFile,char* destFile) {
   strcpy(destFile,scrFile);  
   char* pPostfix = strrchr(scrFile,'.');
-  for (int i=1;i<1000;i++)
-  {
+  for (int i=1;i<1000;i++) {
     if (access(destFile,0)) {
       return true;
     } else {
@@ -115,46 +119,49 @@ bool GenerateUniqueFileName(char* scrFile,char* destFile) {
   return false;
 }
 
-bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
-                        unsigned int argCount, NPVariant* result) {
+#ifdef _WINDOWS
+const char* GetPicturePath() {
   TCHAR szDisplayName[MAX_PATH];
-
   PIDLIST_ABSOLUTE pIdList;
   SHGetSpecialFolderLocation(NULL,CSIDL_MYPICTURES,&pIdList);
   if (SHGetPathFromIDList(pIdList,szDisplayName)) {
     char* p = (char*)npnfuncs->memalloc(MAX_PATH);
     WideCharToMultiByte(CP_UTF8,0,szDisplayName,-1,p,MAX_PATH,0,0);
-    STRINGZ_TO_NPVARIANT(p,*result);
+    return p;
   }
+  return NULL;
+}
+#endif
 
+bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
+                        unsigned int argCount, NPVariant* result) {
+#ifdef _WINDOWS
+  STRINGZ_TO_NPVARIANT(GetPicturePath(), *result);
+#elif defined __APPLE__
+  STRINGZ_TO_NPVARIANT(GetPictureFolder(), *result);
+#endif
   return true;
 }
 
 bool AutoSave(NPObject* obj, const NPVariant* args, 
               unsigned int argCount, NPVariant* result) {
-  result->type = NPVariantType_Bool;
-  result->value.boolValue = TRUE;
-
-  if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
+  if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
+      !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]))
     return false;
 
   char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
-  if (!url)
-    return false;
-
-  char* title = NULL;
-  if (argCount > 2 && NPVARIANT_IS_STRING(args[1]))
-    title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
-  else
-    return false;
-
+  char* title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
+  char* path = (char*)NPVARIANT_TO_STRING(args[2]).UTF8Characters;
+  
   char* base64 = strstr(url, "base64,");
   if (!base64)
     return false;
+
   base64 += 7;
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
 
-  const char* path = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
+  result->type = NPVariantType_Bool;
+  result->value.boolValue = 1;
 
 #ifdef _WINDOWS
   TCHAR szFileName[MAX_PATH];
@@ -188,9 +195,33 @@ bool AutoSave(NPObject* obj, const NPVariant* args,
   }
 #endif
 
+#ifdef __APPLE__
+  if (!IsFolder(path))
+    return false;
+
+  char invalidChar[] = "\\/:*?\"<>|";
+  int nLen = strlen(title);
+  for(int i=0; i<nLen; i++) {
+    if (strchr(invalidChar, title[i]) != NULL)
+      title[i] = ' ';
+  }
+  char filename[MAX_PATH];
+  char file[MAX_PATH];
+  sprintf(filename, "%s/%s.png", path, title);
+  if (GenerateUniqueFileName(filename, file)) {
+    size_t byteLength = (base64size * 3) / 4;
+    u_char* data = (u_char*)malloc(byteLength); 
+    int dataLength = b64_pton(base64, data, byteLength);
+
+    if (!SaveFile(file, data, dataLength))
+      result->value.boolValue = 0;
+  }
+#endif
+
   return true;
 }
 
+#ifdef _WINDOWS
 int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
   switch (uMsg) {
   case BFFM_INITIALIZED:
@@ -199,17 +230,18 @@ int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
   }
   return 0;
 }
+#endif
 
 bool SetSavePath(NPObject* obj, const NPVariant* args, 
                  uint32_t argCount, NPVariant* result) {
-#ifdef _WINDOWS
-  TCHAR szDisplayName[MAX_PATH]={0};
-  TCHAR szSavePath[MAX_PATH]={0};
-
   if (argCount<1 && !NPVARIANT_IS_STRING(args[0]))
     return false;
 
   const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+
+#ifdef _WINDOWS
+  TCHAR szDisplayName[MAX_PATH]={0};
+  TCHAR szSavePath[MAX_PATH]={0};
 
   if (NPVARIANT_TO_STRING(args[0]).UTF8Length > 0)
     MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
@@ -230,6 +262,9 @@ bool SetSavePath(NPObject* obj, const NPVariant* args,
     WideCharToMultiByte(CP_UTF8,0,szSavePath,-1,p,MAX_PATH,0,0);
     STRINGZ_TO_NPVARIANT(p,*result);
   }
+#elif defined __APPLE__
+  const char* folder = SetSaveFolder(path);
+  STRINGZ_TO_NPVARIANT(folder, *result);
 #endif
 
   return true;
@@ -237,17 +272,17 @@ bool SetSavePath(NPObject* obj, const NPVariant* args,
 
 bool OpenSavePath(NPObject* obj, const NPVariant* args, 
                   unsigned int argCount, NPVariant* result) {
-#ifdef _WINDOWS
-  TCHAR szSavePath[MAX_PATH]=L"";
-
   if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
     return false;
 
   const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
 
+#ifdef _WINDOWS
+  TCHAR szSavePath[MAX_PATH]=L"";
   MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
-
   ShellExecute(NULL,L"open",szSavePath,NULL,NULL,SW_SHOWNORMAL);
+#elif defined __APPLE__
+  OpenSaveFolder(path);
 #endif
 
   return true;
@@ -256,22 +291,18 @@ bool OpenSavePath(NPObject* obj, const NPVariant* args,
 
 bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result) {
-  if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
+  if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
+      !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]))
     return false;
 
   char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
-  if (!url)
-    return false;
-
-  char* title = NULL;
-  if (argCount > 2 && NPVARIANT_IS_STRING(args[1]))
-    title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
-  else
-    return false;
-
+  char* title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
+  char* path = (char*)NPVARIANT_TO_STRING(args[2]).UTF8Characters;
+  
   char* base64 = strstr(url, "base64,");
   if (!base64)
     return false;
+
   base64 += 7;
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
 
@@ -282,22 +313,10 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   TCHAR szSavePath[MAX_PATH]=L"";
   char szInitPath[MAX_PATH];
 
-  if (argCount != 3)
-    return false;
+  MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
+  WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
 
-  const char* path = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
-  if (NPVARIANT_TO_STRING(args[2]).UTF8Length > 0) {
-    MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
-    WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
-  } else {
-    PIDLIST_ABSOLUTE pIdList;
-    SHGetSpecialFolderLocation(NULL,CSIDL_MYPICTURES,&pIdList);
-    if (SHGetPathFromIDList(pIdList,szSavePath)) {
-      WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
-    }
-  }
-
-  char szFile[1024] = "";
+  char szFile[MAX_PATH] = "";
   TCHAR szTitle[MAX_PATH];
   MultiByteToWideChar(CP_UTF8,0,title,-1,szTitle,MAX_PATH);
   WideCharToMultiByte(CP_ACP,0,szTitle,-1,szFile,MAX_PATH,0,0);
@@ -365,7 +384,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
 #endif
 
 #ifdef __APPLE__
-  const char* file = GetSaveFileName();
+  const char* file = GetSaveFileName(path);
   if (file) {
     size_t byteLength = (base64size * 3) / 4;
     u_char* data = (u_char*)malloc(byteLength); 

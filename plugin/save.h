@@ -34,10 +34,8 @@
 
 #include "npfunctions.h"
 
-bool SaveScreenshot(NPObject* obj, const NPVariant* args,
-                    uint32_t argCount, NPVariant* result);
-
-bool GenerateUniqueFileName(char* scrFile,char* destFile);
+bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
+                        unsigned int argCount, NPVariant* result);
 
 bool AutoSave(NPObject* obj, const NPVariant* args, 
               unsigned int argCount, NPVariant* result);
@@ -48,7 +46,7 @@ bool SetSavePath(NPObject* obj, const NPVariant* args,
 bool OpenSavePath(NPObject* obj, const NPVariant* args, 
                   unsigned int argCount, NPVariant* result);
 
-bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
-                        unsigned int argCount, NPVariant* result);
+bool SaveScreenshot(NPObject* obj, const NPVariant* args,
+                    uint32_t argCount, NPVariant* result);
 
 #endif  // NPCAPTURE__SAVE_H_
