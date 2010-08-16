@@ -17,7 +17,7 @@
 *   Xianzhu Wang <wangxianzhu@google.com>
 *
 * Alternatively, the contents of this file may be used under the terms of
-* either the GNU General Public License Version 2 or later (the "GPL"), or 
+* either the GNU General Public License Version 2 or later (the "GPL"), or
 * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
 * in which case the provisions of the GPL or the LGPL are applicable instead
 * of those above. If you wish to allow use of your version of this file only
@@ -58,7 +58,7 @@ static bool SaveFile(const char* fileName, const unsigned char* bytes,
 }
 
 bool GenerateUniqueFileName(char* scrFile,char* destFile) {
-  strcpy(destFile,scrFile);  
+  strcpy(destFile,scrFile);
   char* pPostfix = strrchr(scrFile,'.');
   for (int i=1;i<1000;i++) {
     if (access(destFile,0)) {
@@ -134,17 +134,20 @@ bool OpenSaveFolder(const char* path);
 bool IsFolder(const char* path);
 #endif
 
-bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
+bool GetDefaultSavePath(NPObject* obj, const NPVariant* args,
                         unsigned int argCount, NPVariant* result) {
 #ifdef _WINDOWS
   STRINGZ_TO_NPVARIANT(GetPicturePath(), *result);
+#elif defined GTK
+  const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_PICTURES);
+  STRINGZ_TO_NPVARIANT(dir, *result);
 #elif defined __APPLE__
   STRINGZ_TO_NPVARIANT(GetPictureFolder(), *result);
 #endif
   return true;
 }
 
-bool AutoSave(NPObject* obj, const NPVariant* args, 
+bool AutoSave(NPObject* obj, const NPVariant* args,
               unsigned int argCount, NPVariant* result) {
   if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
       !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]))
@@ -153,7 +156,7 @@ bool AutoSave(NPObject* obj, const NPVariant* args,
   char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
   char* title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
   char* path = (char*)NPVARIANT_TO_STRING(args[2]).UTF8Characters;
-  
+
   char* base64 = strstr(url, "base64,");
   if (!base64)
     return false;
@@ -209,7 +212,7 @@ bool AutoSave(NPObject* obj, const NPVariant* args,
   sprintf(filename, "%s/%s.png", path, title);
   if (GenerateUniqueFileName(filename, file)) {
     size_t byteLength = (base64size * 3) / 4;
-    u_char* data = (u_char*)malloc(byteLength); 
+    u_char* data = (u_char*)malloc(byteLength);
     int dataLength = b64_pton(base64, data, byteLength);
 
     if (!SaveFile(file, data, dataLength))
@@ -220,7 +223,7 @@ bool AutoSave(NPObject* obj, const NPVariant* args,
   return true;
 }
 
-bool SetSavePath(NPObject* obj, const NPVariant* args, 
+bool SetSavePath(NPObject* obj, const NPVariant* args,
                  uint32_t argCount, NPVariant* result) {
   if (argCount<1 && !NPVARIANT_IS_STRING(args[0]))
     return false;
@@ -258,7 +261,7 @@ bool SetSavePath(NPObject* obj, const NPVariant* args,
   return true;
 }
 
-bool OpenSavePath(NPObject* obj, const NPVariant* args, 
+bool OpenSavePath(NPObject* obj, const NPVariant* args,
                   unsigned int argCount, NPVariant* result) {
   if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
     return false;
@@ -285,7 +288,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
   char* title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
   char* path = (char*)NPVARIANT_TO_STRING(args[2]).UTF8Characters;
-  
+
   char* base64 = strstr(url, "base64,");
   if (!base64)
     return false;
@@ -320,7 +323,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   Ofn.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
   Ofn.lpstrTitle = NULL;
   Ofn.lpstrDefExt = "png";
- 
+
   if (GetSaveFileNameA(&Ofn)) {
     int byteLength = Base64DecodeGetRequiredLength(base64size);
     BYTE* bytes = new BYTE[byteLength];
@@ -339,16 +342,14 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
 
   if (!gLastDialog) {
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
-        title, NULL,
+        "Save", NULL,
         GTK_FILE_CHOOSER_ACTION_SAVE,
         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
         GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
                                                    TRUE);
-    const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_PICTURES);
-    if (dir)
-      gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), dir);
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
 
     GtkFileFilter *file_filter = gtk_file_filter_new();
     gtk_file_filter_set_name(file_filter, "PNG Image");
@@ -370,7 +371,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   const char* file = GetSaveFileName(path);
   if (file) {
     size_t byteLength = (base64size * 3) / 4;
-    u_char* data = (u_char*)malloc(byteLength); 
+    u_char* data = (u_char*)malloc(byteLength);
     int dataLength = b64_pton(base64, data, byteLength);
 
     if (!SaveFile(file, data, dataLength))
@@ -380,4 +381,3 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
 
   return true;
 }
-
