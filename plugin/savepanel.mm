@@ -1,6 +1,6 @@
 #import <Cocoa/Cocoa.h>
 
-const char* GetSaveFileName(const char* path) {
+const char* GetSaveFileName(const char* title, const char* path) {
   int runResult;
 
   /* create or get the shared instance of NSSavePanel */
@@ -8,10 +8,10 @@ const char* GetSaveFileName(const char* path) {
  
   /* set up new attributes */
   [sp setRequiredFileType:@"png"];
-  [sp setDirectoryURL:[NSURL URLWithString:[NSString stringWithUTF8String:path]]];
  
   /* display the NSSavePanel */
-  runResult = [sp runModal];
+  runResult = [sp runModalForDirectory:[NSString stringWithUTF8String:path]
+                  file:[NSString stringWithUTF8String:title]];
 
   /* if successful, save file under designated name */
   if (runResult == NSOKButton) {
@@ -22,9 +22,9 @@ const char* GetSaveFileName(const char* path) {
   }
 }
 
-const char* GetPictureFolder() {
+const char* GetDocumentFolder() {
   NSArray *paths;
-  paths = NSSearchPathForDirectoriesInDomains(NSPicturesDirectory, NSUserDomainMask, YES);
+  paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   return [[paths lastObject] UTF8String];
 }
 
@@ -36,7 +36,7 @@ const char* SetSaveFolder(const char* path) {
   [op setCanChooseDirectories:YES];
   [op setCanChooseFiles:NO];
   [op setAllowsMultipleSelection:NO];
-  [op setDirectoryURL:[NSURL URLWithString:[NSString stringWithUTF8String:path]]];
+  [op setDirectory:[NSString stringWithUTF8String:path]];
 
   runResult = [op runModal];
   

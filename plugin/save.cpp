@@ -127,8 +127,8 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
   gLastDialog = NULL;
 }
 #elif defined __APPLE__
-const char* GetSaveFileName(const char* path);
-const char* GetPictureFolder();
+const char* GetSaveFileName(const char* title, const char* path);
+const char* GetDocumentFolder();
 const char* SetSaveFolder(const char* path);
 bool OpenSaveFolder(const char* path);
 bool IsFolder(const char* path);
@@ -142,7 +142,7 @@ bool GetDefaultSavePath(NPObject* obj, const NPVariant* args,
   const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_PICTURES);
   STRINGZ_TO_NPVARIANT(dir, *result);
 #elif defined __APPLE__
-  STRINGZ_TO_NPVARIANT(GetPictureFolder(), *result);
+  STRINGZ_TO_NPVARIANT(GetDocumentFolder(), *result);
 #endif
   return true;
 }
@@ -368,7 +368,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
   }
   gtk_window_present(GTK_WINDOW(gLastDialog));
 #elif defined __APPLE__
-  const char* file = GetSaveFileName(path);
+  const char* file = GetSaveFileName(title, path);
   if (file) {
     size_t byteLength = (base64size * 3) / 4;
     u_char* data = (u_char*)malloc(byteLength);
