@@ -141,6 +141,7 @@
       bg.screenshot.openSavePath();
     })
     initScreenCaptureQuality();
+    setAutoSaveStatusOnLinux();
   }
 
   function save() {
@@ -156,6 +157,14 @@
     chrome.tabs.getSelected(null, function(tab) {
       chrome.tabs.remove(tab.id);
     });
+  }
+
+  function setAutoSaveStatusOnLinux() {
+    var isLinuxPlatform = bg.screenshot.isThisPlatform('linux');
+    console.log('isLinuxPlatform:' + isLinuxPlatform);
+    if (isLinuxPlatform) {
+      document.getElementById('autoSaveSettingDiv').style.display = 'none';
+    }
   }
 
   function initScreenCaptureQuality() {
@@ -196,6 +205,7 @@
      </div>
      <div class="clear"></div>
    </div>
+   <div id="autoSaveSettingDiv">
    <h4 id="autoSaveSetting"></h4>
    <div class="section-content">
      <div class="clear"></div>
@@ -210,6 +220,7 @@
        </div>
        <div style="margin-left:5px; width:480px; float:left;" id="autoSaveText"></div></label></div>
      <div class="clear"></div>
+   </div>
    </div>
    <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()"></button></div>
  </div>

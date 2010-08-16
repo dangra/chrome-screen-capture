@@ -225,12 +225,12 @@ var screenshot = {
     chrome.tabs.create({'url': 'showimage.html'}, function() {});
   },
 
-  isWindowsPlatform: function() {
-    return navigator.userAgent.toLowerCase().indexOf('windows') > -1;
+  isThisPlatform: function(operationSystem) {
+    return navigator.userAgent.toLowerCase().indexOf(operationSystem) > -1;
   },
 
   setScreenshotQualityByOS: function() {
-    var isWindowsPlatform = navigator.userAgent.toLowerCase().indexOf('windows') > -1;
+    var isWindowsPlatform = screenshot.isThisPlatform('windows');
     if (!localStorage.screenshootQuality) {
       localStorage.screenshootQuality = (isWindowsPlatform ? 'jpeg' : 'png');
     }
