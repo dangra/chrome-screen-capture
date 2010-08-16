@@ -37,13 +37,9 @@
 #include <atlenc.h>
 #include <ShlObj.h>
 #include <io.h>
-#endif
-
-#ifdef GTK
+#elif defined GTK
 #include <gtk/gtk.h>
-#endif
-
-#ifdef __APPLE__
+#elif defined __APPLE__
 #include <resolv.h>
 #define MAX_PATH 260
 #endif
@@ -60,45 +56,6 @@ static bool SaveFile(const char* fileName, const unsigned char* bytes,
   }
   return false;
 }
-
-#ifdef GTK
-static guchar* gLastData = NULL;
-static int gLastDataLength = 0;
-
-static void FreeLastData() {
-  if (gLastData)
-    free(gLastData);
-  gLastData = NULL;
-  gLastDataLength = 0;
-}
-
-GtkWidget *gLastDialog = NULL;
-
-static void OnDialogResponse(GtkDialog* dialog, gint response,
-                             gpointer userData) {
-  if (response == GTK_RESPONSE_OK) {
-    char *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    if (file && gLastData) {
-      SaveFile(file, gLastData, gLastDataLength);
-      g_free(file);
-    }
-  }
-  gtk_widget_destroy(GTK_WIDGET(dialog));
-}
-
-static void OnDialogDestroy(GtkObject* object, gpointer userData) {
-  FreeLastData();
-  gLastDialog = NULL;
-}
-#endif
-
-#ifdef __APPLE__
-const char* GetSaveFileName(const char* path);
-const char* GetPictureFolder();
-const char* SetSaveFolder(const char* path);
-bool OpenSaveFolder(const char* path);
-bool IsFolder(const char* path);
-#endif
 
 bool GenerateUniqueFileName(char* scrFile,char* destFile) {
   strcpy(destFile,scrFile);  
@@ -131,6 +88,50 @@ const char* GetPicturePath() {
   }
   return NULL;
 }
+
+int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
+  switch (uMsg) {
+  case BFFM_INITIALIZED:
+    SendMessage(hwnd,BFFM_SETSELECTION,TRUE,lpData);
+    break;
+  }
+  return 0;
+}
+#elif defined GTK
+static guchar* gLastData = NULL;
+static int gLastDataLength = 0;
+
+static void FreeLastData() {
+  if (gLastData)
+    free(gLastData);
+  gLastData = NULL;
+  gLastDataLength = 0;
+}
+
+GtkWidget *gLastDialog = NULL;
+
+static void OnDialogResponse(GtkDialog* dialog, gint response,
+                             gpointer userData) {
+  if (response == GTK_RESPONSE_OK) {
+    char *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (file && gLastData) {
+      SaveFile(file, gLastData, gLastDataLength);
+      g_free(file);
+    }
+  }
+  gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+
+static void OnDialogDestroy(GtkObject* object, gpointer userData) {
+  FreeLastData();
+  gLastDialog = NULL;
+}
+#elif defined __APPLE__
+const char* GetSaveFileName(const char* path);
+const char* GetPictureFolder();
+const char* SetSaveFolder(const char* path);
+bool OpenSaveFolder(const char* path);
+bool IsFolder(const char* path);
 #endif
 
 bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
@@ -193,9 +194,7 @@ bool AutoSave(NPObject* obj, const NPVariant* args,
       result->value.boolValue = FALSE;
     }
   }
-#endif
-
-#ifdef __APPLE__
+#elif defined __APPLE__
   if (!IsFolder(path))
     return false;
 
@@ -220,17 +219,6 @@ bool AutoSave(NPObject* obj, const NPVariant* args,
 
   return true;
 }
-
-#ifdef _WINDOWS
-int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
-  switch (uMsg) {
-  case BFFM_INITIALIZED:
-    SendMessage(hwnd,BFFM_SETSELECTION,TRUE,lpData);
-    break;
-  }
-  return 0;
-}
-#endif
 
 bool SetSavePath(NPObject* obj, const NPVariant* args, 
                  uint32_t argCount, NPVariant* result) {
@@ -288,7 +276,6 @@ bool OpenSavePath(NPObject* obj, const NPVariant* args,
   return true;
 }
 
-
 bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result) {
   if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
@@ -341,9 +328,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
     if (!SaveFile(szFile, bytes, byteLength))
       result->value.boolValue = 0;
   }
-#endif
-
-#ifdef GTK
+#elif defined GTK
   FreeLastData();
   gsize byteLength = (base64size * 3) / 4;
   gLastData = (guchar*)malloc(byteLength);
@@ -381,9 +366,7 @@ bool SaveScreenshot(NPObject* obj, const NPVariant* args,
     gLastDialog = dialog;
   }
   gtk_window_present(GTK_WINDOW(gLastDialog));
-#endif
-
-#ifdef __APPLE__
+#elif defined __APPLE__
   const char* file = GetSaveFileName(path);
   if (file) {
     size_t byteLength = (base64size * 3) / 4;
