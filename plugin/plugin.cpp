@@ -40,7 +40,7 @@
 // CPlugin class implementation
 //
 
-#include <vector>
+#include <string.h>
 #include "plugin.h"
 #include "save.h"
 
