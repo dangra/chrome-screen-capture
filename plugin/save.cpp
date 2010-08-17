@@ -29,7 +29,9 @@
 * the terms of any one of the NPL, the GPL or the LGPL.
 * ***** END LICENSE BLOCK ***** */
 
-#include <vector>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include "plugin.h"
 #include "save.h"
 
