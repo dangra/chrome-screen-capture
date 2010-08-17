@@ -34,6 +34,18 @@
 
 #include "npfunctions.h"
 
+bool GetDefaultSavePath(NPObject* obj, const NPVariant* args, 
+                        unsigned int argCount, NPVariant* result);
+
+bool AutoSave(NPObject* obj, const NPVariant* args, 
+              unsigned int argCount, NPVariant* result);
+
+bool SetSavePath(NPObject* obj, const NPVariant* args, 
+                 uint32_t argCount, NPVariant* result);
+
+bool OpenSavePath(NPObject* obj, const NPVariant* args, 
+                  unsigned int argCount, NPVariant* result);
+
 bool SaveScreenshot(NPObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result);
 

@@ -30,8 +30,6 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include <stdio.h>
-#include <vector>
-
 #include "plugin.h"
 
 NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
