@@ -114,12 +114,6 @@ var page = {
     page.docWidth = document.width;
     page.winHeight = window.innerHeight;
     page.winWidth = window.innerWidth;
-//    page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
-//        (window.innerWidth - page.scrollbar) : window.innerWidth;
-//    page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
-//        (window.innerHeight - page.scrollbar) : window.innerHeight;
-//    page.visibleWidth = document.documentElement.clientWidth;
-//    page.visibleHeight = document.documentElement.clientHeight;
     page.startY = window.scrollY;
     page.startX = window.scrollX;
     window.scrollTo(0, 0);
@@ -129,8 +123,6 @@ var page = {
         'msg': 'scroll_init_done',
         'height': page.docHeight,
         'width': page.docWidth,
-//        'visibleHeight': page.visibleHeight,
-//        'visibleWidth': page.visibleWidth,
         'scrollXCount': 0,
         'scrollYCount': 0};
   },
@@ -167,10 +159,6 @@ var page = {
   },
 
   getWindowSize: function() {
-//    page.visibleWidth = (window.innerHeight < document.body.scrollHeight) ?
-//        (window.innerWidth - page.scrollbar) : window.innerWidth;
-//    page.visibleHeight = (window.innerWidth < document.body.scrollWidth) ?
-//        (window.innerHeight - page.scrollbar) : window.innerHeight;
     return {'msg':'capture_window',
             'docWidth': document.width,
             'docHeight': document.height};

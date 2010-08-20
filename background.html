@@ -211,18 +211,18 @@ var screenshot = {
       var open;
       if (pluginobj.AutoSave(data, screenshot.tab.title,
           localStorage.savePath)) {
-        status = 'saveSuccess';
-        open = chrome.i18n.getMessage('openSavePath');
-      } else {
-        status = 'saveFail';
-        open = false;
-      }
-      screenshot.sendMessage({msg: 'auto_save_done',
-          status: chrome.i18n.getMessage(status), open: open},
-          screenshot.onResponseVisibleSize);
+        screenshot.showNotifications();
+      } 
       return;
     }
     chrome.tabs.create({'url': 'showimage.html'}, function() {});
+  },
+
+  showNotifications: function() {
+    var htmlNotification = webkitNotifications.createHTMLNotification(
+      'notification.html'  // html url - can be relative
+    );
+    htmlNotification.show();
   },
 
   isThisPlatform: function(operationSystem) {
