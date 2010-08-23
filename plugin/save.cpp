@@ -27,7 +27,6 @@
 #include <string>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include "plugin.h"
 #include "save.h"
 
@@ -39,6 +38,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <gtk/gtk.h>
+#include <unistd.h>
 #elif defined __APPLE__
 #include <resolv.h>
 #define MAX_PATH 260
@@ -250,8 +250,8 @@ bool AutoSave(NPP npp, const NPVariant* args,
   }
   filename += ".png";
   std::string unique_filename;
-  if (GenerateUniqueFileName(filename, &unique_filename) &&
-      SaveFileBase64(unique_filename.c_str(), base64, base64size))
+  if (!GenerateUniqueFileName(filename, &unique_filename) ||
+      !SaveFileBase64(unique_filename.c_str(), base64, base64size))
     result->value.boolValue = 0;
 
   return true;
@@ -383,7 +383,7 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
   Ofn.lpstrTitle = NULL;
   Ofn.lpstrDefExt = "png";
 
-  if (GetSaveFileNameA(&Ofn) && SaveFileBase64(szFile, base64, base64size))
+  if (!GetSaveFileNameA(&Ofn) || !SaveFileBase64(szFile, base64, base64size))
     result->value.boolValue = 0;
 #elif defined GTK
   FreeSaveData();
@@ -423,7 +423,7 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
   gtk_window_present(GTK_WINDOW(gSaveDialog));
 #elif defined __APPLE__
   const char* file = GetSaveFileName(title, path).c_str();
-  if (file && SaveFileBase64(file, base64, base64size))
+  if (!file || !SaveFileBase64(file, base64, base64size))
     result->value.boolValue = 0;
 #endif
 
