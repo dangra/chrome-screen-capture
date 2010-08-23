@@ -175,9 +175,9 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 }
 
 #elif defined __APPLE__
-const char* GetSaveFileName(const char* title, const char* path);
-const char* GetDocumentFolder();
-const char* SetSaveFolder(const char* path);
+std::string GetSaveFileName(const char* title, const char* path);
+std::string GetDocumentFolder();
+std::string SetSaveFolder(const char* path);
 bool OpenSaveFolder(const char* path);
 bool IsFolder(const char* path);
 #endif
@@ -286,7 +286,7 @@ bool SetSavePath(NPP npp, const NPVariant* args,
   WideCharToMultiByte(CP_UTF8, 0,
                       bRet ? szDisplayName : szSavePath,
                       -1, utf8, MAX_PATH, 0, 0);
-  InvokeCallback(callback, utf8);
+  InvokeCallback(npp, callback, utf8);
 #elif defined GTK
   ReleaseFolderCallback();
   gFolderCallback = callback;
@@ -308,7 +308,7 @@ bool SetSavePath(NPP npp, const NPVariant* args,
   }
   gtk_window_present(GTK_WINDOW(gFolderDialog));
 #elif defined __APPLE__
-  InvokeCallback(callback, SetSaveFolder(path).c_str());
+  InvokeCallback(npp, callback, SetSaveFolder(path).c_str());
 #endif
 
   return true;
@@ -422,7 +422,7 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
   }
   gtk_window_present(GTK_WINDOW(gSaveDialog));
 #elif defined __APPLE__
-  const char* file = GetSaveFileName(title, path);
+  const char* file = GetSaveFileName(title, path).c_str();
   if (file && SaveFileBase64(file, base64, base64size))
     result->value.boolValue = 0;
 #endif
