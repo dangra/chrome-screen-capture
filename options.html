@@ -169,7 +169,8 @@
 
   function setSavePath(callback) {
     var pluginobj = document.getElementById('pluginobj');
-    pluginobj.SetSavePath(localStorage.savePath, callback);
+    pluginobj.SetSavePath(localStorage.savePath, callback,
+                          chrome.i18n.getMessage('setDefaultPath'));
   }
 
   function getDefaultSavePath() {

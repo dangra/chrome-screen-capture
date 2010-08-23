@@ -34,6 +34,7 @@
 #include <atlenc.h>
 #include <ShlObj.h>
 #include <io.h>
+#define snprintf sprintf_s
 #elif defined GTK
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,7 +63,7 @@ static bool SaveFileBase64(const char* fileName, const char* base64,
 #ifdef _WINDOWS
   int byteLength = Base64DecodeGetRequiredLength(base64size);
   unsigned char* data = new unsigned char[byteLength];
-  Base64Decode(base64, base64size, bytes, &byteLength);
+  Base64Decode(base64, base64size, data, &byteLength);
 #elif defined GTK
   int byteLength = (base64size * 3) / 4;
   unsigned char* data = new unsigned char[byteLength];
@@ -118,10 +119,10 @@ static void InvokeCallback(NPP npp, NPObject* callback, bool param) {
 std::string GetPicturePath() {
   TCHAR szDisplayName[MAX_PATH];
   PIDLIST_ABSOLUTE pIdList;
-  SHGetSpecialFolderLocation(NULL,CSIDL_MYPICTURES,&pIdList);
-  if (SHGetPathFromIDList(pIdList,szDisplayName)) {
+  SHGetSpecialFolderLocation(NULL, CSIDL_MYPICTURES, &pIdList);
+  if (SHGetPathFromIDList(pIdList, szDisplayName)) {
     char utf8[MAX_PATH];
-    WideCharToMultiByte(CP_UTF8,0,szDisplayName,-1,p,MAX_PATH,0,0);
+    WideCharToMultiByte(CP_UTF8, 0, szDisplayName, -1, utf8, MAX_PATH, 0, 0);
     return utf8;
   }
   return std::string();
@@ -130,7 +131,7 @@ std::string GetPicturePath() {
 int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
   switch (uMsg) {
   case BFFM_INITIALIZED:
-    SendMessage(hwnd,BFFM_SETSELECTION,TRUE,lpData);
+    SendMessage(hwnd, BFFM_SETSELECTION, TRUE, lpData);
     break;
   }
   return 0;
@@ -253,8 +254,10 @@ bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
 #ifdef _WINDOWS
   TCHAR szWideBuf[MAX_PATH] = { 0 };
   MultiByteToWideChar(CP_UTF8, 0, path, -1, szWideBuf, MAX_PATH);
-  if (!PathIsDirectory(szWideBuf))
-    return false;
+  if (!PathIsDirectory(szWideBuf)) {
+    result->value.boolValue = 0;
+    return true;
+  }
   char szPath[MAX_PATH] = { 0 };
   WideCharToMultiByte(CP_ACP, 0, szWideBuf, -1, szPath, MAX_PATH, 0, 0);
   path = szPath;
@@ -266,11 +269,15 @@ bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
   title = szTitle;
 #elif defined GTK
   struct stat st;
-  if (stat(path, &st) != 0 || !S_ISDIR(st.st_mode))
-    return false;
+  if (stat(path, &st) != 0 || !S_ISDIR(st.st_mode)) {
+    result->value.boolValue = 0;
+    return true;
+  }
 #elif defined __APPLE__
-  if (!IsFolder(path))
-    return false;
+  if (!IsFolder(path)) {
+    result->value.boolValue = 0;
+    return true;
+  }
 #endif
 
   static const char* kReplacedChars = "\\/:*?\"<>|";
@@ -292,28 +299,33 @@ bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
 
 bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
                  uint32_t argCount, NPVariant* result) {
-  if (argCount < 2 || !NPVARIANT_IS_STRING(args[0]) ||
-      !NPVARIANT_IS_OBJECT(args[1]) || !NPVARIANT_TO_OBJECT(args[1]))
+  if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
+      !NPVARIANT_IS_OBJECT(args[1]) || !NPVARIANT_TO_OBJECT(args[1]) ||
+      !NPVARIANT_IS_STRING(args[2]))
     return false;
 
   const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
   NPObject* callback = NPVARIANT_TO_OBJECT(args[1]);
+  const char* title = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
 
 #ifdef _WINDOWS
-  TCHAR szDisplayName[MAX_PATH]={0};
-  TCHAR szSavePath[MAX_PATH]={0};
+  TCHAR szDisplayName[MAX_PATH] = {0};
+  TCHAR szSavePath[MAX_PATH] = {0};
+  TCHAR szTitle[MAX_PATH] = {0};
 
   if (NPVARIANT_TO_STRING(args[0]).UTF8Length > 0)
-    MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, szSavePath, MAX_PATH);
+  if (NPVARIANT_TO_STRING(args[2]).UTF8Length > 0)
+    MultiByteToWideChar(CP_UTF8, 0, title, -1, szTitle, MAX_PATH);
 
   BROWSEINFO info={0};
-  info.hwndOwner = (HWND)obj->hWnd;
-  info.lpszTitle = L"Select default picture path";
+  info.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
+  info.lpszTitle = szTitle;
   info.pszDisplayName = szDisplayName;
   info.lpfn = BrowserCallBack;
   info.ulFlags = BIF_RETURNONLYFSDIRS;
   info.lParam = (LPARAM)szSavePath;
-  BOOL bRet = SHGetPathFromIDList(SHBrowseForFolder(&info),szDisplayName);
+  BOOL bRet = SHGetPathFromIDList(SHBrowseForFolder(&info), szDisplayName);
 
   char utf8[MAX_PATH];
   WideCharToMultiByte(CP_UTF8, 0,
@@ -326,7 +338,7 @@ bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   npnfuncs->retainobject(callback);
   if (!gFolderDialog) {
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
-        "Select default picture path", NULL,
+        title, NULL,
         GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
         GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
@@ -405,7 +417,7 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = (HWND)obj->hWnd;
+  Ofn.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);
@@ -416,13 +428,9 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   Ofn.lpstrTitle = NULL;
   Ofn.lpstrDefExt = "png";
 
-<<<<<<< .mine
-  InvokeCallback(obj->npp,
-      (!GetSaveFileNameA(&Ofn) || SaveFileBase64(szFile, base64, base64size)));
-=======
-  if (!GetSaveFileNameA(&Ofn) || !SaveFileBase64(szFile, base64, base64size))
-    result->value.boolValue = 0;
->>>>>>> .r172
+  InvokeCallback(obj->npp, callback,
+      !GetSaveFileNameA(&Ofn) || SaveFileBase64(szFile, base64, base64size));
+
 #elif defined GTK
   ReleaseSaveCallback();
   gSaveCallback = callback;
@@ -467,7 +475,7 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   gtk_window_present(GTK_WINDOW(gSaveDialog));
 #elif defined __APPLE__
   std::string file = GetSaveFileName(title, path);
-  InvokeCallback(obj->npp,
+  InvokeCallback(obj->npp, callback,
       file.empty() || SaveFileBase64(file.c_str(), base64, base64size));
 #endif
 

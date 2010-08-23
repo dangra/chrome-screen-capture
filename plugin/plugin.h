@@ -60,9 +60,6 @@ public:
                           NPVariant* result);
 
   NPP npp;
-#ifdef _WINDOWS
-  HWND hWnd; 
-#endif
 };
 
 class CPlugin {
@@ -71,7 +68,6 @@ private:
   NPWindow * m_Window;
   NPBool m_bInitialized;
   ScriptablePluginObject *m_pScriptableObject;
-
 #ifdef _WINDOWS
   HWND m_hWnd; 
 #endif
@@ -83,6 +79,9 @@ public:
   NPBool init(NPWindow* pNPWindow);
   NPBool isInitialized();
   ScriptablePluginObject *GetScriptableObject();
+#ifdef _WINDOWS
+  HWND GetHWnd(); 
+#endif
 };
 
 #endif // __PLUGIN_H__

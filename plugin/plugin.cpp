@@ -159,9 +159,6 @@ NPBool CPlugin::isInitialized() {
 ScriptablePluginObject * CPlugin::GetScriptableObject() {
   if (!m_pScriptableObject) {
     m_pScriptableObject = (ScriptablePluginObject*)npnfuncs->createobject(m_pNPInstance, &plugin_ref_obj);
-#ifdef _WINDOWS
-    m_pScriptableObject->hWnd = m_hWnd;
-#endif
 
     // Retain the object since we keep it in plugin code
     // so that it won't be freed by browser.
@@ -170,3 +167,9 @@ ScriptablePluginObject * CPlugin::GetScriptableObject() {
 
   return m_pScriptableObject;
 }
+
+#ifdef _WINDOWS
+HWND CPlugin::GetHWnd() {
+  return m_hWnd;
+}
+#endif
