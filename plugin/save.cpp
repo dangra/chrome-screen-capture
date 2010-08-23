@@ -203,9 +203,9 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 }
 
 #elif defined __APPLE__
-const char* GetSaveFileName(const char* title, const char* path);
-const char* GetDocumentFolder();
-const char* SetSaveFolder(const char* path);
+std::string GetSaveFileName(const char* title, const char* path);
+std::string GetDocumentFolder();
+std::string SetSaveFolder(const char* path);
 bool OpenSaveFolder(const char* path);
 bool IsFolder(const char* path);
 #endif
