@@ -46,6 +46,7 @@ extern NPNetscapeFuncs* npnfuncs;
 
 class ScriptablePluginObject: NPObject {
 public:
+  ScriptablePluginObject(NPP instance);
   static NPObject* Allocate(NPP instance, NPClass* npclass);
   static void Deallocate(NPObject* obj);
   static bool HasMethod(NPObject* obj, NPIdentifier methodName);
@@ -58,6 +59,7 @@ public:
   static bool GetProperty(NPObject* obj, NPIdentifier propertyName,
                           NPVariant* result);
 
+  NPP npp_;
 #ifdef _WINDOWS
   HWND hWnd; 
 #endif

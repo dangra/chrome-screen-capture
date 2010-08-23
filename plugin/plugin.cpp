@@ -64,8 +64,12 @@ static NPClass plugin_ref_obj = {
   NULL,
 };
 
+ScriptablePluginObject::ScriptablePluginObject(NPP instance)
+    : npp_(instance) {
+}
+
 NPObject* ScriptablePluginObject::Allocate(NPP instance, NPClass* npclass) {
-  return (NPObject*)(new ScriptablePluginObject);
+  return (NPObject*)(new ScriptablePluginObject(instance));
 }
 
 void ScriptablePluginObject::Deallocate(NPObject* obj) {
@@ -84,33 +88,27 @@ bool ScriptablePluginObject::InvokeDefault(NPObject* obj, const NPVariant* args,
 bool ScriptablePluginObject::Invoke(NPObject* obj, NPIdentifier methodName,
                      const NPVariant* args, uint32_t argCount,
                      NPVariant* result) {
+  NPP npp = ((ScriptablePluginObject*)obj)->npp_;
   char* name = npnfuncs->utf8fromidentifier(methodName);
   bool ret_val = false;
   if (!name) {
     return ret_val;
   }
-  if (!strncmp((const char*)name, kSaveScreenshot,
-               strlen(kSaveScreenshot))) {
-    ret_val = SaveScreenshot(obj, args, argCount, result);
-  } else if (!strncmp((const char*)name, kAutoSave,
-             strlen(kAutoSave))) {
-    ret_val = AutoSave(obj, args, argCount, result);
-  } else if (!strncmp((const char*)name, kOpenSavePath,
-             strlen(kOpenSavePath))) {
-    ret_val = OpenSavePath(obj, args, argCount, result);
-  } else if (!strncmp((const char*)name, kSetSavePath,
-             strlen(kSetSavePath))) {
-    ret_val = SetSavePath(obj, args, argCount, result);
-  } else if (!strncmp(name,kGetDefaultSavePath,
-             strlen(kGetDefaultSavePath))) {
-    ret_val = GetDefaultSavePath(obj, args, argCount, result);
+  if (!strcmp(name, kSaveScreenshot)) {
+    ret_val = SaveScreenshot(npp, args, argCount, result);
+  } else if (!strcmp(name, kAutoSave)) {
+    ret_val = AutoSave(npp, args, argCount, result);
+  } else if (!strcmp(name, kOpenSavePath)) {
+    ret_val = OpenSavePath(npp, args, argCount, result);
+  } else if (!strcmp(name, kSetSavePath)) {
+    ret_val = SetSavePath(npp, args, argCount, result);
+  } else if (!strcmp(name, kGetDefaultSavePath)) {
+    ret_val = GetDefaultSavePath(npp, args, argCount, result);
   } else {
     // Exception handling. 
-    npnfuncs->setexception(obj, "exception during invocation");
+    npnfuncs->setexception(obj, "Unknown method");
   }
-  if (name) {
-    npnfuncs->memfree(name);
-  }
+  npnfuncs->memfree(name);
   return ret_val;
 }
 
