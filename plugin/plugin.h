@@ -59,7 +59,7 @@ public:
   static bool GetProperty(NPObject* obj, NPIdentifier propertyName,
                           NPVariant* result);
 
-  NPP npp_;
+  NPP npp;
 #ifdef _WINDOWS
   HWND hWnd; 
 #endif

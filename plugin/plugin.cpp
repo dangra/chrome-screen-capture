@@ -65,7 +65,7 @@ static NPClass plugin_ref_obj = {
 };
 
 ScriptablePluginObject::ScriptablePluginObject(NPP instance)
-    : npp_(instance) {
+    : npp(instance) {
 }
 
 NPObject* ScriptablePluginObject::Allocate(NPP instance, NPClass* npclass) {
@@ -88,22 +88,22 @@ bool ScriptablePluginObject::InvokeDefault(NPObject* obj, const NPVariant* args,
 bool ScriptablePluginObject::Invoke(NPObject* obj, NPIdentifier methodName,
                      const NPVariant* args, uint32_t argCount,
                      NPVariant* result) {
-  NPP npp = ((ScriptablePluginObject*)obj)->npp_;
+  ScriptablePluginObject *thisObj = (ScriptablePluginObject*)obj;
   char* name = npnfuncs->utf8fromidentifier(methodName);
   bool ret_val = false;
   if (!name) {
     return ret_val;
   }
   if (!strcmp(name, kSaveScreenshot)) {
-    ret_val = SaveScreenshot(npp, args, argCount, result);
+    ret_val = SaveScreenshot(thisObj, args, argCount, result);
   } else if (!strcmp(name, kAutoSave)) {
-    ret_val = AutoSave(npp, args, argCount, result);
+    ret_val = AutoSave(thisObj, args, argCount, result);
   } else if (!strcmp(name, kOpenSavePath)) {
-    ret_val = OpenSavePath(npp, args, argCount, result);
+    ret_val = OpenSavePath(thisObj, args, argCount, result);
   } else if (!strcmp(name, kSetSavePath)) {
-    ret_val = SetSavePath(npp, args, argCount, result);
+    ret_val = SetSavePath(thisObj, args, argCount, result);
   } else if (!strcmp(name, kGetDefaultSavePath)) {
-    ret_val = GetDefaultSavePath(npp, args, argCount, result);
+    ret_val = GetDefaultSavePath(thisObj, args, argCount, result);
   } else {
     // Exception handling. 
     npnfuncs->setexception(obj, "Unknown method");

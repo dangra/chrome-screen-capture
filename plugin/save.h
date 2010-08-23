@@ -30,19 +30,21 @@
 
 #include "npfunctions.h"
 
-bool GetDefaultSavePath(NPP npp, const NPVariant* args,
+class ScriptablePluginObject;
+
+bool GetDefaultSavePath(ScriptablePluginObject* obj, const NPVariant* args,
                         unsigned int argCount, NPVariant* result);
 
-bool AutoSave(NPP npp, const NPVariant* args,
+bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
               unsigned int argCount, NPVariant* result);
 
-bool SetSavePath(NPP npp, const NPVariant* args,
+bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
                  uint32_t argCount, NPVariant* result);
 
-bool OpenSavePath(NPP npp, const NPVariant* args,
+bool OpenSavePath(ScriptablePluginObject* obj, const NPVariant* args,
                   unsigned int argCount, NPVariant* result);
 
-bool SaveScreenshot(NPP npp, const NPVariant* args,
+bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result);
 
 #endif  // NPCAPTURE__SAVE_H_

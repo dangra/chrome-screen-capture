@@ -106,6 +106,14 @@ static void InvokeCallback(NPP npp, NPObject* callback, const char* param) {
   npnfuncs->invokeDefault(npp, callback, &npParam, 1, &result);
 }
 
+static void InvokeCallback(NPP npp, NPObject* callback, bool param) {
+  NPVariant npParam;
+  BOOLEAN_TO_NPVARIANT(param, npParam);
+  NPVariant result;
+  VOID_TO_NPVARIANT(result);
+  npnfuncs->invokeDefault(npp, callback, &npParam, 1, &result);
+}
+
 #ifdef _WINDOWS
 std::string GetPicturePath() {
   TCHAR szDisplayName[MAX_PATH];
@@ -131,6 +139,7 @@ int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
 static guchar* gSaveData = NULL;
 static int gSaveDataLength = 0;
 static GtkWidget* gSaveDialog = NULL;
+static NPObject* gSaveCallback = NULL;
 static GtkWidget* gFolderDialog = NULL;
 static NPObject* gFolderCallback = NULL;
 
@@ -139,6 +148,13 @@ static void FreeSaveData() {
     free(gSaveData);
   gSaveData = NULL;
   gSaveDataLength = 0;
+}
+
+static void ReleaseSaveCallback() {
+  if (gSaveCallback) {
+    npnfuncs->releaseobject(gSaveCallback);
+    gSaveCallback = NULL;
+  }
 }
 
 static void ReleaseFolderCallback() {
@@ -150,13 +166,19 @@ static void ReleaseFolderCallback() {
 
 static void OnDialogResponse(GtkDialog* dialog, gint response,
                              gpointer userData) {
+  // Hide the dialog to prevent it from covering any alert dialog opened by
+  // the JavaScript callback.
+  gtk_widget_hide(GTK_WIDGET(dialog));
   if (response == GTK_RESPONSE_ACCEPT) {
     char* file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
     if (dialog == GTK_DIALOG(gSaveDialog)) {
-      if (file && gSaveData)
-        SaveFile(file, gSaveData, gSaveDataLength);
+      if (file && gSaveData) {
+        InvokeCallback((NPP)userData, gSaveCallback,
+                       SaveFile(file, gSaveData, gSaveDataLength));
+        // To indicate the callback has already been invoked.
+        ReleaseSaveCallback();
+      }
     } else {
-      fprintf(stderr, "Dialog response, %s", file);
       InvokeCallback((NPP)userData, gFolderCallback, file);
     }
     g_free(file);
@@ -167,6 +189,11 @@ static void OnDialogResponse(GtkDialog* dialog, gint response,
 static void OnDialogDestroy(GtkObject* object, gpointer userData) {
   if (GTK_WIDGET(object) == gSaveDialog) {
     FreeSaveData();
+    // The callback has not been invoked, meaning that the dialog has been
+    // canceled.
+    if (gSaveCallback)
+      InvokeCallback((NPP)userData, gSaveCallback, true);
+    ReleaseSaveCallback();
     gSaveDialog = NULL;
   } else {
     ReleaseFolderCallback();
@@ -175,14 +202,14 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 }
 
 #elif defined __APPLE__
-std::string GetSaveFileName(const char* title, const char* path);
-std::string GetDocumentFolder();
-std::string SetSaveFolder(const char* path);
+const char* GetSaveFileName(const char* title, const char* path);
+const char* GetDocumentFolder();
+const char* SetSaveFolder(const char* path);
 bool OpenSaveFolder(const char* path);
 bool IsFolder(const char* path);
 #endif
 
-bool GetDefaultSavePath(NPP npp, const NPVariant* args,
+bool GetDefaultSavePath(ScriptablePluginObject* obj, const NPVariant* args,
                         unsigned int argCount, NPVariant* result) {
 #ifdef _WINDOWS
   std::string pathStr = GetPicturePath();
@@ -203,7 +230,7 @@ bool GetDefaultSavePath(NPP npp, const NPVariant* args,
   return true;
 }
 
-bool AutoSave(NPP npp, const NPVariant* args,
+bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
               unsigned int argCount, NPVariant* result) {
   if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
       !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]))
@@ -257,7 +284,7 @@ bool AutoSave(NPP npp, const NPVariant* args,
   return true;
 }
 
-bool SetSavePath(NPP npp, const NPVariant* args,
+bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
                  uint32_t argCount, NPVariant* result) {
   if (argCount < 2 || !NPVARIANT_IS_STRING(args[0]) ||
       !NPVARIANT_IS_OBJECT(args[1]) || !NPVARIANT_TO_OBJECT(args[1]))
@@ -274,7 +301,7 @@ bool SetSavePath(NPP npp, const NPVariant* args,
     MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
 
   BROWSEINFO info={0};
-  info.hwndOwner = (HWND)((ScriptablePluginObject*)obj)->hWnd;
+  info.hwndOwner = (HWND)obj->hWnd;
   info.lpszTitle = L"Select default picture path";
   info.pszDisplayName = szDisplayName;
   info.lpfn = BrowserCallBack;
@@ -286,7 +313,7 @@ bool SetSavePath(NPP npp, const NPVariant* args,
   WideCharToMultiByte(CP_UTF8, 0,
                       bRet ? szDisplayName : szSavePath,
                       -1, utf8, MAX_PATH, 0, 0);
-  InvokeCallback(npp, callback, utf8);
+  InvokeCallback(obj->npp, callback, utf8);
 #elif defined GTK
   ReleaseFolderCallback();
   gFolderCallback = callback;
@@ -300,21 +327,22 @@ bool SetSavePath(NPP npp, const NPVariant* args,
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
 
-    g_signal_connect(dialog, "response", G_CALLBACK(OnDialogResponse), npp);
-    g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy), NULL);
+    g_signal_connect(dialog, "response", G_CALLBACK(OnDialogResponse),
+                     obj->npp);
+    g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy), obj->npp);
     gtk_widget_show_all(dialog);
     gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
     gFolderDialog = dialog;
   }
   gtk_window_present(GTK_WINDOW(gFolderDialog));
 #elif defined __APPLE__
-  InvokeCallback(npp, callback, SetSaveFolder(path).c_str());
+  InvokeCallback(obj->npp, callback, SetSaveFolder(path).c_str());
 #endif
 
   return true;
 }
 
-bool OpenSavePath(NPP npp, const NPVariant* args,
+bool OpenSavePath(ScriptablePluginObject* obj, const NPVariant* args,
                   unsigned int argCount, NPVariant* result) {
   if (argCount < 1 || !NPVARIANT_IS_STRING(args[0]))
     return false;
@@ -338,15 +366,17 @@ bool OpenSavePath(NPP npp, const NPVariant* args,
   return true;
 }
 
-bool SaveScreenshot(NPP npp, const NPVariant* args,
+bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result) {
-  if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
-      !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]))
+  if (argCount < 4 || !NPVARIANT_IS_STRING(args[0]) ||
+      !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]) ||
+      !NPVARIANT_IS_OBJECT(args[3]))
     return false;
 
   char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
   char* title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
   char* path = (char*)NPVARIANT_TO_STRING(args[2]).UTF8Characters;
+  NPObject* callback = NPVARIANT_TO_OBJECT(args[3]);
 
   char* base64 = strstr(url, "base64,");
   if (!base64)
@@ -354,9 +384,6 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
 
   base64 += 7;
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
-
-  result->type = NPVariantType_Bool;
-  result->value.boolValue = 1;
 
 #ifdef _WINDOWS
   TCHAR szSavePath[MAX_PATH]=L"";
@@ -372,7 +399,7 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
-  Ofn.hwndOwner = (HWND)((ScriptablePluginObject*)obj)->hWnd;
+  Ofn.hwndOwner = (HWND)obj->hWnd;
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
   Ofn.lpstrFile = szFile;
   Ofn.nMaxFile = sizeof(szFile);
@@ -383,9 +410,18 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
   Ofn.lpstrTitle = NULL;
   Ofn.lpstrDefExt = "png";
 
+<<<<<<< .mine
+  InvokeCallback(obj->npp,
+      (!GetSaveFileNameA(&Ofn) || SaveFileBase64(szFile, base64, base64size)));
+=======
   if (!GetSaveFileNameA(&Ofn) || !SaveFileBase64(szFile, base64, base64size))
     result->value.boolValue = 0;
+>>>>>>> .r172
 #elif defined GTK
+  ReleaseSaveCallback();
+  gSaveCallback = callback;
+  npnfuncs->retainobject(callback);
+
   FreeSaveData();
   gsize byteLength = (base64size * 3) / 4;
   gSaveData = (guchar*)malloc(byteLength);
@@ -399,8 +435,9 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
         "Save", NULL,
         GTK_FILE_CHOOSER_ACTION_SAVE,
         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+        GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+    gtk_window_set_title(GTK_WINDOW(dialog), title);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
                                                    TRUE);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
@@ -414,17 +451,18 @@ bool SaveScreenshot(NPP npp, const NPVariant* args,
     gtk_file_filter_set_name(file_filter, "All Files");
     gtk_file_filter_add_pattern(file_filter, "*.*");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
-    g_signal_connect(dialog, "response", G_CALLBACK(OnDialogResponse), NULL);
-    g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy), NULL);
+    g_signal_connect(dialog, "response", G_CALLBACK(OnDialogResponse),
+                     obj->npp);
+    g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy), obj->npp);
     gtk_widget_show_all(dialog);
     gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
     gSaveDialog = dialog;
   }
   gtk_window_present(GTK_WINDOW(gSaveDialog));
 #elif defined __APPLE__
-  const char* file = GetSaveFileName(title, path).c_str();
-  if (!file || !SaveFileBase64(file, base64, base64size))
-    result->value.boolValue = 0;
+  std::string file = GetSaveFileName(title, path);
+  InvokeCallback(obj->npp,
+      file.empty() || SaveFileBase64(file.c_str(), base64, base64size));
 #endif
 
   return true;
