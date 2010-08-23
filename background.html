@@ -20,6 +20,7 @@ var screenshot = {
   scrollYCount: 0,
   scrollBarX: 17,
   scrollBarY: 17,
+  capturedStatus: true,
 
   /**
   * Receive messages from content_script, and then decide what to do next
@@ -88,7 +89,7 @@ var screenshot = {
         var context = screenshot.canvas.getContext("2d");
         context.drawImage(image, 0, 0);
         screenshot.postImage();
-      }
+      };
       image.src = data;
     });
   },
@@ -211,8 +212,12 @@ var screenshot = {
       var open;
       if (pluginobj.AutoSave(data, screenshot.tab.title,
           localStorage.savePath)) {
-        screenshot.showNotifications();
-      } 
+        screenshot.capturedStatus = true;
+      } else {
+        screenshot.capturedStatus = false;
+      }
+      screenshot.showNotifications();
+      chrome.extension.sendRequest({msg: 'webpageCapturedDone'});
       return;
     }
     chrome.tabs.create({'url': 'showimage.html'}, function() {});

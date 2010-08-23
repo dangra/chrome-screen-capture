@@ -22,15 +22,19 @@
       function init() {
         var bg = chrome.extension.getBackgroundPage();
         var tipDiv = document.getElementById('tip');
-        var aElement = document.createElement('a');
-        aElement.innerText = chrome.i18n.getMessage('openSavePath');
-        aElement.href = 'javascript:void(0)';
-        aElement.addEventListener('click', function() {
-          bg.screenshot.openSavePath();
-        }, false);
-        var message = chrome.i18n.getMessage('saveSuccess');
-        tipDiv.innerText = message;
-        tipDiv.appendChild(aElement);
+        var capturedStatus = bg.screenshot.capturedStatus;
+        if (capturedStatus) {
+          tipDiv.innerText = chrome.i18n.getMessage('saveSuccess');
+          var aElement = document.createElement('a');
+          aElement.innerText = chrome.i18n.getMessage('openSavePath');
+          aElement.href = 'javascript:void(0)';
+          aElement.addEventListener('click', function() {
+            bg.screenshot.openSavePath();
+          }, false);
+          tipDiv.appendChild(aElement);
+        } else {
+          tipDiv.innerText = chrome.i18n.getMessage('saveFail');
+        }
         closeWindow();
       }
 

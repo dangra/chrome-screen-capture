@@ -90,9 +90,6 @@ var page = {
           page.visibleHeight = request.visibleHeight;
           response(page.scrollNext());
           break;
-        case 'auto_save_done':
-          page.showPromptMessage(request.status, request.open, response);
-
       }
     });
   },

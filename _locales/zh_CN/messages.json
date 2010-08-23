@@ -54,5 +54,5 @@
   "size_huge": {"message": "最大"},
   "solidBlack": {"message": "纯黑"},
   "saveSuccess": {"message": "截图保存成功。"},
-  "saveFail": {"message": "截图保存失败."}
+  "saveFail": {"message": "截图保存失败。"}
 }

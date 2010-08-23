@@ -55,6 +55,8 @@ body {
       document.getElementById('captureSpecialPage').style.display = 'none';
     } else if (request.msg == 'isLoadCanNotCapturn') {
       i18nReplace('tip', 'tip2');
+    } else if (request.msg == 'webpageCapturedDone') {
+      window.close();
     }
   });
 
