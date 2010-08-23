@@ -251,13 +251,19 @@ bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
   result->value.boolValue = 1;
 
 #ifdef _WINDOWS
-  TCHAR szWidePath[MAX_PATH] = { 0 };
-  MultiByteToWideChar(CP_UTF8, 0, path, -1, szWidePath, MAX_PATH);
-  if (!PathIsDirectory(szWidePath))
+  TCHAR szWideBuf[MAX_PATH] = { 0 };
+  MultiByteToWideChar(CP_UTF8, 0, path, -1, szWideBuf, MAX_PATH);
+  if (!PathIsDirectory(szWideBuf))
     return false;
   char szPath[MAX_PATH] = { 0 };
-  WideCharToMultiByte(CP_ACP, 0, szWidePath, -1, szPath, MAX_PATH, 0, 0);
+  WideCharToMultiByte(CP_ACP, 0, szWideBuf, -1, szPath, MAX_PATH, 0, 0);
   path = szPath;
+
+  memset(szWideBuf, 0, sizeof(szWideBuf));
+  MultiByteToWideChar(CP_UTF8, 0, title, -1, szWideBuf, MAX_PATH);
+  char szTitle[MAX_PATH] = { 0 };
+  WideCharToMultiByte(CP_ACP, 0, szWideBuf, -1, szTitle, MAX_PATH, 0, 0);
+  title = szTitle;
 #elif defined GTK
   struct stat st;
   if (stat(path, &st) != 0 || !S_ISDIR(st.st_mode))
