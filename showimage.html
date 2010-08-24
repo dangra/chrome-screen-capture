@@ -775,10 +775,13 @@
       photoShop.draw();
       var pluginobj = document.getElementById('pluginobj');
       var dataurl = $('canvas').toDataURL('image/png');
-      if (!pluginobj.SaveScreenshot(
-          dataurl, bg.screenshot.tab.title, localStorage.savePath)) {
-        alert(chrome.i18n.getMessage('saveerror'));
-      }
+      pluginobj.SaveScreenshot(
+          dataurl, bg.screenshot.tab.title, localStorage.savePath,
+          function(success) {
+            if (!success)
+              alert(chrome.i18n.getMessage('saveerror'));
+          },
+          chrome.i18n.getMessage("savetitle"));
       photoShop.finish();
     },
 

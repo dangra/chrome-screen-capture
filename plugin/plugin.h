@@ -46,6 +46,7 @@ extern NPNetscapeFuncs* npnfuncs;
 
 class ScriptablePluginObject: NPObject {
 public:
+  ScriptablePluginObject(NPP instance);
   static NPObject* Allocate(NPP instance, NPClass* npclass);
   static void Deallocate(NPObject* obj);
   static bool HasMethod(NPObject* obj, NPIdentifier methodName);
@@ -58,9 +59,7 @@ public:
   static bool GetProperty(NPObject* obj, NPIdentifier propertyName,
                           NPVariant* result);
 
-#ifdef _WINDOWS
-  HWND hWnd; 
-#endif
+  NPP npp;
 };
 
 class CPlugin {
@@ -69,7 +68,6 @@ private:
   NPWindow * m_Window;
   NPBool m_bInitialized;
   ScriptablePluginObject *m_pScriptableObject;
-
 #ifdef _WINDOWS
   HWND m_hWnd; 
 #endif
@@ -81,6 +79,9 @@ public:
   NPBool init(NPWindow* pNPWindow);
   NPBool isInitialized();
   ScriptablePluginObject *GetScriptableObject();
+#ifdef _WINDOWS
+  HWND GetHWnd(); 
+#endif
 };
 
 #endif // __PLUGIN_H__

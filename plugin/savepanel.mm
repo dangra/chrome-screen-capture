@@ -1,6 +1,8 @@
+#include <string>
 #import <Cocoa/Cocoa.h>
 
-const char* GetSaveFileName(const char* title, const char* path) {
+std::string GetSaveFileName(const char* title, const char* path,
+                            const char* dialog_title) {
   int runResult;
 
   /* create or get the shared instance of NSSavePanel */
@@ -8,6 +10,7 @@ const char* GetSaveFileName(const char* title, const char* path) {
  
   /* set up new attributes */
   [sp setRequiredFileType:@"png"];
+  [sp setTitle:[NSString stringWithUTF8String:dialog_title]];
  
   /* display the NSSavePanel */
   runResult = [sp runModalForDirectory:[NSString stringWithUTF8String:path]
@@ -18,17 +21,17 @@ const char* GetSaveFileName(const char* title, const char* path) {
     NSURL *file = [sp URL];
     return [[file path] UTF8String];
   } else {
-    return nil;
+    return std::string();
   }
 }
 
-const char* GetDocumentFolder() {
+std::string GetDocumentFolder() {
   NSArray *paths;
   paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   return [[paths lastObject] UTF8String];
 }
 
-const char* SetSaveFolder(const char* path) {
+std::string SetSaveFolder(const char* path, const char* dialog_title) {
   int runResult;
 
   NSOpenPanel *op = [NSOpenPanel openPanel];
@@ -37,6 +40,7 @@ const char* SetSaveFolder(const char* path) {
   [op setCanChooseFiles:NO];
   [op setAllowsMultipleSelection:NO];
   [op setDirectory:[NSString stringWithUTF8String:path]];
+  [op setTitle:[NSString stringWithUTF8String:dialog_title]];
 
   runResult = [op runModal];
   

@@ -134,14 +134,14 @@
     document.getElementById('filePath').value = localStorage.savePath =
         localStorage.savePath ? localStorage.savePath : getDefaultSavePath(); 
     document.getElementById('setSavePath').addEventListener('click', function() {
-      var savePath = setSavePath();
-      document.getElementById('filePath').value = localStorage.savePath = savePath;
+      setSavePath(function(savePath) {
+        document.getElementById('filePath').value = localStorage.savePath = savePath;
+      });
     });
     document.getElementById('openSavePath').addEventListener('click', function() {
       bg.screenshot.openSavePath();
     })
     initScreenCaptureQuality();
-    setAutoSaveStatusOnLinux();
   }
 
   function save() {
@@ -159,14 +159,6 @@
     });
   }
 
-  function setAutoSaveStatusOnLinux() {
-    var isLinuxPlatform = bg.screenshot.isThisPlatform('linux');
-    console.log('isLinuxPlatform:' + isLinuxPlatform);
-    if (isLinuxPlatform) {
-      document.getElementById('autoSaveSettingDiv').style.display = 'none';
-    }
-  }
-
   function initScreenCaptureQuality() {
     bg.screenshot.setScreenshotQualityByOS();
     document.getElementById('lossy').checked =
@@ -175,9 +167,10 @@
         (localStorage.screenshootQuality == 'png' ? true : false);
   }
 
-  function setSavePath() {
+  function setSavePath(callback) {
     var pluginobj = document.getElementById('pluginobj');
-    return pluginobj.SetSavePath(localStorage.savePath);
+    pluginobj.SetSavePath(localStorage.savePath, callback,
+                          chrome.i18n.getMessage('setDefaultPath'));
   }
 
   function getDefaultSavePath() {
