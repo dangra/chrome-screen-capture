@@ -1,6 +1,6 @@
 {
   "name": {"message": "网页截图（由Google提供）"},
-  "description": {"message": "截取网页为图片，支持窗口截图，区域截图和整个网页截图三种方式。"},
+  "description": {"message": "截取网页为图片，支持窗口截图，区域截图和整个网页截图三种方式。支持水平和垂直翻页截取超大网页，新版引进自动截图保存功能。"},
   "default_title": {"message": "网页截图"},
   "captureWindow": {"message": "可视区域截图"},
   "captureSpecialWindow": {"message": "可视区域截图"},
@@ -17,7 +17,7 @@
   "option": {"message": "选项"},
   "save": {"message": "保存"},
   "savetitle": {"message": "保存图片"},
-  "saveerror": {"message": "保存截图失败。"},
+  "saveerror": {"message": "截图保存失败。"}
   "tipStep1": {"message": "以下是您的截图，您可以利用左边的工具进行编辑，然后点击“保存” 按钮。"},
   "tipStep2": {"message": "现在您可以在下面的图片上点击右键，选择“图片另存为”，即可保存图片，或直接点击右边的“保存”按钮。"},
   "tipStepMac": {"message": "现在您可以在下面的图片上点击右键，选择“图片另存为”，即可保存图片。"},
