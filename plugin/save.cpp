@@ -436,6 +436,10 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   gSaveCallback = callback;
   npnfuncs->retainobject(callback);
 
+  char* dialog_title = NULL;
+  if (argCount == 5 && NPVARIANT_IS_STRING(args[4]))
+    dialog_title = (char*)NPVARIANT_TO_STRING(args[4]).UTF8Characters;
+    
   FreeSaveData();
   gsize byteLength = (base64size * 3) / 4;
   gSaveData = (guchar*)malloc(byteLength);
@@ -446,12 +450,11 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
 
   if (!gSaveDialog) {
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
-        "Save", NULL,
+        dialog_title, NULL,
         GTK_FILE_CHOOSER_ACTION_SAVE,
         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
         GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-    gtk_window_set_title(GTK_WINDOW(dialog), title);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog),
                                                    TRUE);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);

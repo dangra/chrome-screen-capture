@@ -780,7 +780,8 @@
           function(success) {
             if (!success)
               alert(chrome.i18n.getMessage('saveerror'));
-          });
+          },
+          chrome.i18n.getMessage("savetitle"));
       photoShop.finish();
     },
 
