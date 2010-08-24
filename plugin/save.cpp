@@ -203,9 +203,9 @@ static void OnDialogDestroy(GtkObject* object, gpointer userData) {
 }
 
 #elif defined __APPLE__
-std::string GetSaveFileName(const char* title, const char* path);
+std::string GetSaveFileName(const char* title, const char* path, const char* dialog_title);
 std::string GetDocumentFolder();
-std::string SetSaveFolder(const char* path);
+std::string SetSaveFolder(const char* path, const char* dialog_title);
 bool OpenSaveFolder(const char* path);
 bool IsFolder(const char* path);
 #endif
@@ -306,7 +306,7 @@ bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
 
   const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
   NPObject* callback = NPVARIANT_TO_OBJECT(args[1]);
-  const char* title = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
+  const char* dialog_title = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
 
 #ifdef _WINDOWS
   TCHAR szDisplayName[MAX_PATH] = {0};
@@ -316,7 +316,7 @@ bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   if (NPVARIANT_TO_STRING(args[0]).UTF8Length > 0)
     MultiByteToWideChar(CP_UTF8, 0, path, -1, szSavePath, MAX_PATH);
   if (NPVARIANT_TO_STRING(args[2]).UTF8Length > 0)
-    MultiByteToWideChar(CP_UTF8, 0, title, -1, szTitle, MAX_PATH);
+    MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, szTitle, MAX_PATH);
 
   BROWSEINFO info={0};
   info.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
@@ -338,7 +338,7 @@ bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   npnfuncs->retainobject(callback);
   if (!gFolderDialog) {
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
-        title, NULL,
+        dialog_title, NULL,
         GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
         GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
@@ -354,7 +354,7 @@ bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   }
   gtk_window_present(GTK_WINDOW(gFolderDialog));
 #elif defined __APPLE__
-  InvokeCallback(obj->npp, callback, SetSaveFolder(path).c_str());
+  InvokeCallback(obj->npp, callback, SetSaveFolder(path, dialog_title).c_str());
 #endif
 
   return true;
@@ -386,15 +386,16 @@ bool OpenSavePath(ScriptablePluginObject* obj, const NPVariant* args,
 
 bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result) {
-  if (argCount < 4 || !NPVARIANT_IS_STRING(args[0]) ||
+  if (argCount < 5 || !NPVARIANT_IS_STRING(args[0]) ||
       !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]) ||
-      !NPVARIANT_IS_OBJECT(args[3]))
+      !NPVARIANT_IS_OBJECT(args[3]) || !NPVARIANT_IS_STRING(args[4]))
     return false;
 
   char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
   char* title = (char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
   char* path = (char*)NPVARIANT_TO_STRING(args[2]).UTF8Characters;
   NPObject* callback = NPVARIANT_TO_OBJECT(args[3]);
+  char* dialog_title = (char*)NPVARIANT_TO_STRING(args[4]).UTF8Characters;
 
   char* base64 = strstr(url, "base64,");
   if (!base64)
@@ -404,16 +405,16 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
 
 #ifdef _WINDOWS
-  TCHAR szSavePath[MAX_PATH]=L"";
+  TCHAR szSavePath[MAX_PATH] = L"";
   char szInitPath[MAX_PATH];
 
-  MultiByteToWideChar(CP_UTF8,0,path,-1,szSavePath,MAX_PATH);
-  WideCharToMultiByte(CP_ACP,0,szSavePath,-1,szInitPath,MAX_PATH,0,0);
+  MultiByteToWideChar(CP_UTF8, 0, path, -1, szSavePath, MAX_PATH);
+  WideCharToMultiByte(CP_ACP, 0, szSavePath, -1, szInitPath, MAX_PATH, 0, 0);
 
   char szFile[MAX_PATH] = "";
   TCHAR szTitle[MAX_PATH];
-  MultiByteToWideChar(CP_UTF8,0,title,-1,szTitle,MAX_PATH);
-  WideCharToMultiByte(CP_ACP,0,szTitle,-1,szFile,MAX_PATH,0,0);
+  MultiByteToWideChar(CP_UTF8, 0, title, -1, szTitle, MAX_PATH);
+  WideCharToMultiByte(CP_ACP, 0, szTitle, -1, szFile, MAX_PATH, 0, 0);
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
@@ -436,10 +437,6 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   gSaveCallback = callback;
   npnfuncs->retainobject(callback);
 
-  char* dialog_title = NULL;
-  if (argCount == 5 && NPVARIANT_IS_STRING(args[4]))
-    dialog_title = (char*)NPVARIANT_TO_STRING(args[4]).UTF8Characters;
-    
   FreeSaveData();
   gsize byteLength = (base64size * 3) / 4;
   gSaveData = (guchar*)malloc(byteLength);
@@ -477,7 +474,7 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   }
   gtk_window_present(GTK_WINDOW(gSaveDialog));
 #elif defined __APPLE__
-  std::string file = GetSaveFileName(title, path);
+  std::string file = GetSaveFileName(title, path, dialog_title);
   InvokeCallback(obj->npp, callback,
       file.empty() || SaveFileBase64(file.c_str(), base64, base64size));
 #endif

@@ -48,7 +48,7 @@
   "setSavePath" : {"message" : "Browse..."},
   "openSavePath" : {"message" : "Go to folder"},
   "defaultPath" : {"message": "Default save location:"},
-  "setDefaultPath" : {"message": "Set default save location:"},
+  "setDefaultPath" : {"message": "Select Default Save Location"},
   "size_small": {"message": "Small"},
   "size_normal": {"message": "Normal"},
   "size_large": {"message": "Large"},

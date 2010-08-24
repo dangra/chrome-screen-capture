@@ -1,7 +1,8 @@
 #include <string>
 #import <Cocoa/Cocoa.h>
 
-std::string GetSaveFileName(const char* title, const char* path) {
+std::string GetSaveFileName(const char* title, const char* path,
+                            const char* dialog_title) {
   int runResult;
 
   /* create or get the shared instance of NSSavePanel */
@@ -9,6 +10,7 @@ std::string GetSaveFileName(const char* title, const char* path) {
  
   /* set up new attributes */
   [sp setRequiredFileType:@"png"];
+  [sp setTitle:[NSString stringWithUTF8String:dialog_title]];
  
   /* display the NSSavePanel */
   runResult = [sp runModalForDirectory:[NSString stringWithUTF8String:path]
@@ -29,7 +31,7 @@ std::string GetDocumentFolder() {
   return [[paths lastObject] UTF8String];
 }
 
-std::string SetSaveFolder(const char* path) {
+std::string SetSaveFolder(const char* path, const char* dialog_title) {
   int runResult;
 
   NSOpenPanel *op = [NSOpenPanel openPanel];
@@ -38,6 +40,7 @@ std::string SetSaveFolder(const char* path) {
   [op setCanChooseFiles:NO];
   [op setAllowsMultipleSelection:NO];
   [op setDirectory:[NSString stringWithUTF8String:path]];
+  [op setTitle:[NSString stringWithUTF8String:dialog_title]];
 
   runResult = [op runModal];
   
