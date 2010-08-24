@@ -47,6 +47,11 @@
 
 class CPlugin;
 
+struct Browser_Param {
+  TCHAR inital_path[MAX_PATH];
+  TCHAR title[MAX_PATH];
+};
+
 static bool SaveFile(const char* fileName, const unsigned char* bytes,
                      int byteLength) {
   FILE* out = fopen(fileName, "wb");
@@ -131,7 +136,26 @@ std::string GetPicturePath() {
 int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
   switch (uMsg) {
   case BFFM_INITIALIZED:
-    SendMessage(hwnd, BFFM_SETSELECTION, TRUE, lpData);
+    Browser_Param* param = (Browser_Param*)lpData;
+    SendMessage(hwnd, BFFM_SETSELECTION, TRUE, (LPARAM)param->inital_path);
+    SetWindowText(hwnd, param->title);
+    HWND treeview = FindWindowEx(hwnd, NULL, L"SysTreeView32", NULL);
+    HWND ok_button = FindWindowEx(hwnd, NULL, L"Button", NULL);
+    if (treeview && ok_button) {
+      RECT rect_treeview,rect_ok_button;
+      GetWindowRect(treeview, &rect_treeview);
+      POINT pt_treeview,pt_button;
+      pt_treeview.x = rect_treeview.left;
+      pt_treeview.y = 0;
+      ScreenToClient(hwnd, &pt_treeview);
+      GetWindowRect(ok_button, &rect_ok_button);
+      pt_button.x = rect_ok_button.left;
+      pt_button.y = rect_ok_button.top;
+      ScreenToClient(hwnd, &pt_button);
+      MoveWindow(treeview, pt_treeview.x, pt_treeview.x, 
+                 rect_treeview.right-rect_treeview.left, 
+                 pt_button.y-2*pt_treeview.x, TRUE);
+    }
     break;
   }
   return 0;
@@ -308,28 +332,28 @@ bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   NPObject* callback = NPVARIANT_TO_OBJECT(args[1]);
   const char* dialog_title = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
 
+  Browser_Param param = {0};
+
 #ifdef _WINDOWS
   TCHAR szDisplayName[MAX_PATH] = {0};
-  TCHAR szSavePath[MAX_PATH] = {0};
-  TCHAR szTitle[MAX_PATH] = {0};
 
   if (NPVARIANT_TO_STRING(args[0]).UTF8Length > 0)
-    MultiByteToWideChar(CP_UTF8, 0, path, -1, szSavePath, MAX_PATH);
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, param.inital_path, MAX_PATH);
   if (NPVARIANT_TO_STRING(args[2]).UTF8Length > 0)
-    MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, szTitle, MAX_PATH);
+    MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, param.title, MAX_PATH);
 
   BROWSEINFO info={0};
   info.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
-  info.lpszTitle = szTitle;
+  info.lpszTitle = NULL;
   info.pszDisplayName = szDisplayName;
   info.lpfn = BrowserCallBack;
   info.ulFlags = BIF_RETURNONLYFSDIRS;
-  info.lParam = (LPARAM)szSavePath;
+  info.lParam = (LPARAM)&param;
   BOOL bRet = SHGetPathFromIDList(SHBrowseForFolder(&info), szDisplayName);
 
   char utf8[MAX_PATH];
   WideCharToMultiByte(CP_UTF8, 0,
-                      bRet ? szDisplayName : szSavePath,
+                      bRet ? szDisplayName : param.inital_path,
                       -1, utf8, MAX_PATH, 0, 0);
   InvokeCallback(obj->npp, callback, utf8);
 #elif defined GTK
@@ -407,6 +431,10 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
 #ifdef _WINDOWS
   TCHAR szSavePath[MAX_PATH] = L"";
   char szInitPath[MAX_PATH];
+  char szDialog_Title[MAX_PATH];
+
+  MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, szSavePath, MAX_PATH);
+  WideCharToMultiByte(CP_ACP, 0, szSavePath, -1, szDialog_Title, MAX_PATH, 0, 0);
 
   MultiByteToWideChar(CP_UTF8, 0, path, -1, szSavePath, MAX_PATH);
   WideCharToMultiByte(CP_ACP, 0, szSavePath, -1, szInitPath, MAX_PATH, 0, 0);
@@ -426,7 +454,7 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   Ofn.nMaxFileTitle = 0;
   Ofn.lpstrInitialDir = szInitPath;
   Ofn.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
-  Ofn.lpstrTitle = NULL;
+  Ofn.lpstrTitle = szDialog_Title;
   Ofn.lpstrDefExt = "png";
 
   InvokeCallback(obj->npp, callback,
