@@ -47,10 +47,12 @@
 
 class CPlugin;
 
+#ifdef _WINDOWS
 struct Browser_Param {
-  TCHAR inital_path[MAX_PATH];
+  TCHAR initial_path[MAX_PATH];
   TCHAR title[MAX_PATH];
 };
+#endif
 
 static bool SaveFile(const char* fileName, const unsigned char* bytes,
                      int byteLength) {
@@ -137,7 +139,7 @@ int WINAPI BrowserCallBack(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
   switch (uMsg) {
   case BFFM_INITIALIZED:
     Browser_Param* param = (Browser_Param*)lpData;
-    SendMessage(hwnd, BFFM_SETSELECTION, TRUE, (LPARAM)param->inital_path);
+    SendMessage(hwnd, BFFM_SETSELECTION, TRUE, (LPARAM)param->initial_path);
     SetWindowText(hwnd, param->title);
     HWND treeview = FindWindowEx(hwnd, NULL, L"SysTreeView32", NULL);
     HWND ok_button = FindWindowEx(hwnd, NULL, L"Button", NULL);
@@ -332,28 +334,27 @@ bool SetSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   NPObject* callback = NPVARIANT_TO_OBJECT(args[1]);
   const char* dialog_title = NPVARIANT_TO_STRING(args[2]).UTF8Characters;
 
+#ifdef _WINDOWS
+  TCHAR display_name[MAX_PATH] = {0};
   Browser_Param param = {0};
 
-#ifdef _WINDOWS
-  TCHAR szDisplayName[MAX_PATH] = {0};
-
   if (NPVARIANT_TO_STRING(args[0]).UTF8Length > 0)
-    MultiByteToWideChar(CP_UTF8, 0, path, -1, param.inital_path, MAX_PATH);
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, param.initial_path, MAX_PATH);
   if (NPVARIANT_TO_STRING(args[2]).UTF8Length > 0)
     MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, param.title, MAX_PATH);
 
   BROWSEINFO info={0};
   info.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
   info.lpszTitle = NULL;
-  info.pszDisplayName = szDisplayName;
+  info.pszDisplayName = display_name;
   info.lpfn = BrowserCallBack;
   info.ulFlags = BIF_RETURNONLYFSDIRS;
   info.lParam = (LPARAM)&param;
-  BOOL bRet = SHGetPathFromIDList(SHBrowseForFolder(&info), szDisplayName);
+  BOOL bRet = SHGetPathFromIDList(SHBrowseForFolder(&info), display_name);
 
   char utf8[MAX_PATH];
   WideCharToMultiByte(CP_UTF8, 0,
-                      bRet ? szDisplayName : param.inital_path,
+                      bRet ? display_name : param.initial_path,
                       -1, utf8, MAX_PATH, 0, 0);
   InvokeCallback(obj->npp, callback, utf8);
 #elif defined GTK
@@ -392,9 +393,9 @@ bool OpenSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   const char* path = NPVARIANT_TO_STRING(args[0]).UTF8Characters;
 
 #ifdef _WINDOWS
-  TCHAR szSavePath[MAX_PATH] = L"";
-  MultiByteToWideChar(CP_UTF8, 0, path, -1, szSavePath, MAX_PATH);
-  ShellExecute(NULL, L"open", szSavePath, NULL, NULL, SW_SHOWNORMAL);
+  TCHAR save_path[MAX_PATH] = L"";
+  MultiByteToWideChar(CP_UTF8, 0, path, -1, save_path, MAX_PATH);
+  ShellExecute(NULL, L"open", save_path, NULL, NULL, SW_SHOWNORMAL);
 #elif defined GTK
   if (fork() == 0) {
     execlp("xdg-open", "xdg-open", path, NULL);
@@ -429,36 +430,35 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
 
 #ifdef _WINDOWS
-  TCHAR szSavePath[MAX_PATH] = L"";
-  char szInitPath[MAX_PATH];
-  char szDialog_Title[MAX_PATH];
+  TCHAR temp_value[MAX_PATH] = L"";
+  char initial_path[MAX_PATH];
+  char sz_dialog_title[MAX_PATH];
 
-  MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, szSavePath, MAX_PATH);
-  WideCharToMultiByte(CP_ACP, 0, szSavePath, -1, szDialog_Title, MAX_PATH, 0, 0);
+  MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, temp_value, MAX_PATH);
+  WideCharToMultiByte(CP_ACP, 0, temp_value, -1, sz_dialog_title, MAX_PATH, 0, 0);
 
-  MultiByteToWideChar(CP_UTF8, 0, path, -1, szSavePath, MAX_PATH);
-  WideCharToMultiByte(CP_ACP, 0, szSavePath, -1, szInitPath, MAX_PATH, 0, 0);
+  MultiByteToWideChar(CP_UTF8, 0, path, -1, temp_value, MAX_PATH);
+  WideCharToMultiByte(CP_ACP, 0, temp_value, -1, initial_path, MAX_PATH, 0, 0);
 
-  char szFile[MAX_PATH] = "";
-  TCHAR szTitle[MAX_PATH];
-  MultiByteToWideChar(CP_UTF8, 0, title, -1, szTitle, MAX_PATH);
-  WideCharToMultiByte(CP_ACP, 0, szTitle, -1, szFile, MAX_PATH, 0, 0);
+  char sz_file[MAX_PATH] = "";
+  MultiByteToWideChar(CP_UTF8, 0, title, -1, temp_value, MAX_PATH);
+  WideCharToMultiByte(CP_ACP, 0, temp_value, -1, sz_file, MAX_PATH, 0, 0);
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
   Ofn.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
   Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
-  Ofn.lpstrFile = szFile;
-  Ofn.nMaxFile = sizeof(szFile);
+  Ofn.lpstrFile = sz_file;
+  Ofn.nMaxFile = sizeof(sz_file);
   Ofn.lpstrFileTitle = NULL;
   Ofn.nMaxFileTitle = 0;
-  Ofn.lpstrInitialDir = szInitPath;
+  Ofn.lpstrInitialDir = initial_path;
   Ofn.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
-  Ofn.lpstrTitle = szDialog_Title;
+  Ofn.lpstrTitle = sz_dialog_title;
   Ofn.lpstrDefExt = "png";
 
   InvokeCallback(obj->npp, callback,
-      !GetSaveFileNameA(&Ofn) || SaveFileBase64(szFile, base64, base64size));
+      !GetSaveFileNameA(&Ofn) || SaveFileBase64(sz_file, base64, base64size));
 
 #elif defined GTK
   ReleaseSaveCallback();
