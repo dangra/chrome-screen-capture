@@ -318,15 +318,7 @@
     },
 
     init: function() {
-      
-
-      var fontSize = localStorage.fontSize ? localStorage.fontSize : 16;
-	  if (fontSize != 10 || fontSize != 16 || fontSize != 18 || fontSize != 32) {
-	    localStorage.fontSize = 16;
-      }
 	  photoShop.initTools();
-      $('fontColorBox').style.backgroundColor =  localStorage.fontColor ?
-          localStorage.fontColor : '#FF0000';
 
       $('canvas').width = $('mask-canvas').width = $('photo').style.width = bg.screenshot.canvas.width;
       $('canvas').height = $('mask-canvas').height = $('photo').style.height = bg.screenshot.canvas.height;
@@ -345,10 +337,8 @@
     },
 
     setHighLightMode: function() {
-      photoShop.highlightType = localStorage.highlightType ?
-          localStorage.highlightType : 'border';
-      photoShop.highlightColor = localStorage.highlightColor ?
-          localStorage.highlightColor : '#FF0000';
+      photoShop.highlightType = localStorage.highlightType || 'border';
+      photoShop.highlightColor = localStorage.highlightColor || '#FF0000';
       $(photoShop.layerId).style.border = '2px solid ' +
             photoShop.highlightColor;
       if (photoShop.highlightType == 'rect') {
@@ -364,10 +354,8 @@
     },
 
     setTextMode: function() {
-      localStorage.fontSize = localStorage.fontSize ?
-          localStorage.fontSize : '16';
-      localStorage.fontColor = localStorage.fontColor ?
-          localStorage.fontColor : '#FF0000';
+      localStorage.fontSize = localStorage.fontSize || '16';
+      localStorage.fontColor = localStorage.fontColor || '#FF0000';
       $(photoShop.layerId).setAttribute('contentEditable', true);
       $(photoShop.layerId).style.border = '1px dotted #333333';
       $(photoShop.layerId).style.cursor = 'text';
@@ -851,8 +839,7 @@
 
     setHighlightColorBoxStyle: function(color) {
       $('highlightColorBox').style.borderColor = color;
-      localStorage.highlightType = localStorage.highlightType ?
-          localStorage.highlightType : 'border';
+      localStorage.highlightType = localStorage.highlightType || 'border';
       if (localStorage.highlightType == 'border') {
         $('highlightColorBox').style.background = '#ffffff';
         $('highlightColorBox').style.opacity = 1;
@@ -891,7 +878,7 @@
 
     setLineColorBoxStyle: function() {
       localStorage.lineType = localStorage.lineType || 'line';
-      localStorage.lineColor = localStorage.lineColor || '#ff0000';
+      localStorage.lineColor = localStorage.lineColor || '#FF0000';
       var ctx = $('lineIconCav').getContext('2d');
       $('straightLine').className = 'mark';
       $('arrow').className = '';
@@ -937,12 +924,22 @@
       photoShop.i18nReplace('lineText', 'line');
       photoShop.i18nReplace('size_10', 'size_small');
       photoShop.i18nReplace('size_16', 'size_normal');
-      photoShop.i18nReplace('size_18', 'size_large');
+      photoShop.i18nReplace('size_18', 'size_large'); 
       photoShop.i18nReplace('size_32', 'size_huge');
-      $('fontColorBox').style.backgroundColor =  localStorage.fontColor ?
-          localStorage.fontColor : '#FF0000';
-      photoShop.setHighlightColorBoxStyle(localStorage.highlightColor ?
-          localStorage.highlightColor : '#FF0000');
+      var fontSize = localStorage.fontSize = localStorage.fontSize || 16;
+	  if (fontSize != 10 && fontSize != 16 && fontSize != 18 && fontSize != 32) {
+        localStorage.fontSize = 16;
+      }
+      localStorage.highlightColor = localStorage.highlightColor || '#FF0000';
+      localStorage.fontColor = localStorage.fontColor || '#FF0000';
+      localStorage.highlightType = localStorage.highlightType || 'border';
+      localStorage.blackoutType = localStorage.blackoutType || 'redact';
+      localStorage.lineType = localStorage.lineType || 'line';
+      localStorage.lineColor = localStorage.lineColor || '#FF0000';
+
+      $('fontColorBox').style.backgroundColor = 
+          localStorage.fontColor || '#FF0000';
+      photoShop.setHighlightColorBoxStyle(localStorage.highlightColor);
       $('borderMode').addEventListener('click', function() {
         localStorage.highlightType = 'border';
         photoShop.setHighlightColorBoxStyle(localStorage.highlightColor);
@@ -976,7 +973,7 @@
         photoShop.setLineColorBoxStyle();
       }, false);
 
-      photoShop.setFontSize(localStorage.fontSize ? localStorage.fontSize : 16);
+      photoShop.setFontSize(localStorage.fontSize);
       $('size_10').addEventListener('click', function() {
         photoShop.setFontSize(10);
       }, false);
