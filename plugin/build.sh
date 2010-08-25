@@ -6,5 +6,5 @@ else
 fi
 
 gcc $FLAG -m32 -fPIC -DGTK -Wno-write-strings `pkg-config --cflags --libs gtk+-2.0` \
-  -shared -o npcapture.so npcapture.cpp save.cpp plugin.cpp np_entry.cpp
+  -shared -o screen_capture.so np_entry.cc npp_entry.cc plugin.cc screen_capture.cc
 

@@ -32,12 +32,12 @@
   "options_page": "options.html",
   "permissions": ["tabs", "http://*/*", "https://*/*","notifications"],
   "plugins": [ {
-    "path": "plugin/npcapture.dll"
+    "path": "plugin/screen_capture.dll"
   }, {
-    "path": "plugin/npcapture.so"
+    "path": "plugin/screen_capture.so"
   }, {
-    "path": "plugin/npcapture64.so"
+    "path": "plugin/screen_capture_64.so"
   }, {
-    "path": "plugin/npcapture.plugin"
+    "path": "plugin/screen_capture.plugin"
   } ]
 }

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by npcapture.rc
+// Used by screen_capture.rc
 //
 #define IDD_MAIN                        101
 #define IDC_BUTTON_GO                   1002

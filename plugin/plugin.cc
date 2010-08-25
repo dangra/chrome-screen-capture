@@ -42,7 +42,7 @@
 
 #include <string.h>
 #include "plugin.h"
-#include "save.h"
+#include "screen_capture.h"
 
 const char* kSaveScreenshot = "SaveScreenshot";
 const char* kAutoSave = "AutoSave";
