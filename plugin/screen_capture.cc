@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "plugin.h"
-#include "save.h"
+#include "screen_capture.h"
 
 #ifdef _WINDOWS
 #include <atlenc.h>

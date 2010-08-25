@@ -49,7 +49,7 @@ BEGIN
             VALUE "InternalName", "ScreenCapturePlugin"
             VALUE "LegalCopyright", "Copyright 2010 Jing Zhao"
             VALUE "MIMEType", "application/x-screencapture"
-            VALUE "OriginalFilename", "npcapture.dll"
+            VALUE "OriginalFilename", "screen_capture.dll"
             VALUE "ProductName", "Screen Capture Plugin"
             VALUE "ProductVersion", "1, 0, 0, 3"
         END

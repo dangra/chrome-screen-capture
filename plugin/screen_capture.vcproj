@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="npcapture"
+	Name="screen_capture"
 	ProjectGUID="{B95450F6-FE6A-4679-90C8-06939153302A}"
 	RootNamespace="npsimple"
 	Keyword="Win32Proj"
@@ -237,7 +237,7 @@
 				AdditionalLibraryDirectories=""
 				GenerateManifest="false"
 				IgnoreDefaultLibraryNames=""
-				ModuleDefinitionFile="npcapture.def"
+				ModuleDefinitionFile="screen_capture.def"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
@@ -344,19 +344,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\np_entry.cpp"
+				RelativePath=".\np_entry.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\npcapture.cpp"
+				RelativePath=".\npp_entry.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\plugin.cpp"
+				RelativePath=".\plugin.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\save.cpp"
+				RelativePath=".\screen_capture.cc"
 				>
 			</File>
 		</Filter>
@@ -366,11 +366,11 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\npcapture.def"
+				RelativePath=".\screen_capture.def"
 				>
 			</File>
 			<File
-				RelativePath=".\npcapture.rc"
+				RelativePath=".\screen_capture.rc"
 				>
 			</File>
 		</Filter>
@@ -380,6 +380,22 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\npapi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\npfunctions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\npruntime.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nptypes.h"
+				>
+			</File>
+			<File
 				RelativePath=".\plugin.h"
 				>
 			</File>
@@ -388,7 +404,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\save.h"
+				RelativePath=".\screen_capture.h"
 				>
 			</File>
 		</Filter>
