@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>npcapture</string>
+	<string>screen_capture</string>
 	<key>CFBundleGetInfoString</key>
 	<string>420+, Copyright 2006-2009 Apple Inc.</string>
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string>chrome.npcapture</string>
+	<string>chrome.screen_capture</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -48,7 +48,7 @@
 		<dict>
 			<key>WebPluginExtensions</key>
 			<array>
-				<string>npcapture</string>
+				<string>screen_capture</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>Screen Capture Extension Plugin</string>
