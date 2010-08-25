@@ -318,8 +318,13 @@
     },
 
     init: function() {
-      photoShop.initTools();
+      
 
+      var fontSize = localStorage.fontSize ? localStorage.fontSize : 16;
+	  if (fontSize != 10 || fontSize != 16 || fontSize != 18 || fontSize != 32) {
+	    localStorage.fontSize = 16;
+      }
+	  photoShop.initTools();
       $('fontColorBox').style.backgroundColor =  localStorage.fontColor ?
           localStorage.fontColor : '#FF0000';
 
