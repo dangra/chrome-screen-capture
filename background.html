@@ -5,10 +5,9 @@
 -->
 <html>
 <head>
-
 </head>
 <body>
-<embed id="pluginobj" type="application/x-screencapture" />
+<embed id="pluginobj" type="application/x-screencapture">
 <script>
 var screenshot = {
   tab: 0,
@@ -71,9 +70,6 @@ var screenshot = {
         break;
       case 'scroll_finished':
         screenshot.captureAndScrollDone();
-        break;
-      case 'openFolder':
-        screenshot.openSavePath();
         break;
     }
   },
@@ -216,17 +212,15 @@ var screenshot = {
       } else {
         screenshot.capturedStatus = false;
       }
-      screenshot.showNotifications();
-      chrome.extension.sendRequest({msg: 'webpageCapturedDone'});
+      screenshot.showNotification();
+      chrome.extension.getViews({type: 'popup'})[0].close();
       return;
     }
     chrome.tabs.create({'url': 'showimage.html'}, function() {});
   },
 
-  showNotifications: function() {
-    var htmlNotification = webkitNotifications.createHTMLNotification(
-      'notification.html'  // html url - can be relative
-    );
+  showNotification: function() {
+    var htmlNotification = webkitNotifications.createHTMLNotification('notification.html');
     htmlNotification.show();
   },
 
@@ -257,9 +251,6 @@ var screenshot = {
 };
 
 screenshot.init();
-
-
-
 </script>
 </body>
 </html>

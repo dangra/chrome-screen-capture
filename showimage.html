@@ -287,7 +287,7 @@
 
   </div>
   <img id="pic" src="#" style="display:none">
-  <embed id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px"/>
+  <embed id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px">
   <script>
   var bg = chrome.extension.getBackgroundPage();
   var photoShop = {
@@ -763,7 +763,7 @@
             if (!success)
               alert(chrome.i18n.getMessage('save_fail'));
           },
-          chrome.i18n.getMessage("save_title"));
+          chrome.i18n.getMessage("save_image"));
       photoShop.finish();
     },
 

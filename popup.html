@@ -47,6 +47,18 @@ body {
   var bg = chrome.extension.getBackgroundPage();
   var isScriptLoad = false;
 
+  chrome.extension.onRequest.addListener(function(request, sender, response) {
+    if (request.msg == 'page_capturable') {
+      document.getElementById('tip').style.display = 'none';
+      document.getElementById('captureSpecialPage').style.display = 'none';
+      document.getElementById('captureWindow').style.display = 'block';
+      document.getElementById('captureArea').style.display = 'block';
+      document.getElementById('captureWebpage').style.display = 'block';
+    } else if (request.msg == 'page_uncapturable') {
+      i18nReplace('tip', 'special');
+    }
+  });
+
   function toDo(what) {
     switch(what) {
       case 'capture_window':
@@ -79,19 +91,6 @@ body {
     i18nReplace('captureArea', 'capture_area');
     i18nReplace('captureWebpage', 'capture_webpage');
     i18nReplace('capturing', 'capturing');
-    chrome.extension.onRequest.addListener(function(request, sender, response) {
-      if (request.msg == 'isLoadCanCapture') {
-        document.getElementById('tip').style.display = 'none';
-        document.getElementById('captureSpecialPage').style.display = 'none';
-        document.getElementById('captureWindow').style.display = 'block';
-        document.getElementById('captureArea').style.display = 'block';
-        document.getElementById('captureWebpage').style.display = 'block';
-      } else if (request.msg == 'isLoadCanNotCapture') {
-        i18nReplace('tip', 'special');
-      } else if (request.msg == 'webpageCapturedDone') {
-        window.close();
-      }
-    });
     chrome.tabs.getSelected(null, function(tab) {
       bg.screenshot.tab = tab;
       if (tab.url.indexOf('chrome') == 0) {
@@ -99,16 +98,16 @@ body {
         document.getElementById('captureSpecialPage').style.display = 'block';
         return;
       }
-      chrome.tabs.sendRequest(tab.id, {msg: 'content_script_is_load'},
+      chrome.tabs.sendRequest(tab.id, {msg: 'is_page_capturable'},
         function(response) {
           isScriptLoad = true;
-          if (response.msg == 'isLoadCanCapture') {
+          if (response.msg == 'capturable') {
             document.getElementById('tip').style.display = 'none';
             document.getElementById('captureSpecialPage').style.display = 'none';
             document.getElementById('captureWindow').style.display = 'block';
             document.getElementById('captureArea').style.display = 'block';
             document.getElementById('captureWebpage').style.display = 'block';
-          } else if (response.msg == 'isLoadCanNotCapture'){
+          } else if (response.msg == 'uncapturable'){
             i18nReplace('tip', 'special');
           } else {
             i18nReplace('tip', 'loading');

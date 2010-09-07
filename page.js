@@ -462,34 +462,14 @@ var page = {
     (document.head || document.body || document.documentElement).appendChild(script);
   },
 
-  showPromptMessage: function(status, open, response) {
-    var msgDiv = document.createElement('div');
-    msgDiv.className = 'sc_tip_save_status';
-    msgDiv.innerHTML = status;
-    if (!!open) {
-      var openFolder = function() {
-        response({msg: 'openFolder'});
-      }
-      var aElement = document.createElement('a');
-      aElement.innerText = open;
-      aElement.href = 'javascript:void(0)';
-      aElement.addEventListener('click', openFolder, false);
-      msgDiv.appendChild(aElement);
-    }
-    document.body.appendChild(msgDiv);
-    window.setTimeout(function(){
-      document.body.removeChild(msgDiv);
-    }, 5000);
-  },
-
   /**
   * Remove an element
   */
   init: function() {
     if (!this.checkPageIsOnlyEmbedElement()) {
-      chrome.extension.sendRequest({msg: 'isLoadCanCapture'});
+      chrome.extension.sendRequest({msg: 'page_capturable'});
     } else {
-      chrome.extension.sendRequest({msg: 'isLoadCanNotCapture'});
+      chrome.extension.sendRequest({msg: 'page_uncapturable'});
     }
     this.injectCssResource('style.css');
     this.messageListener();

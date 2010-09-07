@@ -4,7 +4,7 @@
     "description": "Name of the extension"
   },
   "description": {
-    "message": "Capture visible content of a tab, a region of a web page, or the whole page as a PNG image. Support horizontal and vertical scroll when capturing whole page, with an all new autosave capability."
+    "message": "Capture visible content of a tab, a region of a web page, or the whole page as a PNG image. Support horizontal and vertical scroll when capturing whole page, with an all new autosave capability.",
     "description": "Description of the extension, which appears in the gallery and Chrome extension management UI"
   },
   "default_title": {
@@ -103,11 +103,11 @@
     "message": "Close",
     "description": "Close button."
   },
-  "save_title": {
+  "save_image": {
     "message": "Save Image",
     "description": "Title of the Save dialog."
   },
-  "option_title": {
+  "options": {
     "message": "Screen Capture Options",
     "description": "Title of the Option page."
   },
@@ -129,7 +129,7 @@
   },
   "save_tip": {
     "message": "Default save location:",
-    "description": "Tip before the save location edit box".
+    "description": "Tip before the save location edit box."
   },
   "autosave": {
     "message": "Autosave - after capture, bypass editing screen and directly save the captured image to the default location with the web page title as default file name",

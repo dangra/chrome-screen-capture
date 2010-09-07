@@ -1,14 +1,14 @@
 function checkScriptLoad() {
   chrome.extension.onRequest.addListener(function(request, sender, response) {
-    if (request.msg == 'content_script_is_load') {
+    if (request.msg == 'is_page_capturable') {
       try {
         if (isThisScriptLoad()) {
-          response({msg: 'isLoadCanCapture'});
+          response({msg: 'capturable'});
         } else {
-          response({msg: 'isLoadCanNotCapture'});
+          response({msg: 'uncapturable'});
         }
       } catch(e) {
-        response({msg: 'noLoad'});
+        response({msg: 'loading'});
         console.log(e);
       }
     }
