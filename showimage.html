@@ -318,7 +318,7 @@
     },
 
     init: function() {
-	  photoShop.initTools();
+      photoShop.initTools();
 
       $('canvas').width = $('mask-canvas').width = $('photo').style.width = bg.screenshot.canvas.width;
       $('canvas').height = $('mask-canvas').height = $('photo').style.height = bg.screenshot.canvas.height;
@@ -381,9 +381,6 @@
           }
         }
         $(id).style.borderWidth = 0;
-        //$(id).style.cursor = 'default';
-        //$(id).removeAttribute('onblur');
-        //$(id).removeAttribute('contentEditable');
       }
     },
 
@@ -404,7 +401,7 @@
     },
 
     editMore: function() {
-      $('tip').innerHTML = chrome.i18n.getMessage('tipStep1');
+      $('tip').innerHTML = chrome.i18n.getMessage('edit_tip');
       $('toolbar').style.display = 'block';
       $('showBox').style.display = 'block';
       $('pic').style.display = 'none';
@@ -449,15 +446,12 @@
           break;
         case 'line':
           photoShop.flag = 'line';
-          //photoShop.createCanvas();
           break;
         case 'arrow':
           photoShop.flag = 'arrow';
-          //photoShop.createCanvas();
           break;
         case 'blur':
           photoShop.flag = 'blur';
-          //photoShop.createCanvas();
           break;
       }
       photoShop.isDraw = true;
@@ -552,7 +546,6 @@
 
     showCloseButton: function(id) {
       $(id).style.display = 'block';
-      //photoShop.isDraw = false;
     },
 
     hideCloseButton: function(id) {
@@ -623,8 +616,6 @@
         photoShop.createCloseButton(photoShop.layerId, imageBtnId,
             photoShop.nowWidth, photoShop.nowHeight);
         photoShop.createDiv();
-//        event.stopPropagation();
-//        event.preventDefault();
       } else if (photoShop.endX ==
           photoShop.startX && photoShop.endY == photoShop.startY) {
         photoShop.removeElement(photoShop.layerId);
@@ -680,8 +671,6 @@
           $(photoShop.layerId).style.width = photoShop.nowWidth ;
           photoShop.blurImage()
         }
-//        event.stopPropagation();
-//        event.preventDefault();
       }
 
     },
@@ -772,9 +761,9 @@
           dataurl, bg.screenshot.tab.title, localStorage.savePath,
           function(success) {
             if (!success)
-              alert(chrome.i18n.getMessage('saveerror'));
+              alert(chrome.i18n.getMessage('save_fail'));
           },
-          chrome.i18n.getMessage("savetitle"));
+          chrome.i18n.getMessage("save_title"));
       photoShop.finish();
     },
 
@@ -888,6 +877,7 @@
       ctx.strokeStyle = localStorage.lineColor;
       ctx.lineWidth = 2
       ctx.lineTo(13, 1);
+
       // draw arrow
       if (localStorage.lineType == 'arrow') {
         $('straightLine').className = '';
@@ -909,10 +899,10 @@
     },
 
     initTools: function() {
-      photoShop.i18nReplace('tip', 'tipStep1');
+      photoShop.i18nReplace('tip', 'edit_tip');
       photoShop.i18nReplace('tHighlight', 'highlight');
       photoShop.i18nReplace('tRedact', 'redact');
-      photoShop.i18nReplace('redactText', 'solidBlack');
+      photoShop.i18nReplace('redactText', 'solid_black');
       photoShop.i18nReplace('tText', 'text');
       photoShop.i18nReplace('tEditMore', 'editMore');
       photoShop.i18nReplace('tSave', 'save');
@@ -924,10 +914,10 @@
       photoShop.i18nReplace('lineText', 'line');
       photoShop.i18nReplace('size_10', 'size_small');
       photoShop.i18nReplace('size_16', 'size_normal');
-      photoShop.i18nReplace('size_18', 'size_large'); 
+      photoShop.i18nReplace('size_18', 'size_large');
       photoShop.i18nReplace('size_32', 'size_huge');
       var fontSize = localStorage.fontSize = localStorage.fontSize || 16;
-	  if (fontSize != 10 && fontSize != 16 && fontSize != 18 && fontSize != 32) {
+      if (fontSize != 10 && fontSize != 16 && fontSize != 18 && fontSize != 32) {
         localStorage.fontSize = 16;
       }
       localStorage.highlightColor = localStorage.highlightColor || '#FF0000';
@@ -937,7 +927,7 @@
       localStorage.lineType = localStorage.lineType || 'line';
       localStorage.lineColor = localStorage.lineColor || '#FF0000';
 
-      $('fontColorBox').style.backgroundColor = 
+      $('fontColorBox').style.backgroundColor =
           localStorage.fontColor || '#FF0000';
       photoShop.setHighlightColorBoxStyle(localStorage.highlightColor);
       $('borderMode').addEventListener('click', function() {
@@ -1049,8 +1039,8 @@
           step = 4;
         }
         for (var i = 0; i < outer; i++) {
+          // Calculate for r g b a
           nextPosition = (rowOrColumn == 0 ? (i * width * 4) : (4 * i));
-          //Calculate for r g b a
           for (var k = 0; k < 4; k++) {
             nowPosition = nextPosition + k;
             var pixSum = 0;
@@ -1064,13 +1054,12 @@
                     + pix[nowPosition + (j + 2) * step]);
                 pix[nowPosition + j * step] = Math.floor(pixSum/count);
               }
-              // j is now inner - 2 (1 bigger)
               pix[nowPosition + j * step] = pix[nowPosition + (j + 1) * step] =
                   Math.floor(pixSum / count);
           }
         }
       }
-	  return image;
+      return image;
     },
 
     // Calculate coordinates of arrow

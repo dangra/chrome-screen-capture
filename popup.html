@@ -47,14 +47,14 @@ body {
   var bg = chrome.extension.getBackgroundPage();
   var isScriptLoad = false;
   chrome.extension.onRequest.addListener(function(request, sender, response) {
-    if (request && request.msg == 'isLoadCanCapturn') {
+    if (request && request.msg == 'isLoadCanCapture') {
       document.getElementById('tip').style.display = 'none';
       document.getElementById('captureWindow').style.display = 'block';
       document.getElementById('captureArea').style.display = 'block';
       document.getElementById('captureWebpage').style.display = 'block';
       document.getElementById('captureSpecialPage').style.display = 'none';
-    } else if (request.msg == 'isLoadCanNotCapturn') {
-      i18nReplace('tip', 'tip2');
+    } else if (request.msg == 'isLoadCanNotCapture') {
+      i18nReplace('tip', 'special_title');
     } else if (request.msg == 'webpageCapturedDone') {
       window.close();
     }
@@ -97,18 +97,18 @@ body {
       chrome.tabs.sendRequest(tab.id, {msg: 'content_script_is_load'},
           function(response) {
             isScriptLoad = true;
-            if (response && response.msg == 'isLoadCanCapturn') {
+            if (response && response.msg == 'isLoadCanCapture') {
               document.getElementById('tip').style.display = 'none';
               document.getElementById('captureSpecialPage').style.display = 'none';
               document.getElementById('captureWindow').style.display = 'block';
               document.getElementById('captureArea').style.display = 'block';
               document.getElementById('captureWebpage').style.display = 'block';
-            } else if (response.msg == 'isLoadCanNotCapturn'){
-              i18nReplace('tip', 'tip2');
+            } else if (response.msg == 'isLoadCanNotCapture'){
+              i18nReplace('tip', 'special_title');
             } else if(response.msg == 'noLoad') {
-              i18nReplace('tip', 'tip3');
+              i18nReplace('tip', 'loading_title');
             } else {
-              i18nReplace('tip', 'tip3');
+              i18nReplace('tip', 'loading_title');
             }
       });
     });
@@ -122,10 +122,10 @@ body {
       }
     }
     setTimeout(insertScript, 500);
-    i18nReplace('captureSpecialPage', 'captureSpecialWindow');
-    i18nReplace('captureWindow', 'captureWindow');
-    i18nReplace('captureArea', 'captureArea');
-    i18nReplace('captureWebpage', 'captureWebpage');
+    i18nReplace('captureSpecialPage', 'capture_window');
+    i18nReplace('captureWindow', 'capture_window');
+    i18nReplace('captureArea', 'capture_area');
+    i18nReplace('captureWebpage', 'capture_webpage');
     i18nReplace('loading', 'loading');
   }
 </script>
@@ -135,7 +135,7 @@ body {
   <div id="loadDiv" ><img src="loading.gif" alt="">
     <div id="loading"></div>
   </div>
-	<div id="tip"></div>
+  <div id="tip"></div>
   <div id="item">
 
     <div class="menu" onclick="toDo('capture_special_page');"

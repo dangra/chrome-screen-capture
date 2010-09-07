@@ -209,7 +209,7 @@ var page = {
 
     var crop = page.createDiv(areaElement, 'sc_drag_crop');
     crop.addEventListener('mousedown', page.getSelectionSize, true);
-    crop.innerHTML = chrome.i18n.getMessage('crop');
+    crop.innerHTML = chrome.i18n.getMessage('ok');
 
     page.createDiv(areaElement, 'sc_drag_north_west');
     page.createDiv(areaElement, 'sc_drag_north_east');
@@ -486,10 +486,10 @@ var page = {
   * Remove an element
   */
   init: function() {
-    if (isThisScriptLoad) {
-      chrome.extension.sendRequest({msg: 'isLoadCanCapturn'});
+    if (isThisScriptLoad()) {
+      chrome.extension.sendRequest({msg: 'isLoadCanCapture'});
     } else {
-      chrome.extension.sendRequest({msg: 'isLoadCanNotCapturn'});
+      chrome.extension.sendRequest({msg: 'isLoadCanNotCapture'});
     }
     this.injectCssResource('style.css');
     this.messageListener();

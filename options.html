@@ -120,17 +120,17 @@
   var bg = chrome.extension.getBackgroundPage();
 
   function init() {
-    i18nReplace('optionTitle', 'optionTitle');
-    i18nReplace('saveAndClose', 'saveAndClose');
-    i18nReplace('screenshootQualitySetting', 'screenshootQualitySetting');
-    i18nReplace('lossyScreenShot', 'lossyScreenShot');
-    i18nReplace('losslessScreenShot', 'losslessScreenShot');
-    i18nReplace('autoSaveText', 'autoSave');
-    i18nReplace('setSavePath', 'setSavePath');
-    i18nReplace('openSavePath', 'openSavePath');
-    i18nReplace('autoSaveSetting', 'autoSaveSetting');
-    i18nReplace('defaultPath', 'defaultPath');
-    document.getElementById('autoSave').checked = eval(localStorage.autoSave);
+    i18nReplace('optionTitle', 'option_title');
+    i18nReplace('saveAndClose', 'save_and_close');
+    i18nReplace('screenshootQualitySetting', 'quality_setting');
+    i18nReplace('lossyScreenShot', 'lossy');
+    i18nReplace('losslessScreenShot', 'lossless');
+    i18nReplace('autosaveSetting', 'save_setting');
+    i18nReplace('defaultPath', 'save_tip');
+    i18nReplace('autosaveText', 'autosave');
+    i18nReplace('setSavePath', 'set_save_path');
+    i18nReplace('openSavePath', 'open_save_path');
+    document.getElementById('autosave').checked = eval(localStorage.autosave);
     document.getElementById('filePath').value = localStorage.savePath =
         localStorage.savePath ? localStorage.savePath : getDefaultSavePath(); 
     document.getElementById('setSavePath').addEventListener('click', function() {
@@ -148,7 +148,7 @@
      localStorage.screenshootQuality =
          document.getElementById('lossy').checked ? 'jpeg' : '' ||
          document.getElementById('lossless').checked ? 'png' : '';
-     localStorage.autoSave = document.getElementById('autoSave').checked ?
+     localStorage.autosave = document.getElementById('autosave').checked ?
          'true' : 'false';
   }
 
@@ -170,7 +170,7 @@
   function setSavePath(callback) {
     var pluginobj = document.getElementById('pluginobj');
     pluginobj.SetSavePath(localStorage.savePath, callback,
-                          chrome.i18n.getMessage('setDefaultPath'));
+                          chrome.i18n.getMessage('set_save_path_title'));
   }
 
   function getDefaultSavePath() {
@@ -198,8 +198,8 @@
      </div>
      <div class="clear"></div>
    </div>
-   <div id="autoSaveSettingDiv">
-   <h4 id="autoSaveSetting"></h4>
+   <div id="autosaveSettingDiv">
+   <h4 id="autosaveSetting"></h4>
    <div class="section-content">
      <div class="clear"></div>
      <div id="defaultPath" style="margin-left:4px;"></div>
@@ -209,9 +209,9 @@
      </div>
      <div style="margin:5px 0 0 10px;">
        <label><div style="float:left; margin-top:2px;">
-         <input type="checkbox" id="autoSave">
+         <input type="checkbox" id="autosave">
        </div>
-       <div style="margin-left:5px; width:480px; float:left;" id="autoSaveText"></div></label></div>
+       <div style="margin-left:5px; width:480px; float:left;" id="autosaveText"></div></label></div>
      <div class="clear"></div>
    </div>
    </div>
