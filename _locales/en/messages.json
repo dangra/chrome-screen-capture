@@ -11,14 +11,6 @@
     "message": "Screen Capture",
     "description": "Browser action tooltip text."
   },
-  "special_title": {
-    "message": "This is a special page. Unable to perform screen capture actions on this page.",
-    "description": "Browser action tooltip text, shown for special pages."
-  },
-  "loading_title": {
-    "message": "The page is loading, please wait.",
-    "description": "Browser action tooltip text, shown when the page is loading."
-  },
   "capture_window": {
     "message": "Capture Visible Content",
     "description": "The 1st menu item in browser action popup, meaning capture visible content of a tab."
@@ -31,9 +23,17 @@
     "message": "Capture Whole Page",
     "description": "The 3rd menu item in browser action popup, meaning capture the whole page."
   },
+  "special": {
+    "message": "This is a special page. Unable to perform screen capture actions on this page.",
+    "description": "Message in browser action popup, shown when the current tab is a special page."
+  },
   "loading": {
+    "message": "The page is loading, please wait.",
+    "description": "Message in browser action popup, shown when the current tab hasn't finished loading."
+  },
+  "capturing": {
     "message": "Capturing, please wait...",
-    "description": "The loading message in browser action popup, shown when capturing the whole page."
+    "description": "Message in browser action popup, shown when capturing the whole page."
   },
   "cancel": {
     "message": "Cancel",

@@ -486,7 +486,7 @@ var page = {
   * Remove an element
   */
   init: function() {
-    if (isThisScriptLoad()) {
+    if (!this.checkPageIsOnlyEmbedElement()) {
       chrome.extension.sendRequest({msg: 'isLoadCanCapture'});
     } else {
       chrome.extension.sendRequest({msg: 'isLoadCanNotCapture'});
@@ -498,7 +498,7 @@ var page = {
 };
 
 isThisScriptLoad = function() {
-  return page.checkPageIsOnlyEmbedElement();
+  return !page.checkPageIsOnlyEmbedElement();
 }
 
 function $(id) {
