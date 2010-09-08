@@ -44,9 +44,6 @@ body {
 }
 </style>
 <script type='text/javascript'>
-  var bg = chrome.extension.getBackgroundPage();
-  var isScriptLoad = false;
-
   chrome.extension.onRequest.addListener(function(request, sender, response) {
     if (request.msg == 'page_capturable') {
       document.getElementById('tip').style.display = 'none';
@@ -60,6 +57,7 @@ body {
   });
 
   function toDo(what) {
+    var bg = chrome.extension.getBackgroundPage();
     switch(what) {
       case 'capture_window':
         bg.screenshot.captureWindow();
@@ -91,8 +89,8 @@ body {
     i18nReplace('captureArea', 'capture_area');
     i18nReplace('captureWebpage', 'capture_webpage');
     i18nReplace('capturing', 'capturing');
+    var isScriptLoad = false;
     chrome.tabs.getSelected(null, function(tab) {
-      bg.screenshot.tab = tab;
       if (tab.url.indexOf('chrome') == 0) {
         document.getElementById('tip').style.display = 'none';
         document.getElementById('captureSpecialPage').style.display = 'block';

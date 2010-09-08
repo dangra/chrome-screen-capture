@@ -79,7 +79,7 @@ var page = {
   /**
   * Receive messages from background page, and then decide what to do next
   */
-  messageListener: function() {
+  addMessageListener: function() {
     chrome.extension.onRequest.addListener(function(request, sender, response) {
       switch (request.msg) {
         case 'capture_window': response(page.getWindowSize()); break;
@@ -98,7 +98,7 @@ var page = {
   * Send Message to background page
   */
   sendMessage: function(message) {
-    chrome.extension.connect().postMessage(message);
+    chrome.extension.sendRequest(message);
   },
 
   /**
@@ -466,18 +466,18 @@ var page = {
   * Remove an element
   */
   init: function() {
-    if (!this.checkPageIsOnlyEmbedElement()) {
+    if (isPageCapturable()) {
       chrome.extension.sendRequest({msg: 'page_capturable'});
     } else {
       chrome.extension.sendRequest({msg: 'page_uncapturable'});
     }
     this.injectCssResource('style.css');
-    this.messageListener();
+    this.addMessageListener();
     this.injectJavaScriptResource("page_context.js");
   }
 };
 
-isThisScriptLoad = function() {
+isPageCapturable = function() {
   return !page.checkPageIsOnlyEmbedElement();
 }
 
