@@ -53,6 +53,11 @@ body {
       document.getElementById('captureWebpage').style.display = 'block';
     } else if (request.msg == 'page_uncapturable') {
       i18nReplace('tip', 'special');
+      document.getElementById('tip').style.display = 'block';
+      document.getElementById('captureSpecialPage').style.display = 'none';
+      document.getElementById('captureWindow').style.display = 'none';
+      document.getElementById('captureArea').style.display = 'none';
+      document.getElementById('captureWebpage').style.display = 'none';
     }
   });
 
@@ -113,7 +118,7 @@ body {
         });
     });
     var insertScript = function() {
-      if (!isScriptLoad) {
+      if (isScriptLoad == false) {
         document.getElementById('tip').style.display = 'none';
         document.getElementById('captureSpecialPage').style.display = 'block';
         chrome.tabs.executeScript(null, {file: 'page.js'});

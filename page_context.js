@@ -36,7 +36,6 @@ var __screenCapturePageContext__ = {
 
   toggleBodyScrollValueHookStatus : function() {
     this.currentHookStatus_ = !this.currentHookStatus_;
-    window.console.log("toggle hook staus " + this.currentHookStatus_);
     if (this.currentHookStatus_) {
       var This = this;
       try {
@@ -149,8 +148,6 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
           }
         }
       }
-      //window.console.log("get " + propertyName + ", value is :" +
-      //                  returnValue + ", typeof is :" + typeof returnValue);
       return returnValue;
     });
     // Set the setter object.
@@ -185,8 +182,6 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
           }
         }
       }
-      //window.console.log("set " + propertyName + ", value is :" +
-      //                  userValue);
       internalObj[propertyName] = userValue;
     });
   };
@@ -212,7 +207,6 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
       continue;
     }
     if (typeof originalObject[prop] != "function") {
-      //window.console.log("copy property : " + prop);
       this.properties_.push(prop);
       setGetterAndSetter(this.wrapper_, prop);
     }
@@ -264,7 +258,6 @@ __screenCapturePageContext__.ObjectWrapDelegate.prototype.watch = function(
   } else {
     watchers = new Array();
     this.watcherTable_[propertyName] = watchers;
-    window.console.log("watch : " + propertyName);
   }
   watchers.push(watchHandler);
   return true;
@@ -280,7 +273,6 @@ __screenCapturePageContext__.ObjectWrapDelegate.prototype.unwatch = function(
     for (var i = 0, l = watchers.length; i < l; ++i) {
       if (watchHandler == watchers[i]) {
         watchers.splice(i, 1);
-        window.console.log("unwatch : " + propertyName);
         return true;
       }
     }

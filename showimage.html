@@ -265,8 +265,8 @@
   <embed id="pluginobj" type="application/x-screencapture" hidden="true" height="1px" width="1px">
   <script>
   var photoshop = {
-    tab: 0,
-    canvas: 0,
+    canvas: document.createElement("canvas"),
+    tabTitle: '',
     startX: 0,
     startY: 0,
     endX: 0,
@@ -293,18 +293,24 @@
       return $(id).innerHTML = chrome.i18n.getMessage(name);
     },
 
-    init: function() {
-      photoshop.initTools();
+    initCanvas: function() {
       var bg = chrome.extension.getBackgroundPage();
-      photoshop.tab = bg.screenshot.tab;
-      photoshop.canvas = bg.screenshot.canvas;
       $('canvas').width = $('mask-canvas').width = $('photo').style.width =
-          photoshop.canvas.width;
+          photoshop.canvas.width = bg.screenshot.canvas.width;
       $('canvas').height = $('mask-canvas').height = $('photo').style.height =
-          photoshop.canvas.height;
-      var context = $('canvas').getContext('2d');
+          photoshop.canvas.height = bg.screenshot.canvas.height;
+      var context = photoshop.canvas.getContext('2d');
+      context.drawImage(bg.screenshot.canvas,0,0);
+      context = $('canvas').getContext('2d');
       context.drawImage(photoshop.canvas,0,0);
       $('canvas').style.display = 'block';
+    },
+
+    init: function() {
+      photoshop.initTools();
+      photoshop.initCanvas();
+      var bg = chrome.extension.getBackgroundPage();
+      photoshop.tabTitle = bg.screenshot.tab.title;
       var showBoxHeight = function() {
         $('showBox').style.height = window.innerHeight - photoshop.offsetY - 1;
       }
@@ -370,8 +376,7 @@
     },
 
     finish: function() {
-      var context;
-      context = $('canvas').getContext('2d');
+      var context = $('canvas').getContext('2d');
       context.drawImage(photoshop.canvas,0,0);
     },
 
@@ -721,7 +726,7 @@
       var pluginobj = document.getElementById('pluginobj');
       var dataurl = $('canvas').toDataURL('image/png');
       pluginobj.SaveScreenshot(
-          dataurl, photoshop.tab.title, localStorage.savePath,
+          dataurl, photoshop.tabTitle, localStorage.savePath,
           function(success) {
             if (!success)
               alert(chrome.i18n.getMessage('save_fail'));
@@ -969,8 +974,7 @@
       try {
         ctx.drawImage(photoshop.canvas, x, y, width, height, 0, 0, width, height);
       } catch(error) {
-        console.log('width : height' + width + ' : ' + height) ;
-        console.log(error);
+        console.log(error + ' width : height' + width + ' : ' + height) ;
       }
       var imageData = ctx.getImageData(0, 0, width, height);
       imageData = photoshop.boxBlur(imageData, width, height, 20);

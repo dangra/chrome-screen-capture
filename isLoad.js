@@ -9,7 +9,6 @@ function checkScriptLoad() {
         }
       } catch(e) {
         response({msg: 'loading'});
-        console.log(e);
       }
     }
   });
