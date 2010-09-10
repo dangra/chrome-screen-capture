@@ -66,7 +66,7 @@ var page = {
     for (var i = 0; i < bodyNode.length; i++) {
       var tagName = bodyNode[i].tagName;
       if (tagName == 'OBJECT' || tagName == 'EMBED' || tagName == 'VIDEO' ||
-          tagName == 'SCRIPT') {
+          tagName == 'SCRIPT' || tagName == 'LINK') {
         isOnlyEmbed = true;
       } else if (bodyNode[i].style.display != 'none'){
         isOnlyEmbed = false;
@@ -79,7 +79,7 @@ var page = {
   /**
   * Receive messages from background page, and then decide what to do next
   */
-  messageListener: function() {
+  addMessageListener: function() {
     chrome.extension.onRequest.addListener(function(request, sender, response) {
       switch (request.msg) {
         case 'capture_window': response(page.getWindowSize()); break;
@@ -98,7 +98,7 @@ var page = {
   * Send Message to background page
   */
   sendMessage: function(message) {
-    chrome.extension.connect().postMessage(message);
+    chrome.extension.sendRequest(message);
   },
 
   /**
@@ -209,7 +209,7 @@ var page = {
 
     var crop = page.createDiv(areaElement, 'sc_drag_crop');
     crop.addEventListener('mousedown', page.getSelectionSize, true);
-    crop.innerHTML = chrome.i18n.getMessage('crop');
+    crop.innerHTML = chrome.i18n.getMessage('ok');
 
     page.createDiv(areaElement, 'sc_drag_north_west');
     page.createDiv(areaElement, 'sc_drag_north_east');
@@ -462,43 +462,23 @@ var page = {
     (document.head || document.body || document.documentElement).appendChild(script);
   },
 
-  showPromptMessage: function(status, open, response) {
-    var msgDiv = document.createElement('div');
-    msgDiv.className = 'sc_tip_save_status';
-    msgDiv.innerHTML = status;
-    if (!!open) {
-      var openFolder = function() {
-        response({msg: 'openFolder'});
-      }
-      var aElement = document.createElement('a');
-      aElement.innerText = open;
-      aElement.href = 'javascript:void(0)';
-      aElement.addEventListener('click', openFolder, false);
-      msgDiv.appendChild(aElement);
-    }
-    document.body.appendChild(msgDiv);
-    window.setTimeout(function(){
-      document.body.removeChild(msgDiv);
-    }, 5000);
-  },
-
   /**
   * Remove an element
   */
   init: function() {
-    if (isThisScriptLoad) {
-      chrome.extension.sendRequest({msg: 'isLoadCanCapturn'});
+    if (isPageCapturable()) {
+      chrome.extension.sendRequest({msg: 'page_capturable'});
     } else {
-      chrome.extension.sendRequest({msg: 'isLoadCanNotCapturn'});
+      chrome.extension.sendRequest({msg: 'page_uncapturable'});
     }
     this.injectCssResource('style.css');
-    this.messageListener();
+    this.addMessageListener();
     this.injectJavaScriptResource("page_context.js");
   }
 };
 
-isThisScriptLoad = function() {
-  return page.checkPageIsOnlyEmbedElement();
+isPageCapturable = function() {
+  return !page.checkPageIsOnlyEmbedElement();
 }
 
 function $(id) {

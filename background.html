@@ -5,14 +5,12 @@
 -->
 <html>
 <head>
-
 </head>
 <body>
-<embed id="pluginobj" type="application/x-screencapture" />
+<embed id="pluginobj" type="application/x-screencapture">
 <script>
 var screenshot = {
   tab: 0,
-  data: '',
   canvas: document.createElement("canvas"),
   visibleHeight: 0,
   visibleWidth: 0,
@@ -20,21 +18,29 @@ var screenshot = {
   scrollYCount: 0,
   scrollBarX: 17,
   scrollBarY: 17,
-  capturedStatus: true,
+  captureStatus: true,
 
   /**
   * Receive messages from content_script, and then decide what to do next
   */
-  messageListener: function() {
-    chrome.extension.onConnect.addListener(function(port) {
-      port.onMessage.addListener(function(obj) {
-        switch(obj.msg) {
-          case 'capture_selected':
-            screenshot.capturePortion(obj.x, obj.y, obj.width, obj.height,
-                obj.visibleWidth, obj.visibleHeight, obj.docWidth, obj.docHeight);
-            break;
-        }
-      });
+  addMessageListener: function() {
+    chrome.extension.onRequest.addListener(function(request, sender, response) {
+      var obj = request;
+      switch(obj.msg) {
+        case 'capture_selected':
+          screenshot.capturePortion(obj.x, obj.y, obj.width, obj.height,
+              obj.visibleWidth, obj.visibleHeight, obj.docWidth, obj.docHeight);
+          break;
+      }
+    });
+  },
+
+  /**
+  * Send the Message to content-script
+  */
+  sendMessage: function(message, callback) {
+    chrome.tabs.getSelected(null, function(tab) {
+      chrome.tabs.sendRequest(tab.id, message, callback);
     });
   },
 
@@ -62,18 +68,15 @@ var screenshot = {
         screenshot.canvas.height = response.height;
         screenshot.scrollXCount = response.scrollXCount;
         screenshot.scrollYCount = response.scrollYCount;
-        setTimeout("screenshot.captureAndScroll()",100);
+        setTimeout(screenshot.captureAndScroll(),100);
         break;
       case 'scroll_next_done':
         screenshot.scrollXCount = response.scrollXCount;
         screenshot.scrollYCount = response.scrollYCount;
-        setTimeout("screenshot.captureAndScroll()",100);
+        setTimeout(screenshot.captureAndScroll(),100);
         break;
       case 'scroll_finished':
         screenshot.captureAndScrollDone();
-        break;
-      case 'openFolder':
-        screenshot.openSavePath();
         break;
     }
   },
@@ -193,40 +196,32 @@ var screenshot = {
   },
 
   /**
-  * Send the Message to content-script
-  */
-  sendMessage: function(message, callback) {
-    chrome.tabs.sendRequest(screenshot.tab.id, message, callback);
-  },
-
-  /**
-  * Post image to 'showimage.html'
+  * Autosave the image or post it to 'showimage.html'
   */
   postImage: function() {
     // auto save picture
     if (eval(localStorage.autoSave)) {
       var pluginobj = document.getElementById('pluginobj');
       var data = screenshot.canvas.toDataURL('image/png');
-      var message;
-      var status;
-      var open;
-      if (pluginobj.AutoSave(data, screenshot.tab.title,
-          localStorage.savePath)) {
-        screenshot.capturedStatus = true;
-      } else {
-        screenshot.capturedStatus = false;
-      }
-      screenshot.showNotifications();
-      chrome.extension.sendRequest({msg: 'webpageCapturedDone'});
-      return;
+      chrome.tabs.getSelected(null, function(tab) {
+        if (pluginobj.AutoSave(data, tab.title, localStorage.savePath)) {
+          screenshot.captureStatus = true;
+        } else {
+          screenshot.captureStatus = false;
+        }
+      });
+      screenshot.showNotification();
+      chrome.extension.getViews({type: 'popup'})[0].close();
+    } else {
+      chrome.tabs.getSelected(null, function(tab) {
+        screenshot.tab = tab;
+      });
+      chrome.tabs.create({'url': 'showimage.html'});
     }
-    chrome.tabs.create({'url': 'showimage.html'}, function() {});
   },
 
-  showNotifications: function() {
-    var htmlNotification = webkitNotifications.createHTMLNotification(
-      'notification.html'  // html url - can be relative
-    );
+  showNotification: function() {
+    var htmlNotification = webkitNotifications.createHTMLNotification('notification.html');
     htmlNotification.show();
   },
 
@@ -252,14 +247,11 @@ var screenshot = {
     var savePath = pluginobj.GetDefaultSavePath();
     localStorage.savePath = localStorage.savePath ?
         localStorage.savePath : savePath;
-    screenshot.messageListener();
+    screenshot.addMessageListener();
   }
 };
 
 screenshot.init();
-
-
-
 </script>
 </body>
 </html>
