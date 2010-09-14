@@ -1,162 +1,42 @@
 {
-  "name": {
-    "message": "Screen Capture (by Google)",
-    "description": "Name of the extension"
-  },
-  "description": {
-    "message": "Capture visible content of a tab, a region of a web page, or the whole page as a PNG image. Support horizontal and vertical scroll when capturing whole page, with an all new autosave capability.",
-    "description": "Description of the extension, which appears in the gallery and Chrome extension management UI"
-  },
-  "default_title": {
-    "message": "Screen Capture",
-    "description": "Browser action tooltip text."
-  },
-  "capture_window": {
-    "message": "Capture Visible Content",
-    "description": "The 1st menu item in browser action popup, meaning capture visible content of a tab."
-  },
-  "capture_area": {
-    "message": "Capture Region",
-    "description": "The 2nd menu item in browser action popup, meaning capture a region of a web page."
-  },
-  "capture_webpage": {
-    "message": "Capture Whole Page",
-    "description": "The 3rd menu item in browser action popup, meaning capture the whole page."
-  },
-  "special": {
-    "message": "This is a special page. Unable to perform screen capture actions on this page.",
-    "description": "Message in browser action popup, shown when the current tab is a special page."
-  },
-  "loading": {
-    "message": "The page is loading, please wait.",
-    "description": "Message in browser action popup, shown when the current tab hasn't finished loading."
-  },
-  "capturing": {
-    "message": "Capturing, please wait...",
-    "description": "Message in browser action popup, shown when capturing the whole page."
-  },
-  "cancel": {
-    "message": "Cancel",
-    "description": "Cancel button."
-  },
-  "ok": {
-    "message": "OK",
-    "description": "OK button."
-  },
-  "highlight": {
-    "message": "Highlight",
-    "description": "The 1st button in image editing toolbar, meaning highlight an area in the image."
-  },
-  "border": {
-    "message": "Draw Border Only",
-    "description": "The 1st menu item in Highlight menu."
-  },
-  "rect": {
-    "message": "Fill Entire Area",
-    "description": "The 2nd menu item in Highlight menu."
-  },
-  "redact": {
-    "message": "Redact",
-    "description": "The 2nd button in image editing toolbar, meaning redact an area in the image."
-  },
-  "solid_black": {
-    "message": "Solid Black",
-    "description": "The 1st menu item in Redact menu."
-  },
-  "blur": {
-    "message": "Blur",
-    "description": "The 2nd menu item in Redact menu."
-  },
-  "text": {
-    "message": "Text",
-    "description": "The 3rd button in image editing toolbar, meaning add text in the image."
-  },
-  "size_small": {
-    "message": "Small",
-    "description": "The 1st menu item in Text menu, meaning small text size."
-  },
-  "size_normal": {
-    "message": "Normal",
-    "description": "The 2nd menu item in Text menu, meaning normal text size."
-  },
-  "size_large": {
-    "message": "Large",
-    "description": "The 3rd menu item in Text menu, meaning large text size."
-  },
-  "size_huge": {
-    "message": "Huge",
-    "description": "The 4th menu item in Text menu, meaning huge text size."
-  },
-  "line": {
-    "message": "Line",
-    "description": "The 4th button in image editing toolbar, meaning draw a line in the image."
-  },
-  "edit_tip": {
-    "message": "Below is the screenshot you captured. You can edit it with the tools on the left. Press Save when finished.",
-    "description": "Tip in image editing toolbar."
-  },
-  "save": {
-    "message": "Save",
-    "description": "Save button."
-  },
-  "close": {
-    "message": "Close",
-    "description": "Close button."
-  },
-  "save_image": {
-    "message": "Save Image",
-    "description": "Title of the Save dialog."
-  },
-  "options": {
-    "message": "Screen Capture Options",
-    "description": "Title of the Option page."
-  },
-  "quality_setting": {
-    "message": "Screenshot Quality Settings:",
-    "description": "The 1st sub-title in the Option page."
-  },
-  "lossy": {
-    "message": "Lossy screenshot",
-    "description": "The 1st quality option."
-  },
-  "lossless": {
-    "message": "Lossless screenshot",
-    "description": "The 2nd quality option."
-  },
-  "save_setting": {
-    "message": "Screenshot Save Settings:",
-    "description": "The 2nd sub-title in the Option page."
-  },
-  "save_tip": {
-    "message": "Default save location:",
-    "description": "Tip before the save location edit box."
-  },
-  "autosave": {
-    "message": "Autosave - after capture, bypass editing screen and directly save the captured image to the default location with the web page title as default file name",
-    "description": "Autosave option."
-  },
-  "set_save_path": {
-    "message": "Browse...",
-    "description": "Browse button, meaning open a browsing dialog to set the save location."
-  },
-  "set_save_path_title": {
-    "message": "Select Default Save Location",
-    "description": "Title of the browsing dialog"
-  },
-  "open_save_path": {
-    "message": "Go to folder",
-    "description": "Go to folder button, meaning open the save location."
-  },
-  "save_and_close": {
-    "message": "Save & Close",
-    "description": "Save and close button on the option page"
-  },
-  "save_success": {
-    "message": "Screenshot saved.",
-    "description": "Save success tip."
-  },
-  "save_fail": {
-    "message": "Failed to save the screenshot.",
-    "description": "Save fail tip."
-  }
+  "name": {"message": "Screen Capture (by Google)"},
+  "description": {"message": "Capture visible content of a tab, a region of a web page, or the whole page as a PNG image. Support horizontal and vertical scroll when capturing whole page, with an all new autosave capability."},
+  "default_title": {"message": "Screen Capture"},
+  "capture_window": {"message": "Capture Visible Content"},
+  "capture_area": {"message": "Capture Region"},
+  "capture_webpage": {"message": "Capture Whole Page"},
+  "special": {"message": "This is a special page. Unable to perform screen capture actions on this page."},
+  "loading": {"message": "The page is loading, please wait."},
+  "capturing": {"message": "Capturing, please wait..."},
+  "cancel": {"message": "Cancel"},
+  "ok": {"message": "OK"},
+  "highlight": {"message": "Highlight"},
+  "border": {"message": "Draw Border Only"},
+  "rect": {"message": "Fill Entire Area"},
+  "redact": {"message": "Redact"},
+  "solid_black": {"message": "Solid Black"},
+  "blur": {"message": "Blur"},
+  "text": {"message": "Text"},
+  "size_small": {"message": "Small"},
+  "size_normal": {"message": "Normal"},
+  "size_large": {"message": "Large"},
+  "size_huge": {"message": "Huge"},
+  "line": {"message": "Line"},
+  "edit_tip": {"message": "Below is the screenshot you captured. You can edit it with the tools on the left. Press Save when finished."},
+  "save": {"message": "Save"},
+  "close": {"message": "Close"},
+  "save_image": {"message": "Save Image"},
+  "options": {"message": "Screen Capture Options"},
+  "quality_setting": {"message": "Screenshot Quality Settings: "},
+  "lossy": {"message": "Lossy screenshot"},
+  "lossless": {"message": "Lossless screenshot"},
+  "save_setting": {"message": "Screenshot Save Settings: "},
+  "save_tip": {"message": "Default save location: "},
+  "autosave": {"message": "Autosave - after capture, bypass editing screen and directly save the captured image to the default location with the web page title as default file name"},
+  "set_save_path": {"message": "Browse..."},
+  "set_save_path_title": {"message": "Select Default Save Location"},
+  "open_save_path": {"message": "Go to folder"},
+  "save_and_close": {"message": "Save & Close"},
+  "save_success": {"message": "Screenshot saved."},
+  "save_fail": {"message": "Failed to save the screenshot."}
 }
