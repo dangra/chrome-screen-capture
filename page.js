@@ -29,7 +29,8 @@ var page = {
   fixedElements_ : [],
 
   hookBodyScrollValue: function(needHook) {
-    document.documentElement.setAttribute("__screen_capture_need_hook_scroll_value__", needHook);
+    document.documentElement.setAttribute(
+        "__screen_capture_need_hook_scroll_value__", needHook);
     var event = document.createEvent('Event');
     event.initEvent('__screen_capture_check_hook_status_event__', true, true);
     document.documentElement.dispatchEvent(event);
@@ -50,7 +51,8 @@ var page = {
       );
       var currentNode;
       while (currentNode = nodeIterator.nextNode()) {
-        var nodeComputedStyle = document.defaultView.getComputedStyle(currentNode, "");
+        var nodeComputedStyle =
+            document.defaultView.getComputedStyle(currentNode, "");
         // Skip nodes which don't have computeStyle or are invisible.
         if (!nodeComputedStyle)
           return;
@@ -239,7 +241,7 @@ var page = {
   },
 
   /**
-  * init selection area due to the position of the mouse when mouse down
+  * Init selection area due to the position of the mouse when mouse down
   */
   onMouseDown: function() {
     if (event.button != 2) {
@@ -351,7 +353,7 @@ var page = {
   },
 
  /**
-  * fix the selection area position when mouse up
+  * Fix the selection area position when mouse up
   */
   onMouseUp: function()
   {

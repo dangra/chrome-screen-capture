@@ -22,10 +22,8 @@ var __screenCapturePageContext__ = {
   checkHookStatus: function() {
     var needHookScrollValue = document.documentElement.getAttributeNode(
         '__screen_capture_need_hook_scroll_value__');
-    needHookScrollValue =
+    this.currentHookStatus_ =
         !!(needHookScrollValue && needHookScrollValue.nodeValue == 'true');
-    if (this.currentHookStatus_ != needHookScrollValue)
-      this.currentHookStatus_ = !this.currentHookStatus_;
   },
 
   init: function() {
