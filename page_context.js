@@ -26,7 +26,6 @@ var __screenCapturePageContext__ = {
         !!(needHookScrollValue && needHookScrollValue.nodeValue == 'true');
     if (this.currentHookStatus_ != needHookScrollValue)
       this.currentHookStatus_ = !this.currentHookStatus_;
-    window.console.log(this.currentHookStatus_);
   },
 
   init: function() {
