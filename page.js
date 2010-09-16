@@ -30,6 +30,9 @@ var page = {
 
   hookBodyScrollValue: function(needHook) {
     document.documentElement.setAttribute("__screen_capture_need_hook_scroll_value__", needHook);
+    var event = document.createEvent('Event');
+    event.initEvent('__screen_capture_check_hook_status_event__', true, true);
+    document.documentElement.dispatchEvent(event);
   },
 
   enableFixedPosition: function(enableFlag) {

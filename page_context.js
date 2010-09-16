@@ -1,5 +1,5 @@
 var __screenCapturePageContext__ = {
-  clone : function(object) {
+  clone: function(object) {
     function StubObj() { }
     StubObj.prototype = object;
     var newObj = new StubObj();
@@ -10,13 +10,13 @@ var __screenCapturePageContext__ = {
       try {
         return this.__proto__.toString();
       } catch (e) {
-        return "object Object";
+        return 'object Object';
       }
     }
     return newObj;
   },
 
-  bind : function(newThis, func) {
+  bind: function(newThis, func) {
     var args = [];
     for(var i = 2;i < arguments.length; i++) {
       args.push(arguments[i]);
@@ -26,52 +26,58 @@ var __screenCapturePageContext__ = {
     }
   },
 
-  bodyWrapperDelegate_ : null,
-  currentHookStatus_ : false,
+  bodyWrapperDelegate_: null,
+  currentHookStatus_: false,
 
-  scrollValueHooker : function(oldValue, newValue, reason) {
+  scrollValueHooker: function(oldValue, newValue, reason) {
     // When we hook the value of scrollLeft/Top of body, it always returns 0.
     return 0;
   },
 
-  toggleBodyScrollValueHookStatus : function() {
+  toggleBodyScrollValueHookStatus: function() {
     this.currentHookStatus_ = !this.currentHookStatus_;
     if (this.currentHookStatus_) {
       var This = this;
       try {
-        document.__defineGetter__("body", function() {
+        document.__defineGetter__('body', function() {
           return This.bodyWrapperDelegate_.getWrapper();
         });
       } catch (e) {
-        window.console.log("error" + e);
+        window.console.log('error' + e);
       }
-      this.bodyWrapperDelegate_.watch("scrollLeft", this.scrollValueHooker);
-      this.bodyWrapperDelegate_.watch("scrollTop", this.scrollValueHooker);
+      this.bodyWrapperDelegate_.watch('scrollLeft', this.scrollValueHooker);
+      this.bodyWrapperDelegate_.watch('scrollTop', this.scrollValueHooker);
     } else {
-      this.bodyWrapperDelegate_.unwatch("scrollLeft", this.scrollValueHooker);
-      this.bodyWrapperDelegate_.unwatch("scrollTop", this.scrollValueHooker);
+      this.bodyWrapperDelegate_.unwatch('scrollLeft', this.scrollValueHooker);
+      this.bodyWrapperDelegate_.unwatch('scrollTop', this.scrollValueHooker);
       var This = this;
       try {
-        document.__defineGetter__("body", function() {
+        document.__defineGetter__('body', function() {
           return This.bodyWrapperDelegate_.getWrapper().getInternalObject();
         });
       } catch (e) {
-        window.console.log("error" + e);
+        window.console.log('error' + e);
       }
     }
   },
 
-  checkHookStatus : function() {
-    var needHookScrollValue = document.documentElement.getAttributeNode("__screen_capture_need_hook_scroll_value__");
-    needHookScrollValue = !!(needHookScrollValue && needHookScrollValue.nodeValue == "true");
+  checkHookStatus: function() {
+    var needHookScrollValue = document.documentElement.getAttributeNode(
+        '__screen_capture_need_hook_scroll_value__');
+    needHookScrollValue =
+        !!(needHookScrollValue && needHookScrollValue.nodeValue == 'true');
     if (this.currentHookStatus_ != needHookScrollValue)
       this.toggleBodyScrollValueHookStatus();
   },
 
-  init : function() {
+  init: function() {
     if (!this.bodyWrapperDelegate_) {
-      this.bodyWrapperDelegate_ = new __screenCapturePageContext__.ObjectWrapDelegate(document.body, "^(DOCUMENT_[A-Z_]+|[A-Z_]+_NODE)$");
-      window.setInterval(__screenCapturePageContext__.bind(this, this.checkHookStatus), 100)
+      this.bodyWrapperDelegate_ =
+          new __screenCapturePageContext__.ObjectWrapDelegate(
+              document.body, '^(DOCUMENT_[A-Z_]+|[A-Z_]+_NODE)$');
+      document.documentElement.addEventListener(
+          '__screen_capture_check_hook_status_event__',
+          __screenCapturePageContext__.bind(this, this.checkHookStatus));
     }
   }
 };
@@ -92,8 +98,8 @@ var __screenCapturePageContext__ = {
 // parameter @originalObject, object which you want to wrap
 // parameter @propertyNameFilter, string, regular expression pattern string for
 //    those properties you don't put in the wrap object.
-__screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
-                                        propertyNameFilter) {
+__screenCapturePageContext__.ObjectWrapDelegate = function(
+    originalObject, propertyNameFilter) {
   this.window_ = window;
   // The wrapper is the object we use to wrap the 'originalObject'.
   this.wrapper_ = __screenCapturePageContext__.clone(originalObject);
@@ -104,17 +110,17 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
   this.watcherTable_ = {};
 
   // Check the propertyNameFilter parameter.
-  if (typeof propertyNameFilter == "undefined") {
-    propertyNameFilter = "";
-  } else if (typeof propertyNameFilter != "string") {
+  if (typeof propertyNameFilter == 'undefined') {
+    propertyNameFilter = '';
+  } else if (typeof propertyNameFilter != 'string') {
     try {
       propertyNameFilter = propertyNameFilter.toString();
     } catch (e) {
-      propertyNameFilter = "";
+      propertyNameFilter = '';
     }
   }
   if (propertyNameFilter.length) {
-    this.propertyNameFilter_ = new RegExp("");
+    this.propertyNameFilter_ = new RegExp('');
     this.propertyNameFilter_.compile(propertyNameFilter);
   } else {
     this.propertyNameFilter_ = null;
@@ -136,13 +142,13 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
         for (var i = 0, l = watchersCache.length; i < l; ++i) {
           var watcher = watchersCache[i];
           if (!watcher) {
-            window.console.log("wrapper's watch for " + propertyName +
-                              " is unavailable!");
+            window.console.log('wrapper\'s watch for ' + propertyName +
+                              ' is unavailable!');
             continue;  // should never happend
           }
           originalReturnValue = returnValue;
           try {
-            returnValue = watcher(returnValue, returnValue, "get");
+            returnValue = watcher(returnValue, returnValue, 'get');
           } catch (e) {
             returnValue = originalReturnValue;
           }
@@ -170,13 +176,13 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
         for (var i = 0, l = watchersCache.length; i < l; ++i) {
           var watcher = watchersCache[i];
           if (!watcher) {
-            window.console.log("wrapper's watch for " + propertyName +
-                              " is unavailable!");
+            window.console.log('wrapper\'s watch for ' + propertyName +
+                              ' is unavailable!');
             continue;  // should never happend
           }
           originalValue = userValue;
           try {
-            userValue = watcher(oldValue, userValue, "set");
+            userValue = watcher(oldValue, userValue, 'set');
           } catch (e) {
             userValue = originalValue;
           }
@@ -187,7 +193,7 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
   };
 
   this.cleanUp_ = function() {
-    This.window_.removeEventListener("unload", This.cleanUp_, false);
+    This.window_.removeEventListener('unload', This.cleanUp_, false);
     // Delete all properties
     for (var i = 0, l = This.properties_.length; i < l; ++i) {
       delete This.wrapper_[This.properties_[i]];
@@ -203,26 +209,28 @@ __screenCapturePageContext__.ObjectWrapDelegate = function(originalObject,
   // We only bridge the non-function properties.
   for (var prop in originalObject) {
     if (this.propertyNameFilter_ && this.propertyNameFilter_.test(prop)) {
-      this.propertyNameFilter_.test("");
+      this.propertyNameFilter_.test('');
       continue;
     }
-    if (typeof originalObject[prop] != "function") {
+    if (typeof originalObject[prop] != 'function') {
       this.properties_.push(prop);
       setGetterAndSetter(this.wrapper_, prop);
     }
   }
 
   // Listen the unload event.
-  this.window_.addEventListener("unload", this.cleanUp_, false);
+  this.window_.addEventListener('unload', this.cleanUp_, false);
 };
 
-__screenCapturePageContext__.ObjectWrapDelegate.prototype.getWrapper = function() {
+__screenCapturePageContext__.ObjectWrapDelegate.prototype.getWrapper =
+    function() {
   return this.wrapper_;
 }
 
 // Check whether a property is in the wrapper or not. If yes, return true.
 // Otherwise return false.
-__screenCapturePageContext__.ObjectWrapDelegate.prototype.hasProperty = function(propertyName) {
+__screenCapturePageContext__.ObjectWrapDelegate.prototype.hasProperty =
+    function(propertyName) {
   for (var i = 0, l = this.properties_.length; i < l; ++i) {
     if (propertyName == this.properties_[i])
       return true;
@@ -238,8 +246,8 @@ __screenCapturePageContext__.ObjectWrapDelegate.prototype.hasProperty = function
 // A watchpoint can filter (or nullify) the value assignment, by returning a
 // modified newval (or by returning oldval).
 // When watchpoint is trigering by get opeartor, the oldval is equal with
-// newval. The reason will be "get".
-// When watchpoint is trigering by set opeartor, The reason will be "set".
+// newval. The reason will be 'get'.
+// When watchpoint is trigering by set opeartor, The reason will be 'set'.
 // If you delete a property for which a watchpoint has been set,
 // that watchpoint does not disappear. If you later recreate the property,
 // the watchpoint is still in effect.
