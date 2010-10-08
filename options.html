@@ -130,7 +130,7 @@
     i18nReplace('autosaveText', 'autosave');
     i18nReplace('setSavePath', 'set_save_path');
     i18nReplace('openSavePath', 'open_save_path');
-    document.getElementById('autosave').checked = eval(localStorage.autosave);
+    document.getElementById('autosave').checked = eval(localStorage.autoSave);
     document.getElementById('filePath').value = localStorage.savePath =
         localStorage.savePath ? localStorage.savePath : getDefaultSavePath(); 
     document.getElementById('setSavePath').addEventListener('click', function() {
@@ -148,7 +148,7 @@
      localStorage.screenshootQuality =
          document.getElementById('lossy').checked ? 'jpeg' : '' ||
          document.getElementById('lossless').checked ? 'png' : '';
-     localStorage.autosave = document.getElementById('autosave').checked ?
+     localStorage.autoSave = document.getElementById('autosave').checked ?
          'true' : 'false';
   }
 
