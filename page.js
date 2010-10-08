@@ -492,7 +492,10 @@ function $(id) {
 
 page.init();
 
+var selfResizeEvent = window.onresize;
+
 window.onresize = function() {
+  selfResizeEvent();
   if (page.isSelectionAreaTurnOn) {
     page.removeSelectionArea();
     page.showSelectionArea();
