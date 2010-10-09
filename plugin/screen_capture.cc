@@ -447,7 +447,7 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   static const char* kReplacedChars = "\\/:*?\"<>|";
   int len = strlen(sz_file);
   for (int i = 0; i < len; i++) {
-    if (sz_file[i] < ' ' || strchr(kReplacedChars, title[i]) != NULL)
+    if (sz_file[i] > ' ' && strchr(kReplacedChars, sz_file[i]) != NULL)
       sz_file[i] = '-';
   }
 
