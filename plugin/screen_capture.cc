@@ -444,6 +444,13 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   MultiByteToWideChar(CP_UTF8, 0, title, -1, temp_value, MAX_PATH);
   WideCharToMultiByte(CP_ACP, 0, temp_value, -1, sz_file, MAX_PATH, 0, 0);
 
+  static const char* kReplacedChars = "\\/:*?\"<>|";
+  int len = strlen(sz_file);
+  for (int i = 0; i < len; i++) {
+    if (sz_file[i] < ' ' || strchr(kReplacedChars, title[i]) != NULL)
+      sz_file[i] = '-';
+  }
+
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
   Ofn.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
