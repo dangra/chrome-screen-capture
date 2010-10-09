@@ -138,8 +138,8 @@ var page = {
       page.scrollYCount = 0;
     }
     if (page.scrollXCount * page.visibleHeight < page.docHeight) {
-      window.scrollTo(page.scrollYCount * document.documentElement.clientWidth,
-                      page.scrollXCount * document.documentElement.clientHeight);
+      window.scrollTo(page.scrollYCount * document.body.clientWidth,
+                      page.scrollXCount * document.body.clientHeight);
       var x = page.scrollXCount;
       var y = page.scrollYCount;
       page.scrollYCount++;
@@ -175,8 +175,8 @@ var page = {
         'y': page.startY,
         'width': page.endX - page.startX,
         'height': page.endY - page.startY,
-        'visibleWidth': document.documentElement.clientWidth,
-        'visibleHeight': document.documentElement.clientHeight,
+        'visibleWidth': document.body.clientWidth,
+        'visibleHeight': document.body.clientHeight,
         'docWidth': document.width,
         'docHeight': document.height
       })}, 100);

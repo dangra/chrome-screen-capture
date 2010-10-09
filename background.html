@@ -68,12 +68,12 @@ var screenshot = {
         screenshot.canvas.height = response.height;
         screenshot.scrollXCount = response.scrollXCount;
         screenshot.scrollYCount = response.scrollYCount;
-        setTimeout(screenshot.captureAndScroll(),100);
+        setTimeout("screenshot.captureAndScroll()", 100);
         break;
       case 'scroll_next_done':
         screenshot.scrollXCount = response.scrollXCount;
         screenshot.scrollYCount = response.scrollYCount;
-        setTimeout(screenshot.captureAndScroll(),100);
+        setTimeout("screenshot.captureAndScroll()", 100);
         break;
       case 'scroll_finished':
         screenshot.captureAndScrollDone();
@@ -232,7 +232,7 @@ var screenshot = {
   setScreenshotQualityByOS: function() {
     var isWindowsPlatform = screenshot.isThisPlatform('windows');
     if (!localStorage.screenshootQuality) {
-      localStorage.screenshootQuality = (isWindowsPlatform ? 'jpeg' : 'png');
+      localStorage.screenshootQuality = (isWindowsPlatform ? 'png' : 'jpeg');
     }
     return localStorage.screenshootQuality;
   },
