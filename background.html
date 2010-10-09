@@ -82,8 +82,7 @@ var screenshot = {
   },
 
   captureSpecialPage: function() {
-    var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshootQuality || 'png';
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -103,8 +102,7 @@ var screenshot = {
   */
   capturePortion: function(x, y, width, height,
                            visibleWidth, visibleHeight, docWidth, docHeight) {
-    var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshootQuality || 'png';
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -126,8 +124,7 @@ var screenshot = {
   },
 
   captureVisible: function(docWidth, docHeight) {
-    var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshootQuality || 'png';
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -149,8 +146,7 @@ var screenshot = {
   * Use the drawImage method to stitching images, and render to canvas
   */
   captureAndScroll: function() {
-    var formatParam  = localStorage.screenshootQuality ?
-        localStorage.screenshootQuality : screenshot.setScreenshotQualityByOS();
+    var formatParam  = localStorage.screenshootQuality || 'png';
     chrome.tabs.captureVisibleTab(null, {format: formatParam}, function(data) {
       var image = new Image();
       image.onload = function() {
@@ -229,14 +225,6 @@ var screenshot = {
     return navigator.userAgent.toLowerCase().indexOf(operationSystem) > -1;
   },
 
-  setScreenshotQualityByOS: function() {
-    var isWindowsPlatform = screenshot.isThisPlatform('windows');
-    if (!localStorage.screenshootQuality) {
-      localStorage.screenshootQuality = (isWindowsPlatform ? 'png' : 'jpeg');
-    }
-    return localStorage.screenshootQuality;
-  },
-
   openSavePath: function() {
     var pluginobj = document.getElementById('pluginobj');
     pluginobj.OpenSavePath(localStorage.savePath);
@@ -247,6 +235,7 @@ var screenshot = {
     var savePath = pluginobj.GetDefaultSavePath();
     localStorage.savePath = localStorage.savePath ?
         localStorage.savePath : savePath;
+    localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';
     screenshot.addMessageListener();
   }
 };

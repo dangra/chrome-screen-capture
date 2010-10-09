@@ -81,6 +81,15 @@ var page = {
     return isOnlyEmbed;
   },
 
+  isGMailPage: function(){
+    var hostName = window.location.hostname;
+    if (hostName == 'mail.google.com' &&
+        document.getElementById('canvas_frame')) {
+      return true;
+    }
+    return false;
+  },
+
   /**
   * Receive messages from background page, and then decide what to do next
   */
@@ -119,6 +128,14 @@ var page = {
     page.startY = window.scrollY;
     page.startX = window.scrollX;
     window.scrollTo(0, 0);
+    var hostName = window.location.hostname;
+    if (page.isGMailPage()) {
+      var frame = document.getElementById('canvas_frame');
+      page.docHeight = frame.contentDocument.height;
+      page.docWidth = frame.contentDocument.width;
+      frame.contentDocument.body.scrollTop = 0;
+      frame.contentDocument.body.scrollLeft = 0;
+    }
     page.scrollXCount = 0;
     page.scrollYCount = 1;
     return {
@@ -138,8 +155,13 @@ var page = {
       page.scrollYCount = 0;
     }
     if (page.scrollXCount * page.visibleHeight < page.docHeight) {
-      window.scrollTo(page.scrollYCount * document.body.clientWidth,
-                      page.scrollXCount * document.body.clientHeight);
+      window.scrollTo(page.scrollYCount * document.documentElement.clientWidth,
+                      page.scrollXCount * document.documentElement.clientHeight);
+      if (page.isGMailPage()) {
+        var frame = document.getElementById('canvas_frame');
+        frame.contentDocument.body.scrollLeft = page.scrollYCount * document.documentElement.clientWidth;
+        frame.contentDocument.body.scrollTop = page.scrollXCount * document.documentElement.clientHeight;
+      }
       var x = page.scrollXCount;
       var y = page.scrollYCount;
       page.scrollYCount++;
@@ -161,9 +183,16 @@ var page = {
   },
 
   getWindowSize: function() {
+    var docWidth = document.width;
+    var docHeight = document.height;
+    if (page.isGMailPage()) {
+      var frame = document.getElementById('canvas_frame');
+      docHeight = frame.contentDocument.height;
+      docWidth = frame.contentDocument.width;
+    }
     return {'msg':'capture_window',
-            'docWidth': document.width,
-            'docHeight': document.height};
+            'docWidth': docWidth,
+            'docHeight': docHeight};
   },
 
   getSelectionSize: function() {
@@ -175,8 +204,8 @@ var page = {
         'y': page.startY,
         'width': page.endX - page.startX,
         'height': page.endY - page.startY,
-        'visibleWidth': document.body.clientWidth,
-        'visibleHeight': document.body.clientHeight,
+        'visibleWidth': document.documentElement.clientWidth,
+        'visibleHeight': document.documentElement.clientHeight,
         'docWidth': document.width,
         'docHeight': document.height
       })}, 100);
@@ -495,7 +524,9 @@ page.init();
 var selfResizeEvent = window.onresize;
 
 window.onresize = function() {
-  selfResizeEvent();
+  if (selfResizeEvent) {
+    selfResizeEvent();
+  }
   if (page.isSelectionAreaTurnOn) {
     page.removeSelectionArea();
     page.showSelectionArea();
