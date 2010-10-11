@@ -30,8 +30,17 @@ var __screenCapturePageContext__ = {
     try {
       document.body.__defineGetter__('scrollLeft',
           __screenCapturePageContext__.bind(this, this.scrollLeftHooker));
+      document.body.__defineSetter__('scrollLeft',
+        function(value) {
+          window.scrollTo(window.scrollY, value);
+        }
       document.body.__defineGetter__('scrollTop',
           __screenCapturePageContext__.bind(this, this.scrollTopHooker));
+      document.body.__defineSetter__('scrollTop',
+        function(value) {
+          window.scrollTo(window.scrollX, value);
+        }
+      );
       document.documentElement.addEventListener(
           '__screen_capture_check_hook_status_event__',
           __screenCapturePageContext__.bind(this, this.checkHookStatus));
