@@ -34,6 +34,7 @@ var __screenCapturePageContext__ = {
         function(value) {
           window.scrollTo(window.scrollY, value);
         }
+      );
       document.body.__defineGetter__('scrollTop',
           __screenCapturePageContext__.bind(this, this.scrollTopHooker));
       document.body.__defineSetter__('scrollTop',
