@@ -482,7 +482,7 @@
 
     },
 
-    createCloseButton: function(parent, id, left, top) {
+    createCloseButton: function(parent, id, left, top, flag) {
       var imgElement = document.createElement('img');
       imgElement.id = id;
       imgElement.src = 'images/cross.png';
@@ -500,13 +500,13 @@
         if (!photoshop.dragFlag) {
           photoshop.showCloseButton(id);
           $(parent).style.zIndex = 110;
+          photoshop.isDraw = (flag == 'text' ? false : photoshop.isDraw);
         }
       };
       $(parent).onmouseout = function() {
-        if (!photoshop.dragFlag) {
-          photoshop.hideCloseButton(id);
-          $(parent).style.zIndex = 100;
-        }
+        photoshop.hideCloseButton(id);
+        $(parent).style.zIndex = 100;
+        photoshop.isDraw = true;
       };
       $(parent).appendChild(imgElement);
       return imgElement;
@@ -582,7 +582,7 @@
         $(photoshop.layerId).focus();
         var imageBtnId = 'close_' + photoshop.layerId;
         photoshop.createCloseButton(photoshop.layerId, imageBtnId,
-            photoshop.nowWidth, photoshop.nowHeight);
+            photoshop.nowWidth, photoshop.nowHeight, photoshop.flag);
         photoshop.createDiv();
       } else if (photoshop.endX ==
           photoshop.startX && photoshop.endY == photoshop.startY) {

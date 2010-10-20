@@ -1,7 +1,7 @@
 #sc_drag_area_protector div{
   border-radius: 0px 0px;
   margin:0;
-  max-width:100%;
+  /*max-width:100%;*/
   min-width: 1px;
 
 }
@@ -46,7 +46,7 @@
   font-weight:bold;
   font-size:10px;
   height:18px;
-  min-width:65px;
+  min-width:65px !important;
   left:12px;
   line-height:18px;
   position:absolute;
@@ -70,26 +70,28 @@
 }
 #sc_drag_crop {
   bottom:-25px;
-  padding-left:10px;
-  padding-right:10px;
+  text-align: center;
   right:10px;
+  min-width: 30px !important;
+  padding: 0 10px;
 }
 #sc_drag_cancel {
   bottom:-25px;
-  padding-left:10px;
-  padding-right:8px;
-  right:60px;
+  text-align: center;
+  right:70px;
+  min-width: 30px !important;
+  padding: 0 10px;
 }
 #sc_drag_shadow_top, #sc_drag_shadow_bottom, #sc_drag_shadow_left, #sc_drag_shadow_right {
   background-color: #000000;
   opacity: 0.5;
   position: absolute;
   z-index:7000;
-  border: 0px;
+  border: 0;
 }
 #sc_drag_shadow_top {
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
 }
 #sc_drag_shadow_bottom {
   bottom: 0;

@@ -95,6 +95,9 @@ var page = {
   */
   addMessageListener: function() {
     chrome.extension.onRequest.addListener(function(request, sender, response) {
+      if (page.isSelectionAreaTurnOn) {
+        page.removeSelectionArea();
+      }
       switch (request.msg) {
         case 'capture_window': response(page.getWindowSize()); break;
         case 'show_selection_area': page.showSelectionArea(); break;
@@ -318,7 +321,7 @@ var page = {
           }
         }
       }
-
+	  event.preventDefault();
     }
   },
 
