@@ -450,6 +450,7 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
     if (sz_file[i] > ' ' && strchr(kReplacedChars, sz_file[i]) != NULL)
       sz_file[i] = '-';
   }
+  strcat(sz_file, ".png");
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
