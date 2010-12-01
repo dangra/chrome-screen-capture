@@ -47,4 +47,7 @@ bool OpenSavePath(ScriptablePluginObject* obj, const NPVariant* args,
 bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result);
 
+bool SaveToClipboard(ScriptablePluginObject* obj, const NPVariant* args,
+                     uint32_t argCount, NPVariant* result);
+
 #endif  // NPCAPTURE__SAVE_H_

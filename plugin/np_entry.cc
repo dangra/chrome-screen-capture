@@ -43,6 +43,14 @@
 #include "npapi.h"
 #include "npfunctions.h"
 
+#ifdef _WINDOWS
+#include <windows.h>
+#include <GdiPlus.h>
+using namespace Gdiplus;
+ULONG_PTR token;
+#pragma comment(lib,"gdiplus.lib")
+#endif
+
 NPNetscapeFuncs* npnfuncs = NULL;
 
 #ifdef __cplusplus
@@ -80,10 +88,17 @@ NPError OSCALL NP_Initialize(NPNetscapeFuncs* npnf
 #if !defined(_WINDOWS) && !defined(WEBKIT_DARWIN_SDK)
                  NP_GetEntryPoints(nppfuncs);
 #endif
+#ifdef _WINDOWS
+  GdiplusStartupInput input;
+  GdiplusStartup(&token,&input,NULL);
+#endif
                  return NPERR_NO_ERROR;
 }
 
 NPError  OSCALL NP_Shutdown() {
+#ifdef _WINDOWS
+  GdiplusShutdown(token);
+#endif
   return NPERR_NO_ERROR;
 }
 

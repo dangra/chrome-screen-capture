@@ -31,13 +31,6 @@
 #include "plugin.h"
 
 NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
-  if(instance == NULL)
-    return NPERR_INVALID_INSTANCE_ERROR;
-
-  CPlugin * pPlugin = (CPlugin *)instance->pdata;
-  if(pPlugin == NULL)
-    return NPERR_GENERIC_ERROR;
-
   switch(variable) {
   default:
     return NPERR_GENERIC_ERROR;
@@ -47,8 +40,14 @@ NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value) {
   case NPPVpluginDescriptionString:
     *((char **)value) = "ScreenCapturePlugin plugin.";
     break;
-  case NPPVpluginScriptableNPObject:
-    *(NPObject **)value = (NPObject*)pPlugin->GetScriptableObject();
+  case NPPVpluginScriptableNPObject: {
+      if(instance == NULL)
+        return NPERR_INVALID_INSTANCE_ERROR;
+      CPlugin * pPlugin = (CPlugin *)instance->pdata;
+      if(pPlugin == NULL)
+        return NPERR_GENERIC_ERROR;
+      *(NPObject **)value = (NPObject*)pPlugin->GetScriptableObject();
+    }
     break;
   case NPPVpluginNeedsXEmbed:
     *((char *)value) = 1;

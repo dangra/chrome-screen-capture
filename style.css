@@ -31,11 +31,11 @@
   height:100%;
   left:0;
   top:0;
-  position: fixed;
+  position: absolute;
   width:100%;
   z-index:8500;
   margin: 0;
-  max-width:100%;
+  
   min-width: 1px;
   overflow: hidden;
 }

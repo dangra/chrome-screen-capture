@@ -19,8 +19,10 @@ var page = {
   isMouseDown: false,
   scrollXCount: 0,
   scrollYCount: 0,
-  docHeight: 0,
-  docWeight: 0,
+  scrollX: 0,
+  scrollY: 0,
+  captureHeight: 0,
+  captureWeight: 0,
   winHeight: 0,
   winWidth: 0,
   isSelectionAreaTurnOn: false,
@@ -101,11 +103,16 @@ var page = {
       switch (request.msg) {
         case 'capture_window': response(page.getWindowSize()); break;
         case 'show_selection_area': page.showSelectionArea(); break;
-        case 'scroll_init': response(page.scrollInit()); break;
+        case 'scroll_init': response(
+            page.scrollInit(0, 0, document.width, document.height, 'captureWhole')); break;
         case 'scroll_next':
           page.visibleWidth = request.visibleWidth;
           page.visibleHeight = request.visibleHeight;
           response(page.scrollNext());
+          break;
+        case 'capture_selected': response(page.scrollInit(page.startX,
+            page.startY, page.endX - page.startX, page.endY - page.startY,
+            'captureSelected'));
           break;
       }
     });
@@ -121,30 +128,39 @@ var page = {
   /**
   * Initialize scrollbar position, and get the data browser
   */
-  scrollInit: function() {
+  scrollInit: function(startX, startY, canvasWidth, canvasHeight, type) {
     this.enableFixedPosition(false);
     this.hookBodyScrollValue(true);
-    page.docHeight = document.height;
-    page.docWidth = document.width;
-    page.winHeight = window.innerHeight;
-    page.winWidth = window.innerWidth;
-    page.startY = window.scrollY;
-    page.startX = window.scrollX;
-    window.scrollTo(0, 0);
+    page.captureHeight = canvasHeight;
+    page.captureWidth = canvasWidth;
+    var docWidth = document.width;
+    var docHeight = document.height;
+    window.scrollTo(startX, startY);
+
     var hostName = window.location.hostname;
-    if (page.isGMailPage()) {
+    if (page.isGMailPage() && type == 'captureWhole') {
       var frame = document.getElementById('canvas_frame');
-      page.docHeight = frame.contentDocument.height;
-      page.docWidth = frame.contentDocument.width;
+      docHeight = page.captureHeight = canvasHeight = frame.contentDocument.height;
+      docWidth = page.captureWidth = canvasWidth = frame.contentDocument.width;
       frame.contentDocument.body.scrollTop = 0;
       frame.contentDocument.body.scrollLeft = 0;
     }
     page.scrollXCount = 0;
     page.scrollYCount = 1;
+    page.scrollX = window.scrollX;
+    page.scrollY = window.scrollY;
     return {
         'msg': 'scroll_init_done',
-        'height': page.docHeight,
-        'width': page.docWidth,
+        'startX': startX,
+        'startY': startY,
+        'scrollX': window.scrollX,
+        'scrollY': window.scrollY,
+        'docHeight': docHeight,
+        'docWidth': docWidth,
+        'visibleWidth': document.documentElement.clientWidth,
+        'visibleHeight': document.documentElement.clientHeight,
+        'canvasWidth': canvasWidth,
+        'canvasHeight': canvasHeight,
         'scrollXCount': 0,
         'scrollYCount': 0};
   },
@@ -153,13 +169,13 @@ var page = {
   * Calculate the next position of the scrollbar
   */
   scrollNext: function() {
-    if (page.scrollYCount * page.visibleWidth >= page.docWidth) {
+    if (page.scrollYCount * page.visibleWidth >= page.captureWidth) {
       page.scrollXCount++;
       page.scrollYCount = 0;
     }
-    if (page.scrollXCount * page.visibleHeight < page.docHeight) {
-      window.scrollTo(page.scrollYCount * document.documentElement.clientWidth,
-                      page.scrollXCount * document.documentElement.clientHeight);
+    if (page.scrollXCount * page.visibleHeight < page.captureHeight) {
+      window.scrollTo(page.scrollYCount * document.documentElement.clientWidth + page.scrollX,
+                      page.scrollXCount * document.documentElement.clientHeight + page.scrollY);
       if (page.isGMailPage()) {
         var frame = document.getElementById('canvas_frame');
         frame.contentDocument.body.scrollLeft = page.scrollYCount * document.documentElement.clientWidth;
@@ -226,6 +242,8 @@ var page = {
   */
   createSelectionArea: function() {
     var areaProtector = $('sc_drag_area_protector');
+    areaProtector.style.width = document.width + 'px';
+    areaProtector.style.height = document.height + 'px';
     areaProtector.onclick = function() {
       event.stopPropagation();
       return false;
@@ -245,7 +263,10 @@ var page = {
     cancel.innerHTML = chrome.i18n.getMessage("cancel");
 
     var crop = page.createDiv(areaElement, 'sc_drag_crop');
-    crop.addEventListener('mousedown', page.getSelectionSize, true);
+    crop.addEventListener('mousedown', function() {
+      page.removeSelectionArea();
+      page.sendMessage({msg: 'capture_selected'});
+    }, false);
     crop.innerHTML = chrome.i18n.getMessage('ok');
 
     page.createDiv(areaElement, 'sc_drag_north_west');
@@ -253,19 +274,22 @@ var page = {
     page.createDiv(areaElement, 'sc_drag_south_east');
     page.createDiv(areaElement, 'sc_drag_south_west');
 
-    document.addEventListener('mousedown', page.onMouseDown, false);
+    areaProtector.addEventListener('mousedown', page.onMouseDown, false);
     document.addEventListener('mousemove', page.onMouseMove, false);
     document.addEventListener('mouseup', page.onMouseUp, false);
-    document.addEventListener('dblclick', page.getSelectionSize, false);
+    $('sc_drag_container').addEventListener('dblclick', function() {
+      page.removeSelectionArea();
+      page.sendMessage({msg: 'capture_selected'});
+    }, false);
 
     page.pageHeight = $('sc_drag_area_protector').clientHeight;
     page.pageWidth = $('sc_drag_area_protector').clientWidth;
 
     var areaElement = $('sc_drag_area');
-    areaElement.style.left = page.startX + 'px';
-    areaElement.style.top = page.startY + 'px';
-    areaElement.style.width = (page.endX - page.startX) + 'px';
-    areaElement.style.height = (page.endY - page.startY) + 'px';
+    areaElement.style.left = page.startX = 0;
+    areaElement.style.top = page.startY = 0;
+    areaElement.style.width =0;
+    areaElement.style.height = 0;
     page.isSelectionAreaTurnOn = true;
 
     page.updateShadow(areaElement);
@@ -281,14 +305,12 @@ var page = {
 
       if (element) {
         var elementName = element.tagName;
-        if (elementName && elementName == 'HTML') {
-          page.removeSelectionArea();
-        } else if (elementName && document) {
+        if (elementName && document) {
           page.isMouseDown = true;
 
           var areaElement = $('sc_drag_area');
-          var xPosition = event.pageX - window.scrollX;
-          var yPosition = event.pageY - window.scrollY;
+          var xPosition = event.pageX;
+          var yPosition = event.pageY;
 
           if (areaElement) {
             if (element == $('sc_drag_container')) {
@@ -315,13 +337,13 @@ var page = {
               page.dragging = true;
               page.endX = 0;
               page.endY = 0;
-              page.startX = xPosition;
-              page.startY = yPosition;
+              page.endX = page.startX = xPosition;
+              page.endY = page.startY = yPosition;
             }
           }
+          event.preventDefault();
         }
       }
-	  event.preventDefault();
     }
   },
 
@@ -333,11 +355,18 @@ var page = {
     if (element && page.isMouseDown) {
       var areaElement = $('sc_drag_area');
       if (areaElement) {
-        var xPosition = event.pageX - window.scrollX;
-        var yPosition = event.pageY - window.scrollY;
+        var xPosition = event.pageX;
+        var yPosition = event.pageY;
+        console.log('y:' + yPosition);
         if (page.dragging || page.resizing) {
           var width = 0;
           var height = 0;
+          if (xPosition > document.width) {
+            xPosition = document.width;
+          }
+          if (yPosition > document.height) {
+            yPosition = document.height;
+          }
           page.endX = xPosition;
           page.endY = yPosition;
           if (page.startX > page.endX) {
@@ -356,6 +385,15 @@ var page = {
           }
           areaElement.style.height = height + 'px';
           areaElement.style.width  = width + 'px';
+          if (window.innerWidth < xPosition) {
+            document.body.scrollLeft = xPosition - window.innerWidth;
+          }
+          if (document.body.scrollTop + window.innerHeight < yPosition + 25) {
+            document.body.scrollTop = yPosition - window.innerHeight + 25;
+          }
+          if (yPosition < document.body.scrollTop) {
+            document.body.scrollTop -= 25;
+          }
         } else if (page.moving) {
           var newXPosition = xPosition - page.moveX;
           var newYPosition = yPosition - page.moveY;
@@ -377,10 +415,22 @@ var page = {
           page.startX = newXPosition;
           page.endY = newYPosition + areaElement.clientHeight;
           page.startY = newYPosition;
+
         }
+        var crop = document.getElementById('sc_drag_crop');
+          var cancel = document.getElementById('sc_drag_cancel');
+          if (event.pageY + 25 > document.height) {
+            crop.style.bottom = 0;
+            cancel.style.bottom = 0
+          } else {
+            crop.style.bottom = '-25px';
+            cancel.style.bottom = '-25px';
+          }
         page.updateShadow(areaElement);
         page.updateSize();
+
       }
+
     }
   },
 
@@ -443,13 +493,14 @@ var page = {
   * Remove selection area
   */
   removeSelectionArea: function() {
-    page.removeElement('sc_drag_area_protector');
-    page.removeElement('sc_drag_area');
-
     document.removeEventListener('mousedown', page.onMouseDown, false);
     document.removeEventListener('mousemove', page.onMouseMove, false);
     document.removeEventListener('mouseup', page.onMouseUp, false);
-    document.removeEventListener('dblclick', page.getSelectionSize, false);
+    $('sc_drag_container').removeEventListener('dblclick',function() {
+      page.removeSelectionArea();
+      page.sendMessage({msg: 'capture_selected'});}, false);
+    page.removeElement('sc_drag_area_protector');
+    page.removeElement('sc_drag_area');
     page.isSelectionAreaTurnOn = false;
   },
 

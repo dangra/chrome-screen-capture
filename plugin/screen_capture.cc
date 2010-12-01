@@ -34,6 +34,8 @@
 #include <atlenc.h>
 #include <ShlObj.h>
 #include <io.h>
+#include <GdiPlus.h>
+using namespace Gdiplus;
 #define snprintf sprintf_s
 #elif defined GTK
 #include <sys/types.h>
@@ -257,6 +259,89 @@ bool GetDefaultSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   return true;
 }
 
+bool SaveToClipboard(ScriptablePluginObject* obj, const NPVariant* args,
+                     uint32_t argCount, NPVariant* result) {
+  BOOLEAN_TO_NPVARIANT(FALSE, *result);
+  if (argCount != 1 || !NPVARIANT_IS_STRING(args[0]))
+    return false;
+
+  char* base64 = strstr((char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters,
+                        "base64,");
+  if (!base64)
+   return false;
+  base64 += 7;
+  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
+
+#ifdef _WINDOWS
+  int byteLength = Base64DecodeGetRequiredLength(base64size);
+  HGLOBAL handle = GlobalAlloc(GMEM_MOVEABLE, byteLength);
+  if (!handle)
+   return false;
+
+  LPVOID bytes = GlobalLock(handle);
+  if (!bytes)
+   return false;
+
+  Base64Decode(base64, base64size, (BYTE*)bytes, &byteLength);
+  IStream* stream;
+  CreateStreamOnHGlobal(handle, FALSE, &stream);
+  Image* image = new Image(stream);
+  if (!image) {
+    if (stream)
+      stream->Release();
+    GlobalUnlock(handle);
+    GlobalFree(handle);
+    return false;
+  }
+
+  HDC dc = GetDC(NULL);
+  HDC hmemdc = CreateCompatibleDC(dc);
+  HBITMAP hbitmap = CreateCompatibleBitmap(dc, image->GetWidth(), 
+                                           image->GetHeight());
+  SelectObject(hmemdc, hbitmap);
+  SolidBrush brush(Color::White);
+  Graphics g(hmemdc);
+  g.FillRectangle(&brush, 0, 0, image->GetWidth(), image->GetHeight());
+  g.DrawImage(image, 0, 0);
+
+  delete image;
+  stream->Release();
+  GlobalUnlock(handle);
+  GlobalFree(handle);
+
+  if (!OpenClipboard(((CPlugin*)obj->npp->pdata)->GetHWnd()))
+    return false;
+
+  EmptyClipboard();
+  SetClipboardData(CF_BITMAP, hbitmap);
+  CloseClipboard();
+  DeleteDC(hmemdc);
+  ReleaseDC(NULL, dc);
+#elif defined GTK
+  const gchar* curr_dir = g_get_current_dir();
+  char temp_path[256];
+  sprintf(temp_path, "%s/temp.png", curr_dir);
+  if (SaveFileBase64(temp_path, base64, base64size)) {
+    GtkClipboard* clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+    if (clipboard == NULL)
+      return false;
+    GError *err = NULL;
+    GdkPixbuf* buff = gdk_pixbuf_new_from_file(temp_path, &err);
+    if (buff != NULL) {
+      gtk_clipboard_set_image(clipboard, buff);
+      gdk_pixbuf_unref(buff);
+    } else {
+      g_error_free(err);
+      return false;
+    }
+  } else {
+    return false;
+  }
+#endif
+  BOOLEAN_TO_NPVARIANT(TRUE, *result);
+  return true;
+}
+
 bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
               unsigned int argCount, NPVariant* result) {
   if (argCount < 3 || !NPVARIANT_IS_STRING(args[0]) ||
@@ -411,9 +496,11 @@ bool OpenSavePath(ScriptablePluginObject* obj, const NPVariant* args,
 
 bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
                     uint32_t argCount, NPVariant* result) {
+
   if (argCount < 5 || !NPVARIANT_IS_STRING(args[0]) ||
       !NPVARIANT_IS_STRING(args[1]) || !NPVARIANT_IS_STRING(args[2]) ||
       !NPVARIANT_IS_OBJECT(args[3]) || !NPVARIANT_IS_STRING(args[4]))
+
     return false;
 
   char* url = (char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;

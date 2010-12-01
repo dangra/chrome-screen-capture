@@ -29,7 +29,7 @@
           aElement.innerText = chrome.i18n.getMessage('open_save_path');
           aElement.href = 'javascript:void(0)';
           aElement.addEventListener('click', function() {
-            bg.screenshot.openSavePath();
+            bg.plugin.openSavePath(localStorage.savePath);
           }, false);
           tipDiv.appendChild(aElement);
         } else {

@@ -23,6 +23,7 @@
   "size_huge": {"message": "Huge"},
   "line": {"message": "Line"},
   "edit_tip": {"message": "Below is the screenshot you captured. You can edit it with the tools on the left. Press Save when finished."},
+  "copy": {"message": "Copy"},
   "save": {"message": "Save"},
   "close": {"message": "Close"},
   "save_image": {"message": "Save Image"},
@@ -38,5 +39,7 @@
   "open_save_path": {"message": "Go to folder"},
   "save_and_close": {"message": "Save & Close"},
   "save_success": {"message": "Screenshot saved."},
-  "save_fail": {"message": "Failed to save the screenshot."}
+  "save_fail": {"message": "Failed to save the screenshot."},
+  "tip_copy_succeed": {"message": "Screenshot copied."},
+  "tip_copy_failed": {"message": "Failed to copy the screenshot."}
 }

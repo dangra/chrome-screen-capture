@@ -7,13 +7,41 @@
 <head>
 </head>
 <body>
-<embed id="pluginobj" type="application/x-screencapture">
+<embed id="pluginObj" type="application/x-screencapture">
 <script>
+var plugin = {
+  pluginObj: document.getElementById('pluginObj'),
+  autoSave: function(data, title, path) {
+    return this.pluginObj.AutoSave(data, title, path);
+  },
+  openSavePath : function(path) {
+    this.pluginObj.OpenSavePath(path);
+  },
+  getDefaultSavePath: function() {
+    return this.pluginObj.GetDefaultSavePath();
+  },
+  setSavePath: function(savePath, callback, title) {
+    this.pluginObj.SetSavePath(savePath, callback, title);
+  },
+  saveScreenshot: function(data, tabTitle, path, callback, imageTitle) {
+    this.pluginObj.SaveScreenshot(data, tabTitle, path, callback, imageTitle);
+  },
+  saveToClipboard: function(data) {
+    return this.pluginObj.SaveToClipboard(data);
+  }
+}
+
 var screenshot = {
   tab: 0,
   canvas: document.createElement("canvas"),
-  visibleHeight: 0,
+  startX: 0,
+  startY: 0,
+  scrollX: 0,
+  scrollY: 0,
+  docHeight: 0,
+  docWidth: 0,
   visibleWidth: 0,
+  visibleHeight: 0,
   scrollXCount: 0,
   scrollYCount: 0,
   scrollBarX: 17,
@@ -28,8 +56,7 @@ var screenshot = {
       var obj = request;
       switch(obj.msg) {
         case 'capture_selected':
-          screenshot.capturePortion(obj.x, obj.y, obj.width, obj.height,
-              obj.visibleWidth, obj.visibleHeight, obj.docWidth, obj.docHeight);
+            screenshot.captureSelected();
           break;
       }
     });
@@ -53,6 +80,11 @@ var screenshot = {
         screenshot.onResponseVisibleSize);
   },
 
+  captureSelected: function() {
+    screenshot.sendMessage({msg: 'capture_selected'},
+        screenshot.onResponseVisibleSize);
+  },
+
   captureWebpage: function() {
     screenshot.sendMessage({msg: 'scroll_init'},
         screenshot.onResponseVisibleSize);
@@ -64,10 +96,18 @@ var screenshot = {
         screenshot.captureVisible(response.docWidth, response.docHeight);
         break;
       case 'scroll_init_done':
-        screenshot.canvas.width = response.width;
-        screenshot.canvas.height = response.height;
+        screenshot.startX = response.startX,
+        screenshot.startY = response.startY,
+        screenshot.scrollX = response.scrollX,
+        screenshot.scrollY = response.scrollY,
+        screenshot.canvas.width = response.canvasWidth;
+        screenshot.canvas.height = response.canvasHeight;
+        screenshot.visibleHeight = response.visibleHeight,
+        screenshot.visibleWidth = response.visibleWidth,
         screenshot.scrollXCount = response.scrollXCount;
         screenshot.scrollYCount = response.scrollYCount;
+        screenshot.docWidth = response.docWidth;
+        screenshot.docHeight = response.docHeight;
         setTimeout("screenshot.captureAndScroll()", 100);
         break;
       case 'scroll_next_done':
@@ -129,9 +169,9 @@ var screenshot = {
       var image = new Image();
       image.onload = function() {
         var width = image.height < docHeight ?
-            image.width - screenshot.scrollBarY : image.width;
+            image.width - 17 : image.width;
         var height = image.width < docWidth ?
-            image.height - screenshot.scrollBarX : image.height;
+            image.height - 17 : image.height;
         screenshot.canvas.width = width;
         screenshot.canvas.height = height;
         var context = screenshot.canvas.getContext("2d");
@@ -153,27 +193,34 @@ var screenshot = {
         var context = screenshot.canvas.getContext('2d');
         var width = 0;
         var height = 0;
-        var visibleWidth = image.height < screenshot.canvas.height ?
-            image.width - screenshot.scrollBarY : image.width;
-        var visibleHeight = image.width < screenshot.canvas.width ?
-            image.height - screenshot.scrollBarX : image.height;
-        var x1 = 0;
+        screenshot.scrollBarY = screenshot.visibleHeight < screenshot.docHeight ? 17 : 0;
+        screenshot.scrollBarX = screenshot.visibleWidth < screenshot.docWidth ? 17 : 0;
+        var visibleWidth = (image.width - screenshot.scrollBarY < screenshot.canvas.width ?
+            image.width - screenshot.scrollBarY : screenshot.canvas.width) ;
+        var visibleHeight = (image.height - screenshot.scrollBarX < screenshot.canvas.height ?
+            image.height - screenshot.scrollBarX : screenshot.canvas.height);
+        var x1 = screenshot.startX - screenshot.scrollX;
         var x2 = 0;
-        var y1 = 0;
+        var y1 = screenshot.startY - screenshot.scrollY;
         var y2 = 0;
         if ((screenshot.scrollYCount + 1) * visibleWidth >
             screenshot.canvas.width) {
           width = screenshot.canvas.width % visibleWidth ;
           x1 = (screenshot.scrollYCount + 1) * visibleWidth -
-              screenshot.canvas.width ;
+              screenshot.canvas.width + screenshot.startX - screenshot.scrollX;
         } else {
           width = visibleWidth;
         }
         if ((screenshot.scrollXCount + 1) * visibleHeight >
             screenshot.canvas.height) {
           height = screenshot.canvas.height % visibleHeight;
-          y1 = (screenshot.scrollXCount + 1) * visibleHeight -
-              screenshot.canvas.height;
+          if ((screenshot.scrollXCount + 1) * visibleHeight + screenshot.scrollY < screenshot.docHeight) {
+            y1 = 0;
+          } else {
+            y1 = (screenshot.scrollXCount + 1) * visibleHeight + screenshot.scrollY -
+                screenshot.docHeight ;
+          }
+
         } else {
           height = visibleHeight ;
         }
@@ -197,10 +244,9 @@ var screenshot = {
   postImage: function() {
     // auto save picture
     if (eval(localStorage.autoSave)) {
-      var pluginobj = document.getElementById('pluginobj');
       var data = screenshot.canvas.toDataURL('image/png');
       chrome.tabs.getSelected(null, function(tab) {
-        if (pluginobj.AutoSave(data, tab.title, localStorage.savePath)) {
+        if (plugin.autoSave(data, tab.title, localStorage.savePath)) {
           screenshot.captureStatus = true;
         } else {
           screenshot.captureStatus = false;
@@ -225,14 +271,8 @@ var screenshot = {
     return navigator.userAgent.toLowerCase().indexOf(operationSystem) > -1;
   },
 
-  openSavePath: function() {
-    var pluginobj = document.getElementById('pluginobj');
-    pluginobj.OpenSavePath(localStorage.savePath);
-  },
-
   init: function() {
-    var pluginobj = document.getElementById('pluginobj');
-    var savePath = pluginobj.GetDefaultSavePath();
+    var savePath = plugin.getDefaultSavePath();
     localStorage.savePath = localStorage.savePath ?
         localStorage.savePath : savePath;
     localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';

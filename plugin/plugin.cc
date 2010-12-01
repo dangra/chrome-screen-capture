@@ -49,6 +49,7 @@ const char* kAutoSave = "AutoSave";
 const char* kSetSavePath = "SetSavePath";
 const char* kOpenSavePath = "OpenSavePath";
 const char* kGetDefaultSavePath = "GetDefaultSavePath";
+const char* kSaveToClipboard = "SaveToClipboard";
 
 static NPClass plugin_ref_obj = {
   NP_CLASS_STRUCT_VERSION,
@@ -104,6 +105,8 @@ bool ScriptablePluginObject::Invoke(NPObject* obj, NPIdentifier methodName,
     ret_val = SetSavePath(thisObj, args, argCount, result);
   } else if (!strcmp(name, kGetDefaultSavePath)) {
     ret_val = GetDefaultSavePath(thisObj, args, argCount, result);
+  } else if (!strcmp(name, kSaveToClipboard)) {
+    ret_val = SaveToClipboard(thisObj, args, argCount, result);
   } else {
     // Exception handling. 
     npnfuncs->setexception(obj, "Unknown method");

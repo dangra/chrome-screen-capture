@@ -23,6 +23,7 @@
   "size_huge": {"message": "最大"},
   "line": {"message": " 直线"},
   "edit_tip": {"message": "以下是您的截图，您可以利用左边的工具进行编辑，然后点击“保存” 按钮。"},
+  "copy": {"message": "拷贝"},
   "save": {"message": "保存"},
   "close": {"message": "关闭"},
   "save_image": {"message": "保存图片"},
@@ -38,5 +39,7 @@
   "open_save_path" : {"message" : "在文件夹中显示"},
   "save_and_close": {"message": "保存并关闭"},
   "save_success": {"message": "截图保存成功。"},
-  "save_fail": {"message": "截图保存失败。"}
+  "save_fail": {"message": "截图保存失败。"},
+  "tip_copy_succeed": {"message": "截图拷贝成功。"},
+  "tip_copy_failed": {"message": "截图拷贝失败。"}
 }
