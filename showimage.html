@@ -596,7 +596,7 @@
       for (var i = 0; i < photoshop.markedArea.length; i++) {
         if (photoshop.markedArea[i].id == id) {
           photoshop.markedArea.splice(i, 1);
-          return;
+          break;
         }
       }
       photoshop.removeElement(id);

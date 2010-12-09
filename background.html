@@ -247,13 +247,13 @@ var screenshot = {
         }
       });
       screenshot.showNotification();
-      chrome.extension.getViews({type: 'popup'})[0].close();
     } else {
       chrome.tabs.getSelected(null, function(tab) {
         screenshot.tab = tab;
       });
       chrome.tabs.create({'url': 'showimage.html'});
     }
+    chrome.extension.getViews({type: 'popup'})[0].close();
   },
 
   showNotification: function() {
