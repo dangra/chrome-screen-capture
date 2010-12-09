@@ -20,12 +20,6 @@ var plugin = {
   getDefaultSavePath: function() {
     return this.pluginObj.GetDefaultSavePath();
   },
-  setSavePath: function(savePath, callback, title) {
-    this.pluginObj.SetSavePath(savePath, callback, title);
-  },
-  saveScreenshot: function(data, tabTitle, path, callback, imageTitle) {
-    this.pluginObj.SaveScreenshot(data, tabTitle, path, callback, imageTitle);
-  },
   saveToClipboard: function(data) {
     return this.pluginObj.SaveToClipboard(data);
   }
