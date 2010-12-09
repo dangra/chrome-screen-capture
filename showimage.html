@@ -321,6 +321,7 @@
   </div>
   </div>
   <img id="pic" src="#" style="display:none">
+  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture">
   <script>
   var bg = chrome.extension.getBackgroundPage();
   var canvas = new Canvas();
@@ -813,7 +814,11 @@
     save: function() {
       photoshop.draw();
       var dataUrl = $('canvas').toDataURL('image/png');
-      bg.plugin.saveScreenshot(
+
+      // Here we use the plugin object in showimage.html instead of the plugin object
+      // in background page, so that the SaveScreenshot dialog will be a modal dialog.
+      var pluginobj = document.getElementById('pluginobj');
+      pluginobj.SaveScreenshot(
           dataUrl, photoshop.tabTitle, localStorage.savePath,
           function(success) {
             if (!success)

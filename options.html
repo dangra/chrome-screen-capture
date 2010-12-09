@@ -134,7 +134,10 @@
     document.getElementById('filePath').value = localStorage.savePath =
         localStorage.savePath ? localStorage.savePath : bg.plugin.getDefaultSavePath();
     document.getElementById('setSavePath').addEventListener('click', function() {
-      bg.plugin.setSavePath(localStorage.savePath, function(savePath) {
+      // Here we use the plugin object in options.html instead of the plugin object
+      // in background page, so that the SetSavePath dialog will be a modal dialog.
+      var pluginobj = document.getElementById('pluginobj');
+      pluginobj.SetSavePath(localStorage.savePath, function(savePath) {
         document.getElementById('filePath').value = localStorage.savePath = savePath;
       }, chrome.i18n.getMessage('set_save_path_title'));
     });
@@ -164,6 +167,9 @@
         (localStorage.screenshootQuality == 'jpeg' ? true : false);
     document.getElementById('lossless').checked =
         (localStorage.screenshootQuality == 'png' ? true : false);
+  }
+
+  function setSavePath(callback) {
   }
 
   function i18nReplace(id, name) {
