@@ -202,8 +202,13 @@ static void OnDialogResponse(GtkDialog* dialog, gint response,
     char* file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
     if (dialog == GTK_DIALOG(gSaveDialog)) {
       if (file && gSaveData) {
+        std::string filename = file;
+        int postfix_index = filename.rfind(".png");
+        if (postfix_index == std::string::npos || 
+            postfix_index != (filename.length() - 4))
+          filename += ".png";
         InvokeCallback((NPP)userData, gSaveCallback,
-                       SaveFile(file, gSaveData, gSaveDataLength));
+                       SaveFile(filename.c_str(), gSaveData, gSaveDataLength));
         // To indicate the callback has already been invoked.
         ReleaseSaveCallback();
       }
@@ -246,6 +251,8 @@ bool GetDefaultSavePath(ScriptablePluginObject* obj, const NPVariant* args,
   size_t length = pathStr.length();
 #elif defined GTK
   const char* path = g_get_user_special_dir(G_USER_DIRECTORY_PICTURES);
+  if (path == NULL)
+    path = g_get_home_dir();
   size_t length = strlen(path);
 #elif defined __APPLE__
   std::string pathStr = GetDocumentFolder();
