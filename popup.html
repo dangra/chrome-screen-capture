@@ -92,7 +92,8 @@ body {
   }
 
   function i18nReplace(id, name) {
-    return $(id).innerHTML = chrome.i18n.getMessage(name) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    return $(id).innerHTML = chrome.i18n.getMessage(name) +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
   }
   
   function init() {
