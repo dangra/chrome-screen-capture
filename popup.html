@@ -18,7 +18,9 @@ body {
   margin-top: 5px;
   line-height: 22px;
   text-indent: 1em;
-  width: 170px;
+  min-width:150px;
+  width: auto;
+  white-space:nowrap;
 }
 .menu:hover {
   background-color: #3d5d6a;
@@ -44,23 +46,28 @@ body {
 }
 </style>
 <script type='text/javascript'>
+
+  function $(id) {
+    return document.getElementById(id);
+  }
+  
   chrome.extension.onRequest.addListener(function(request, sender, response) {
     if (request.msg == 'page_capturable') {
-      document.getElementById('tip').style.display = 'none';
-      document.getElementById('captureSpecialPage').style.display = 'none';
-      document.getElementById('captureWindow').style.display = 'block';
-      document.getElementById('captureArea').style.display = 'block';
-      document.getElementById('captureWebpage').style.display = 'block';
+      $('tip').style.display = 'none';
+      $('captureSpecialPage').style.display = 'none';
+      $('captureWindow').style.display = 'block';
+      $('captureArea').style.display = 'block';
+      $('captureWebpage').style.display = 'block';
     } else if (request.msg == 'page_uncapturable') {
       i18nReplace('tip', 'special');
-      document.getElementById('tip').style.display = 'block';
-      document.getElementById('captureSpecialPage').style.display = 'none';
-      document.getElementById('captureWindow').style.display = 'none';
-      document.getElementById('captureArea').style.display = 'none';
-      document.getElementById('captureWebpage').style.display = 'none';
+      $('tip').style.display = 'block';
+      $('captureSpecialPage').style.display = 'none';
+      $('captureWindow').style.display = 'none';
+      $('captureArea').style.display = 'none';
+      $('captureWebpage').style.display = 'none';
     }
   });
-
+  
   function toDo(what) {
     var bg = chrome.extension.getBackgroundPage();
     switch(what) {
@@ -74,8 +81,8 @@ body {
         break;
       case 'capture_webpage':
         bg.screenshot.captureWebpage();
-        document.getElementById('loadDiv').style.display = 'block';
-        document.getElementById('item').style.display = 'none';
+        $('loadDiv').style.display = 'block';
+        $('item').style.display = 'none';
         break;
       case 'capture_special_page':
         bg.screenshot.captureSpecialPage();
@@ -85,9 +92,9 @@ body {
   }
 
   function i18nReplace(id, name) {
-    return document.getElementById(id).innerText = chrome.i18n.getMessage(name);
+    return $(id).innerHTML = chrome.i18n.getMessage(name) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
   }
-
+  
   function init() {
     i18nReplace('captureSpecialPage', 'capture_window');
     i18nReplace('captureWindow', 'capture_window');
@@ -97,19 +104,19 @@ body {
     var isScriptLoad = false;
     chrome.tabs.getSelected(null, function(tab) {
       if (tab.url.indexOf('chrome') == 0) {
-        document.getElementById('tip').style.display = 'none';
-        document.getElementById('captureSpecialPage').style.display = 'block';
+        $('tip').style.display = 'none';
+        $('captureSpecialPage').style.display = 'block';
         return;
       }
       chrome.tabs.sendRequest(tab.id, {msg: 'is_page_capturable'},
         function(response) {
           isScriptLoad = true;
           if (response.msg == 'capturable') {
-            document.getElementById('tip').style.display = 'none';
-            document.getElementById('captureSpecialPage').style.display = 'none';
-            document.getElementById('captureWindow').style.display = 'block';
-            document.getElementById('captureArea').style.display = 'block';
-            document.getElementById('captureWebpage').style.display = 'block';
+            $('tip').style.display = 'none';
+            $('captureSpecialPage').style.display = 'none';
+            $('captureWindow').style.display = 'block';
+            $('captureArea').style.display = 'block';
+            $('captureWebpage').style.display = 'block';
           } else if (response.msg == 'uncapturable'){
             i18nReplace('tip', 'special');
           } else {
@@ -119,8 +126,8 @@ body {
     });
     var insertScript = function() {
       if (isScriptLoad == false) {
-        document.getElementById('tip').style.display = 'none';
-        document.getElementById('captureSpecialPage').style.display = 'block';
+        $('tip').style.display = 'none';
+        $('captureSpecialPage').style.display = 'block';
         chrome.tabs.executeScript(null, {file: 'page.js'});
         chrome.tabs.executeScript(null, {file: 'isLoad.js'});
       }
@@ -129,9 +136,8 @@ body {
   }
 </script>
 </head>
-
 <body onload="init()">
-  <div id="loadDiv" ><img src="loading.gif" alt="">
+  <div id="loadDiv" ><img src="loading.gif" alt=""/>
     <div id="capturing"></div>
   </div>
   <div id="tip"></div>
