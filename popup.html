@@ -21,6 +21,7 @@ body {
   min-width:150px;
   width: auto;
   white-space:nowrap;
+  padding:0px 35px 0px 0px; 
 }
 .menu:hover {
   background-color: #3d5d6a;
@@ -92,8 +93,7 @@ body {
   }
 
   function i18nReplace(id, name) {
-    return $(id).innerHTML = chrome.i18n.getMessage(name) +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    return $(id).innerHTML = chrome.i18n.getMessage(name);
   }
   
   function init() {
@@ -138,7 +138,7 @@ body {
 </script>
 </head>
 <body onload="init()">
-  <div id="loadDiv" ><img src="loading.gif" alt=""/>
+  <div id="loadDiv" ><img src="loading.gif" alt="">
     <div id="capturing"></div>
   </div>
   <div id="tip"></div>
