@@ -8,25 +8,56 @@
 <style type="text/css">
 body {
   font-family: arial, Verdana;
-  font-size: 13px;
+  font-size: 12px;
+  min-width: 240px; 
 }
+
 .menu {
-  border: 1px solid #bec9ce;
   color: #3d5d6a;
-  cursor: pointer;
-  display: none;
   margin-top: 5px;
   line-height: 22px;
   text-indent: 1em;
-  min-width:150px;
-  width: auto;
-  white-space:nowrap;
-  padding:0px 35px 0px 0px; 
+  float: left;
+  white-space: nowrap;
+  padding: 0px 10px 0px 15px; 
+  background-repeat: no-repeat no-repeat;
+  background-position:  5px 5px;
+
 }
-.menu:hover {
-  background-color: #3d5d6a;
-  color: #ffffff;
+
+.menuI {
+	display: none;	
 }
+.right {
+	color:  #A1A192;
+	float: right;
+	padding: 8px 5px 0px 0px 
+}
+
+ul {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;	
+}
+
+li {
+	list-style: none;
+	cursor: pointer;
+	margin: 0px;
+	padding: 0px;
+    clear: both;
+    overflow: hidden;
+    border: 1px solid white;    
+}
+
+ li:hover {
+ 	border-radius: 3px 3px;	      
+    background: -webkit-gradient(linear, left top, left bottom,		
+             color-stop(0, #fff),  color-stop(0.4, hsl(215, 67%, 97%)), 
+             color-stop(0.41, hsl(213, 48%, 95%)));	
+     border: solid 1px #c5cdd3;  
+  } 
+
 #loadDiv {
   color: #3d5d6a;
   display: none;
@@ -36,14 +67,13 @@ body {
   margin-top: 20px;
   line-height: 40px;
   text-align: center;
-  width: 180px;
 }
+
 #tip {
   color: #3d5d6a;
   font-size: 12px;
   font-family: Verdana, simsun;
   text-align: left;
-  width: 170px;
 }
 </style>
 <script type='text/javascript'>
@@ -55,20 +85,20 @@ body {
   chrome.extension.onRequest.addListener(function(request, sender, response) {
     if (request.msg == 'page_capturable') {
       $('tip').style.display = 'none';
-      $('captureSpecialPage').style.display = 'none';
-      $('captureWindow').style.display = 'block';
-      $('captureArea').style.display = 'block';
-      $('captureWebpage').style.display = 'block';
+      $('captureSpecialPageItem').style.display = 'none';
+      $('captureWindowItem').style.display = 'block';
+      $('captureAreaItem').style.display = 'block';
+      $('captureWebpageItem').style.display = 'block';
     } else if (request.msg == 'page_uncapturable') {
       i18nReplace('tip', 'special');
       $('tip').style.display = 'block';
-      $('captureSpecialPage').style.display = 'none';
-      $('captureWindow').style.display = 'none';
-      $('captureArea').style.display = 'none';
-      $('captureWebpage').style.display = 'none';
+      $('captureSpecialPageItem').style.display = 'none';
+      $('captureWindowItem').style.display = 'none';
+      $('captureAreaItem').style.display = 'none';
+      $('captureWebpageItem').style.display = 'none';
     }
   });
-  
+    
   function toDo(what) {
     var bg = chrome.extension.getBackgroundPage();
     switch(what) {
@@ -106,7 +136,7 @@ body {
     chrome.tabs.getSelected(null, function(tab) {
       if (tab.url.indexOf('chrome') == 0) {
         $('tip').style.display = 'none';
-        $('captureSpecialPage').style.display = 'block';
+        $('captureSpecialPageItem').style.display = 'block';
         return;
       }
       chrome.tabs.sendRequest(tab.id, {msg: 'is_page_capturable'},
@@ -114,10 +144,10 @@ body {
           isScriptLoad = true;
           if (response.msg == 'capturable') {
             $('tip').style.display = 'none';
-            $('captureSpecialPage').style.display = 'none';
-            $('captureWindow').style.display = 'block';
-            $('captureArea').style.display = 'block';
-            $('captureWebpage').style.display = 'block';
+            $('captureSpecialPageItem').style.display = 'none';
+            $('captureWindowItem').style.display = 'block';
+            $('captureAreaItem').style.display = 'block';
+            $('captureWebpageItem').style.display = 'block';
           } else if (response.msg == 'uncapturable'){
             i18nReplace('tip', 'special');
           } else {
@@ -128,7 +158,7 @@ body {
     var insertScript = function() {
       if (isScriptLoad == false) {
         $('tip').style.display = 'none';
-        $('captureSpecialPage').style.display = 'block';
+        $('captureSpecialPageItem').style.display = 'block';
         chrome.tabs.executeScript(null, {file: 'page.js'});
         chrome.tabs.executeScript(null, {file: 'isLoad.js'});
       }
@@ -143,14 +173,24 @@ body {
   </div>
   <div id="tip"></div>
   <div id="item">
-    <div class="menu" onclick="toDo('capture_special_page');"
-         id="captureSpecialPage"></div>
-    <div class="menu" onclick="toDo('capture_window');"
-         id="captureWindow"></div>
-    <div class="menu" onclick="toDo('capture_area');"
-         id="captureArea"></div>
-    <div class="menu" onclick="toDo('capture_webpage');"
-         id="captureWebpage"></div>
+  <ul><li id="captureSpecialPageItem" class="menuI" 
+          onclick="toDo('capture_special_page');">
+    <div class="menu"id="captureSpecialPage" 
+             style="background-image: url(images/screem.png);">
+      </div><div class="right"></div></li>
+   <li id="captureWindowItem"  class="menuI" onclick="toDo('capture_window');">
+   <div class="menu"  id="captureWindow" 
+            style="background-image: url(images/screem.png);"></div>
+         <div class="right">Ctrl+Alt+V</div></li>
+    <li id="captureAreaItem"  class="menuI"   onclick="toDo('capture_area');">
+    <div class="menu"id="captureArea"
+         style="background-image: url(images/custom.png);"></div>
+       <div class="right">Ctrl+Alt+R</div></li>
+    <li id="captureWebpageItem"  class="menuI"   onclick="toDo('capture_webpage');">
+         <div class="menu"  id="captureWebpage"
+          style="background-image: url(images/whole.png);"></div>
+    <div class="right">Ctrl+Alt+H</div></li></ul>
   </div>
 </body>
 </html>
+

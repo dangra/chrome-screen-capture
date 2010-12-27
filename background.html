@@ -50,8 +50,17 @@ var screenshot = {
       var obj = request;
       switch(obj.msg) {
         case 'capture_selected':
-            screenshot.captureSelected();
+          screenshot.captureSelected();
           break;
+       case 'capture_window':
+         screenshot.captureWindow(); 
+         break;
+      case 'capture_area':
+         screenshot.showSelectionArea();
+         break;
+      case 'capture_webpage':
+         screenshot.captureWebpage();   
+         break
       }
     });
   },
