@@ -287,13 +287,13 @@ var page = {
 
     var areaElement = $('sc_drag_area');
     areaElement.style.left = (document.body.scrollLeft +
-      (document.documentElement.clientWidth - 
-      areaElement.offsetWidth) / 2) + "px";
+        (document.documentElement.clientWidth - 
+        areaElement.offsetWidth) / 2) + 'px';
     areaElement.style.top = (document.body.scrollTop + 
-      (document.documentElement.clientHeight - 200 -
-      areaElement.offsetHeight) / 2) + "px";
-    areaElement.style.width = "250px";
-    areaElement.style.height = "150px";
+        (document.documentElement.clientHeight - 200 -
+        areaElement.offsetHeight) / 2) + 'px';
+    areaElement.style.width = '250px';
+    areaElement.style.height = '150px';
     page.isSelectionAreaTurnOn = true;
 
     page.updateShadow(areaElement);
