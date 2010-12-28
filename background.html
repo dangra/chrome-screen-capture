@@ -59,7 +59,7 @@ var screenshot = {
           screenshot.showSelectionArea();
           break;
         case 'capture_webpage':
-          screenshot.captureWebpage();   
+          screenshot.captureWebpage();
           break
       }
     });
@@ -279,6 +279,14 @@ var screenshot = {
     localStorage.savePath = localStorage.savePath ?
         localStorage.savePath : savePath;
     localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';
+    chrome.windows.getCurrent(function(window) {
+      chrome.tabs.getAllInWindow(window.id, function(tabs) {
+        for(var i = 0; i < tabs.length; ++i) {
+          chrome.tabs.executeScript(tabs[i].id, {file: 'toshortcut.js'});
+          chrome.tabs.executeScript(tabs[i].id, {file: 'page.js'});
+        }
+      });
+    });
     screenshot.addMessageListener();
   }
 };
