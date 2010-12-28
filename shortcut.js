@@ -6,9 +6,9 @@ var toshortcut = {
 
   doshortcut: function (event) {
     if (event.ctrlKey && event.altKey) {
-      if(window.event.keyCode == 67) {
+      if(window.event.keyCode == 86) {
         toshortcut.sendMessage({msg: 'capture_area'});
-      } else if(window.event.keyCode == 86) {
+      } else if(window.event.keyCode == 67) {
         toshortcut.sendMessage({msg: 'capture_window'});       
       } else if(window.event.keyCode == 88) {
         toshortcut.sendMessage({msg: 'capture_webpage'});
