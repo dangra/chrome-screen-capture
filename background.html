@@ -266,7 +266,8 @@ var screenshot = {
   },
 
   showNotification: function() {
-    var htmlNotification = webkitNotifications.createHTMLNotification('notification.html');
+    var htmlNotification = webkitNotifications.
+        createHTMLNotification('notification.html');
     htmlNotification.show();
   },
 
@@ -274,14 +275,16 @@ var screenshot = {
     return navigator.userAgent.toLowerCase().indexOf(operationSystem) > -1;
   },
   
-  isInitTab: function() {
-    chrome.windows.getCurrent(function(window) {
-      chrome.tabs.getAllInWindow(window.id, function(tabs) {
-        for(var i = 0; i < tabs.length; ++i) {
-          chrome.tabs.executeScript(tabs[i].id, {file: 'toshortcut.js'});
-          chrome.tabs.executeScript(tabs[i].id, {file: 'page.js'});
-        }
-      });
+  executeScriptsInExistingTabs: function() {
+    chrome.windows.getAll(null, function(wins) {
+      for (var j = 0; j < wins.length; ++j) {
+        chrome.tabs.getAllInWindow(wins[j].id, function(tabs) {
+          for (var i = 0; i < tabs.length; ++i) {
+            chrome.tabs.executeScript(tabs[i].id, {file: 'toshortcut.js'});
+            chrome.tabs.executeScript(tabs[i].id, {file: 'page.js'});
+          }
+        });
+      }
     });
   },
   
@@ -290,7 +293,7 @@ var screenshot = {
     localStorage.savePath = localStorage.savePath ?
         localStorage.savePath : savePath;
     localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';
-    screenshot.isInitTab();
+    screenshot.executeScriptsInExistingTabs();
     screenshot.addMessageListener();
   }
 };
