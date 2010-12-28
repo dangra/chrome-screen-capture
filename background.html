@@ -280,7 +280,7 @@ var screenshot = {
       for (var j = 0; j < wins.length; ++j) {
         chrome.tabs.getAllInWindow(wins[j].id, function(tabs) {
           for (var i = 0; i < tabs.length; ++i) {
-            chrome.tabs.executeScript(tabs[i].id, {file: 'toshortcut.js'});
+            chrome.tabs.executeScript(tabs[i].id, {file: 'shortcut.js'});
             chrome.tabs.executeScript(tabs[i].id, {file: 'page.js'});
           }
         });
