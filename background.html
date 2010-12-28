@@ -273,12 +273,8 @@ var screenshot = {
   isThisPlatform: function(operationSystem) {
     return navigator.userAgent.toLowerCase().indexOf(operationSystem) > -1;
   },
-
-  init: function() {
-    var savePath = plugin.getDefaultSavePath();
-    localStorage.savePath = localStorage.savePath ?
-        localStorage.savePath : savePath;
-    localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';
+  
+  isInitTab:function() {
     chrome.windows.getCurrent(function(window) {
       chrome.tabs.getAllInWindow(window.id, function(tabs) {
         for(var i = 0; i < tabs.length; ++i) {
@@ -287,6 +283,14 @@ var screenshot = {
         }
       });
     });
+  },
+  
+  init: function() {
+    var savePath = plugin.getDefaultSavePath();
+    localStorage.savePath = localStorage.savePath ?
+        localStorage.savePath : savePath;
+    localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';
+    screenshot.isInitTab();
     screenshot.addMessageListener();
   }
 };
