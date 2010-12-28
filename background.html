@@ -274,7 +274,7 @@ var screenshot = {
     return navigator.userAgent.toLowerCase().indexOf(operationSystem) > -1;
   },
   
-  isInitTab:function() {
+  isInitTab: function() {
     chrome.windows.getCurrent(function(window) {
       chrome.tabs.getAllInWindow(window.id, function(tabs) {
         for(var i = 0; i < tabs.length; ++i) {
