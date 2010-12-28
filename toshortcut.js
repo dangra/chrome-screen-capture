@@ -1,9 +1,7 @@
 var toshortcut = { 
 
   init: function() {
-    if(toshortcut.doshortcut != document.body.onkeydown) {
-      document.body.onkeydown = toshortcut.doshortcut;
-    }
+    document.body.addEventListener("keydown", toshortcut.doshortcut, false);
   },
 
   doshortcut: function (event) {
