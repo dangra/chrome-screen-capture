@@ -48,18 +48,25 @@ var screenshot = {
   addMessageListener: function() {
     chrome.extension.onRequest.addListener(function(request, sender, response) {
       var obj = request;
+      var isShortcut =  eval(localStorage.settingShortcut);
       switch(obj.msg) {
         case 'capture_selected':
           screenshot.captureSelected();
           break;
         case 'capture_window':
-          screenshot.captureWindow(); 
+          if (isShortcut) {
+            screenshot.captureWindow();
+          } 
           break;
         case 'capture_area':
-          screenshot.showSelectionArea();
+          if (isShortcut) {
+            screenshot.showSelectionArea();
+          }
           break;
         case 'capture_webpage':
-          screenshot.captureWebpage();
+          if (isShortcut) {
+            screenshot.captureWebpage();
+          }
           break
       }
     });

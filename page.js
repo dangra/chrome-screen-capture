@@ -559,7 +559,7 @@ var page = {
   */
   init: function() { 
     if (document.body.hasAttribute('isExecuteScrip')) {
-      return
+      return;
     }
     if (isPageCapturable()) {
       chrome.extension.sendRequest({msg: 'page_capturable'});

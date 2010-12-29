@@ -9,7 +9,8 @@
 body {
   font-family: arial, Verdana;
   font-size: 12px;
-  min-width: 250px; 
+  width: auto;
+  overflow: visible;
 }
 .menu {
   color: #3d5d6a;
@@ -23,11 +24,6 @@ body {
 }
 .menuI {
 	display: none;	
-}
-.right {
-	color:  #A1A192;
-	float: right;
-	padding: 5px 0px 0px 3px
 }
 ul {
 	list-style: none;
@@ -119,10 +115,18 @@ li {
   
   function init() {
     i18nReplace('captureSpecialPage', 'capture_window');
-    i18nReplace('captureWindow', 'capture_window');
-    i18nReplace('captureArea', 'capture_area');
-    i18nReplace('captureWebpage', 'capture_webpage');
     i18nReplace('capturing', 'capturing');
+    if (eval(localStorage.settingShortcut)) {
+      i18nReplace('captureWindow', 'capture_window_shortcut');
+      i18nReplace('captureArea', 'capture_area_shortCut');
+      i18nReplace('captureWebpage', 'capture_webpage_shortCut');
+      document.body.style.minWidth = "190px"
+    } else {
+      i18nReplace('captureWindow', 'capture_window');
+      i18nReplace('captureArea', 'capture_area');
+      i18nReplace('captureWebpage', 'capture_webpage');
+      document.body.style.minWidth = "140px";
+    }
     var isScriptLoad = false;
     chrome.tabs.getSelected(null, function(tab) {
       if (tab.url.indexOf('chrome') == 0) {
@@ -167,21 +171,21 @@ li {
       onclick="toDo('capture_special_page');">
   <div class="menu"id="captureSpecialPage" 
       style="background-image: url(images/screen.png);">
-  </div><div class="right"></div></li>
+  </div></li>
   <li id="captureWindowItem"  class="menuI" 
       onclick="toDo('capture_window');">
   <div class="menu"  id="captureWindow" 
       style="background-image: url(images/screen.png);"></div>
-  <div class="right">Ctrl+Alt+C</div></li>
+  </li>
   <li id="captureAreaItem" class="menuI" onclick="toDo('capture_area');">
   <div class="menu"id="captureArea"
       style="background-image: url(images/custom.png);"></div>
-  <div class="right">Ctrl+Alt+V</div></li>
+</li>
   <li id="captureWebpageItem"  class="menuI"   
       onclick="toDo('capture_webpage');">
   <div class="menu"  id="captureWebpage"
       style="background-image: url(images/whole.png);"></div>
-  <div class="right">Ctrl+Alt+B</div></li></ul>
+  </li></ul>
   </div>
 </body>
 </html>

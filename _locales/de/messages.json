@@ -1,4 +1,4 @@
-{
+﻿{
    "autosave": {
       "message": "Autospeichern - nach dem Erfassen, den Bearbeiten-Bildschirm überspringen und den erfassten Bereich direkt am Standard-Speicherort mit dem Webseiten-Titel als Dateinamen speichern"
    },
@@ -16,6 +16,15 @@
    },
    "capture_webpage": {
       "message": "Gesamte Seite"
+   },
+   "capture_window_shortcut": {
+      "message": "Sichtbaren Bereich  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ctrl+Alt+C"
+   },
+   "capture_area_shortCut": {
+      "message": "Ausgewählten Bereich &nbsp; Ctrl+Alt+V"
+   },
+   "capture_webpage_shortCut": {
+      "message": "Gesamte Seite  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ctrl+Alt+B"
    },
    "capture_window": {
       "message": "Sichtbaren Bereich"

@@ -1,4 +1,4 @@
-{
+﻿{
    "autosave": {
       "message": "Autozapis - po przechwyceniu, pomiń ekran edycji i zapisz bezpośrednio w domyślnym katalogu z tytułem strony jako nazwa pliku"
    },
@@ -88,6 +88,15 @@
    },
    "save_setting": {
       "message": "Ustawienia Zapisu Zrzutu Ekranu: "
+   },
+   "capture_window_shortcut": {
+      "message": "Przechwyć Widoczny Obszar &nbsp;&nbsp; Ctrl+Alt+C"
+   },
+   "capture_area_shortCut": {
+      "message": "Przechwyć Wybrany Obszar &nbsp;&nbsp;&nbsp;&nbsp;  Ctrl+Alt+V"
+   },
+   "capture_webpage_shortCut": {
+      "message": "Przechwyć Całą Stronę &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; Ctrl+Alt+B"
    },
    "save_success": {
       "message": "Zrzut ekranu zapisany."
