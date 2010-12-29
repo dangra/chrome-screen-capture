@@ -295,6 +295,13 @@ var screenshot = {
     });
   },
   
+  
+  setShortcutEnableInFirst: function() {
+    if (undefined == eval(localStorage.settingShortcut)) {     
+      localStorage.settingShortcut = true;
+    }
+  },
+  
   init: function() {
     var savePath = plugin.getDefaultSavePath();
     localStorage.savePath = localStorage.savePath ?
@@ -302,6 +309,7 @@ var screenshot = {
     localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';
     screenshot.executeScriptsInExistingTabs();
     screenshot.addMessageListener();
+    screenshot.setShortcutEnableInFirst()
   }
 };
 

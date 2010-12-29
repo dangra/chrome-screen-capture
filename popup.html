@@ -22,6 +22,10 @@ body {
   background-repeat: no-repeat no-repeat;
   background-position: 6px 5px;
 }
+.right {
+	color:  #A1A192;
+	float: right;
+}
 .menuI {
 	display: none;	
 }
@@ -116,15 +120,15 @@ li {
   function init() {
     i18nReplace('captureSpecialPage', 'capture_window');
     i18nReplace('capturing', 'capturing');
+    i18nReplace('captureWindowText', 'capture_window');
+    i18nReplace('captureAreaText', 'capture_area');
+    i18nReplace('captureWebpageText', 'capture_webpage');
     if (eval(localStorage.settingShortcut)) {
-      i18nReplace('captureWindow', 'capture_window_shortcut');
-      i18nReplace('captureArea', 'capture_area_shortCut');
-      i18nReplace('captureWebpage', 'capture_webpage_shortCut');
+      i18nReplace('captureWindowShortcut', 'capture_window_shortcut');
+      i18nReplace('captureAreaShortcut', 'capture_area_shortCut');
+      i18nReplace('captureWebpageShortcut', 'capture_webpage_shortCut');
       document.body.style.minWidth = "190px"
-    } else {
-      i18nReplace('captureWindow', 'capture_window');
-      i18nReplace('captureArea', 'capture_area');
-      i18nReplace('captureWebpage', 'capture_webpage');
+    } else { 
       document.body.style.minWidth = "140px";
     }
     var isScriptLoad = false;
@@ -175,17 +179,22 @@ li {
   <li id="captureWindowItem"  class="menuI" 
       onclick="toDo('capture_window');">
   <div class="menu"  id="captureWindow" 
-      style="background-image: url(images/screen.png);"></div>
-  </li>
+      style="background-image: url(images/screen.png);">
+      <span id="captureWindowText" style="float:left;">
+      </span><span class="right"  id="captureWindowShortcut">
+      </span></div> </li>
   <li id="captureAreaItem" class="menuI" onclick="toDo('capture_area');">
   <div class="menu"id="captureArea"
-      style="background-image: url(images/custom.png);"></div>
-</li>
-  <li id="captureWebpageItem"  class="menuI"   
+      style="background-image: url(images/custom.png);">
+      <span id="captureAreaText" style="float:left;"></span>
+      <span class="right"  id="captureAreaShortcut"></span></div>
+  </li><li id="captureWebpageItem"  class="menuI"   
       onclick="toDo('capture_webpage');">
   <div class="menu"  id="captureWebpage"
-      style="background-image: url(images/whole.png);"></div>
-  </li></ul>
+      style="background-image: url(images/whole.png);">
+      <span id="captureWebpageText" style="float:left;">
+      </span><span class="right" id="captureWebpageShortcut">
+      </span></div></li></ul>
   </div>
 </body>
 </html>
