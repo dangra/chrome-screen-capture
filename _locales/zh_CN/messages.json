@@ -37,7 +37,7 @@
   "save_setting": {"message": "截图保存设置："},
   "save_tip": {"message": "默认保存位置："},
   "shortcut_setting": {"message": "快捷键设置："},
-  "shortcutsetting_text": {"message": "是否使用网页截图快捷键"},
+  "shortcutsetting_text": {"message": "使用网页截图快捷键"},
   "autosave" : {"message" : "自动保存 - 截图后，不进行编辑，直接以网页标题为文件名保存到默认位置"},
   "set_save_path" : {"message" : "浏览..."},
   "set_save_path_title" : {"message": "选择默认保存位置"},
