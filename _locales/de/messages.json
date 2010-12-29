@@ -18,13 +18,13 @@
       "message": "Gesamte Seite"
    },
    "capture_window_shortcut": {
-      "message": "Ctrl+Alt+C"
+      "message": "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ctrl+Alt+C"
    },
    "capture_area_shortCut": {
       "message": "Ctrl+Alt+V"
    },
    "capture_webpage_shortCut": {
-      "message": "Ctrl+Alt+B"
+      "message": "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ctrl+Alt+B"
    },
    "capture_window": {
       "message": "Sichtbaren Bereich"

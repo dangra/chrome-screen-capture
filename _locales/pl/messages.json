@@ -93,10 +93,10 @@
       "message": "Ctrl+Alt+C"
    },
    "capture_area_shortCut": {
-   "message": "Ctrl+Alt+V"
+   "message": "&nbsp;&nbsp;Ctrl+Alt+V"
    },
    "capture_webpage_shortCut": {
-      "message": "Ctrl+Alt+B"
+      "message": "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ctrl+Alt+B"
    },
    "save_success": {
       "message": "Zrzut ekranu zapisany."
