@@ -1,16 +1,10 @@
 var toshortcut = { 
 
-  init: function() {
-    var doc = document.body.attributes;
-    try {
-      if ("true" == doc.getNamedItem("isExecuteScrip").value) {
-        return;
-      }
-    } catch(e) {
-      var namedItem = document.createAttribute("isExecuteScrip");
-      namedItem.value = "true";     
-      doc.setNamedItem(namedItem);
+  init: function() {      
+    if (document.body.hasAttribute('isExecuteScrip')) {
+      return;
     }
+    document.body.setAttribute('isExecuteScrip');
     document.body.addEventListener('keydown', toshortcut.doshortcut, false);
   },
 
@@ -20,7 +14,7 @@ var toshortcut = {
         toshortcut.sendMessage({msg: 'capture_area'});
       } else if(window.event.keyCode == 67) {
         toshortcut.sendMessage({msg: 'capture_window'});       
-      } else if(window.event.keyCode == 88) {
+      } else if(window.event.keyCode == 66) {
         toshortcut.sendMessage({msg: 'capture_webpage'});
       }     
     }

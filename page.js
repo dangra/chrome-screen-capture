@@ -557,13 +557,10 @@ var page = {
   /**
   * Remove an element
   */
-  init: function() {
-     try {
-       var doc = document.body.attributes;
-       if ("true" == doc.getNamedItem("isExecuteScrip").value) {
-         return;
-       }
-    } catch(e) {}
+  init: function() { 
+    if (document.body.hasAttribute('isExecuteScrip')) {
+      return
+    }
     if (isPageCapturable()) {
       chrome.extension.sendRequest({msg: 'page_capturable'});
     } else {
