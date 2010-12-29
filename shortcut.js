@@ -1,7 +1,17 @@
 var toshortcut = { 
 
   init: function() {
-    document.body.addEventListener("keydown", toshortcut.doshortcut, false);
+    var doc = document.body.attributes;
+    try {
+      if ("true" == doc.getNamedItem("isExecuteScrip").value) {
+        return;
+      }
+    } catch(e) {
+      var namedItem = document.createAttribute("isExecuteScrip");
+      namedItem.value = "true";     
+      doc.setNamedItem(namedItem);
+    }
+    document.body.addEventListener('keydown', toshortcut.doshortcut, false);
   },
 
   doshortcut: function (event) {
