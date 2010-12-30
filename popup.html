@@ -18,37 +18,38 @@ body {
   text-indent: 1em;
   float: left;
   white-space: nowrap;
-  padding: 1px 10px 0px 15px; 
+  padding: 1px 5px 0px 15px; 
   background-repeat: no-repeat no-repeat;
   background-position: 6px 5px;
 }
 .right {
-	color:  #A1A192;
-	float: right;
+  color:  #A1A192;
+  float: right;
+  display : none;
 }
 .menuI {
-	display: none;	
+  display: none;	
 }
 ul {
-	list-style: none;
-	margin: 0px;
-	padding: 0px;	
+  list-style: none;
+  margin: 0px;
+  padding: 0px;	
 }
 li {
-	list-style: none;
-	cursor: pointer;
-	margin: 0px;
-	padding: 0px;
-    clear: both;
-    overflow: hidden;
-    border: 1px solid white;    
+  list-style: none;
+  cursor: pointer;
+  margin: 0px;
+  padding: 0px;
+  clear: both;
+  overflow: hidden;
+  border: 1px solid white;    
 }
  li:hover {
- 	border-radius: 3px 3px;	      
-    background: -webkit-gradient(linear, left top, left bottom,		
-             color-stop(0, #fff),  color-stop(0.4, hsl(215, 67%, 97%)), 
-             color-stop(0.41, hsl(213, 48%, 95%)));	
-     border: solid 1px #c5cdd3;  
+  border-radius: 3px 3px;	      
+  background: -webkit-gradient(linear, left top, left bottom,		
+      color-stop(0, #fff),  color-stop(0.4, hsl(215, 67%, 97%)), 
+      color-stop(0.41, hsl(213, 48%, 95%)));	
+  border: solid 1px #c5cdd3;  
   } 
 #loadDiv {
   color: #3d5d6a;
@@ -117,6 +118,10 @@ li {
     return $(id).innerHTML = chrome.i18n.getMessage(name);
   }
   
+  function resizeDivWidth(id, width) {
+    $(id).style.width = width + "px";
+  }
+  
   function init() {
     i18nReplace('captureSpecialPage', 'capture_window');
     i18nReplace('capturing', 'capturing');
@@ -124,11 +129,14 @@ li {
     i18nReplace('captureAreaText', 'capture_area');
     i18nReplace('captureWebpageText', 'capture_webpage');
     if (eval(localStorage.settingShortcut)) {
-      i18nReplace('captureWindowShortcut', 'capture_window_shortcut');
-      i18nReplace('captureAreaShortcut', 'capture_area_shortCut');
-      i18nReplace('captureWebpageShortcut', 'capture_webpage_shortCut');
+      $('captureWindowShortcut').style.display = 'inline';
+      $('captureAreaShortcut').style.display = 'inline';
+      $('captureWebpageShortcut').style.display = 'inline';
       document.body.style.minWidth = "190px"
     } else { 
+      $('captureWindowShortcut').style.display = 'none';
+      $('captureAreaShortcut').style.display = 'none';
+      $('captureWebpageShortcut').style.display = 'none';
       document.body.style.minWidth = "140px";
     }
     var isScriptLoad = false;
@@ -147,6 +155,10 @@ li {
             $('captureWindowItem').style.display = 'block';
             $('captureAreaItem').style.display = 'block';
             $('captureWebpageItem').style.display = 'block';
+            var liWidth = $('captureWindowItem')['scrollWidth'];
+            resizeDivWidth('captureWindow', liWidth);
+            resizeDivWidth('captureArea', liWidth);
+            resizeDivWidth('captureWebpage', liWidth);
           } else if (response.msg == 'uncapturable'){
             i18nReplace('tip', 'special');
           } else {
@@ -182,19 +194,19 @@ li {
       style="background-image: url(images/screen.png);">
       <span id="captureWindowText" style="float:left;">
       </span><span class="right"  id="captureWindowShortcut">
-      </span></div> </li>
+      Ctrl+Alt+C</span></div> </li>
   <li id="captureAreaItem" class="menuI" onclick="toDo('capture_area');">
   <div class="menu"id="captureArea"
       style="background-image: url(images/custom.png);">
       <span id="captureAreaText" style="float:left;"></span>
-      <span class="right"  id="captureAreaShortcut"></span></div>
+      <span class="right"  id="captureAreaShortcut">Ctrl+Alt+V</span></div>
   </li><li id="captureWebpageItem"  class="menuI"   
       onclick="toDo('capture_webpage');">
   <div class="menu"  id="captureWebpage"
       style="background-image: url(images/whole.png);">
       <span id="captureWebpageText" style="float:left;">
       </span><span class="right" id="captureWebpageShortcut">
-      </span></div></li></ul>
+      Ctrl+Alt+B</span></div></li></ul>
   </div>
 </body>
 </html>
