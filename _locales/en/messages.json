@@ -1,10 +1,12 @@
-{
+﻿{
   "name": {"message": "Screen Capture (by Google)"},
   "description": {"message": "Capture visible content of a tab, a region of a web page, or the whole page as a PNG image. Support horizontal and vertical scroll when capturing whole page, with an all new autosave capability."},
   "default_title": {"message": "Screen Capture"},
   "capture_window": {"message": "Capture Visible Content"},
   "capture_area": {"message": "Capture Region"},
   "capture_webpage": {"message": "Capture Whole Page"},
+  "shortcut_setting": {"message": "Shortcut Settings:"},
+  "shortcutsetting_text": {"message": "Enable keyboard shortcuts"},
   "special": {"message": "This is a special page. Unable to perform screen capture actions on this page."},
   "loading": {"message": "The page is loading, please wait."},
   "capturing": {"message": "Capturing, please wait..."},

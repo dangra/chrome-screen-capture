@@ -48,10 +48,26 @@ var screenshot = {
   addMessageListener: function() {
     chrome.extension.onRequest.addListener(function(request, sender, response) {
       var obj = request;
+      var isShortcut =  eval(localStorage.settingShortcut);
       switch(obj.msg) {
         case 'capture_selected':
-            screenshot.captureSelected();
+          screenshot.captureSelected();
           break;
+        case 'capture_window':
+          if (isShortcut) {
+            screenshot.captureWindow();
+          } 
+          break;
+        case 'capture_area':
+          if (isShortcut) {
+            screenshot.showSelectionArea();
+          }
+          break;
+        case 'capture_webpage':
+          if (isShortcut) {
+            screenshot.captureWebpage();
+          }
+          break
       }
     });
   },
@@ -257,19 +273,35 @@ var screenshot = {
   },
 
   showNotification: function() {
-    var htmlNotification = webkitNotifications.createHTMLNotification('notification.html');
+    var htmlNotification = webkitNotifications.
+        createHTMLNotification('notification.html');
     htmlNotification.show();
   },
 
   isThisPlatform: function(operationSystem) {
     return navigator.userAgent.toLowerCase().indexOf(operationSystem) > -1;
   },
-
+  
+  executeScriptsInExistingTabs: function() {
+    chrome.windows.getAll(null, function(wins) {
+      for (var j = 0; j < wins.length; ++j) {
+        chrome.tabs.getAllInWindow(wins[j].id, function(tabs) {
+          for (var i = 0; i < tabs.length; ++i) {
+            chrome.tabs.executeScript(tabs[i].id, {file: 'page.js'}); 
+            chrome.tabs.executeScript(tabs[i].id, {file: 'shortcut.js'});
+          }
+        });
+      }
+    });
+  },
+  
   init: function() {
     var savePath = plugin.getDefaultSavePath();
     localStorage.savePath = localStorage.savePath ?
         localStorage.savePath : savePath;
+    localStorage.settingShortcut = localStorage.settingShortcut || true;
     localStorage.screenshootQuality = localStorage.screenshootQuality || 'png';
+    screenshot.executeScriptsInExistingTabs();
     screenshot.addMessageListener();
   }
 };

@@ -286,10 +286,14 @@ var page = {
     page.pageWidth = $('sc_drag_area_protector').clientWidth;
 
     var areaElement = $('sc_drag_area');
-    areaElement.style.left = page.startX = 0;
-    areaElement.style.top = page.startY = 0;
-    areaElement.style.width =0;
-    areaElement.style.height = 0;
+    areaElement.style.left = (document.body.scrollLeft +
+        (document.documentElement.clientWidth - 
+        areaElement.offsetWidth) / 2) + 'px';
+    areaElement.style.top = (document.body.scrollTop + 
+        (document.documentElement.clientHeight - 200 -
+        areaElement.offsetHeight) / 2) + 'px';
+    areaElement.style.width = '250px';
+    areaElement.style.height = '150px';
     page.isSelectionAreaTurnOn = true;
 
     page.updateShadow(areaElement);
@@ -553,7 +557,10 @@ var page = {
   /**
   * Remove an element
   */
-  init: function() {
+  init: function() { 
+    if (document.body.hasAttribute('isExecuteScrip')) {
+      return;
+    }
     if (isPageCapturable()) {
       chrome.extension.sendRequest({msg: 'page_capturable'});
     } else {

@@ -39,6 +39,9 @@
     font-family: verdana, arial, sans-serif, simsun;
     font-size: 14px;
   }
+  input {
+    cursor: pointer;
+  }
   .section-header {
     background: #ebeff9;
     border-top: 1px solid #b5c7de;
@@ -58,6 +61,7 @@
     padding: 30px;
     text-align: left;
     margin: 50px auto 20px auto;
+    height: auto;
     width: 600px;
   }
   .section-content {
@@ -118,7 +122,11 @@
   </style>
   <script>
   var bg = chrome.extension.getBackgroundPage();
-
+  
+  function $(id) {
+    return document.getElementById(id);
+  }
+  
   function init() {
     i18nReplace('optionTitle', 'options');
     i18nReplace('saveAndClose', 'save_and_close');
@@ -126,22 +134,25 @@
     i18nReplace('lossyScreenShot', 'lossy');
     i18nReplace('losslessScreenShot', 'lossless');
     i18nReplace('autosaveSetting', 'save_setting');
+    i18nReplace('shorcutSetting', 'shortcut_setting');
+    i18nReplace('settingShortcutText', 'shortcutsetting_text');
     i18nReplace('defaultPath', 'save_tip');
     i18nReplace('autosaveText', 'autosave');
     i18nReplace('setSavePath', 'set_save_path');
     i18nReplace('openSavePath', 'open_save_path');
-    document.getElementById('autosave').checked = eval(localStorage.autoSave);
-    document.getElementById('filePath').value = localStorage.savePath =
+    $('autosave').checked = eval(localStorage.autoSave);
+    $('settingShortcut').checked = eval(localStorage.settingShortcut);
+    $('filePath').value = localStorage.savePath =
         localStorage.savePath ? localStorage.savePath : bg.plugin.getDefaultSavePath();
-    document.getElementById('setSavePath').addEventListener('click', function() {
+    $('setSavePath').addEventListener('click', function() {
       // Here we use the plugin object in options.html instead of the plugin object
       // in background page, so that the SetSavePath dialog will be a modal dialog.
-      var pluginobj = document.getElementById('pluginobj');
+      var pluginobj = $('pluginobj');
       pluginobj.SetSavePath(localStorage.savePath, function(savePath) {
-        document.getElementById('filePath').value = localStorage.savePath = savePath;
+        $('filePath').value = localStorage.savePath = savePath;
       }, chrome.i18n.getMessage('set_save_path_title'));
     });
-    document.getElementById('openSavePath').addEventListener('click', function() {
+    $('openSavePath').addEventListener('click', function() {
       bg.plugin.openSavePath(localStorage.savePath);
     })
     initScreenCaptureQuality();
@@ -149,10 +160,12 @@
 
   function save() {
      localStorage.screenshootQuality =
-         document.getElementById('lossy').checked ? 'jpeg' : '' ||
-         document.getElementById('lossless').checked ? 'png' : '';
-     localStorage.autoSave = document.getElementById('autosave').checked ?
+         $('lossy').checked ? 'jpeg' : '' ||
+         $('lossless').checked ? 'png' : '';
+     localStorage.autoSave = $('autosave').checked ?
          'true' : 'false';
+     localStorage.settingShortcut = $('settingShortcut').checked ? 
+        'true' : 'false';
   }
 
   function saveAndClose() {
@@ -163,14 +176,14 @@
   }
 
   function initScreenCaptureQuality() {
-    document.getElementById('lossy').checked =
+    $('lossy').checked =
         (localStorage.screenshootQuality == 'jpeg' ? true : false);
-    document.getElementById('lossless').checked =
+    $('lossless').checked =
         (localStorage.screenshootQuality == 'png' ? true : false);
   }
 
   function i18nReplace(id, name) {
-    return document.getElementById(id).innerText = chrome.i18n.getMessage(name);
+    return $(id).innerText = chrome.i18n.getMessage(name);
   }
 
   </script>
@@ -185,8 +198,8 @@
    <div class="section-content">
      <div>
        <label></label><input id="lossy" type="radio" name="quality"><span id="lossyScreenShot"></span></label>
-       &nbsp; <label></label><input id="lossless" type="radio" name="quality"><span id="losslessScreenShot"></span></label>
-     </div>
+       &nbsp; <label></label><input id="lossless" type="radio" name="quality"><span id="losslessScreenShot">
+       </span></label> </div>
      <div class="clear"></div>
    </div>
    <div id="autosaveSettingDiv">
@@ -198,18 +211,21 @@
        <button id="setSavePath"></button>
        <button id="openSavePath"></button>
      </div>
-     <div style="margin:5px 0 0 10px;">
+     <div style="margin:5px 0 0 1px;">
        <label><div style="float:left; margin-top:2px;">
          <input type="checkbox" id="autosave">
        </div>
-       <div style="margin-left:5px; width:480px; float:left;" id="autosaveText"></div></label></div>
-     <div class="clear"></div>
-   </div>
-   </div>
-   <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()"></button></div>
- </div>
-
-
+       <div style="margin-left:5px; width:480px; float:left;" id="autosaveText"></div></label>
+       </div><div class="clear"></div>
+   </div> </div>
+   <div id="shortcutSettingDiv" style="margin: 0px 0px 5px 0px">
+      <h4 id="shorcutSetting"></h4>  
+      <div style="margin: 2px 0px 0px 56px">
+         <input type="checkbox" id="settingShortcut">
+         <span id="settingShortcutText"></span>
+      </div></div>
+   <div class="closeBtn"><button id="saveAndClose" onclick="saveAndClose()"></button>
+   </div></div>
  </div>
  <div id="footer">&copy;2010 Google</div>
  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture">
