@@ -286,18 +286,31 @@ var page = {
     page.pageWidth = $('sc_drag_area_protector').clientWidth;
 
     var areaElement = $('sc_drag_area');
-    areaElement.style.left = (document.body.scrollLeft +
-        (document.documentElement.clientWidth - 
-        areaElement.offsetWidth) / 2) + 'px';
-    areaElement.style.top = (document.body.scrollTop + 
-        (document.documentElement.clientHeight - 200 -
-        areaElement.offsetHeight) / 2) + 'px';
+    areaElement.style.left = page.getElementLeft(areaElement) + 'px';
+    areaElement.style.top = page.getElementTop(areaElement) + 'px';
+    
+    page.startX = page.getElementLeft(areaElement);
+    page.startY = page.getElementTop(areaElement); 
+    page.endX = page.getElementLeft(areaElement) + 250;
+    page.endY = page.getElementTop(areaElement) + 150;
+    
     areaElement.style.width = '250px';
     areaElement.style.height = '150px';
     page.isSelectionAreaTurnOn = true;
-
     page.updateShadow(areaElement);
     page.updateSize();
+  },
+  
+  getElementLeft: function(obj) {
+    return (document.body.scrollLeft +
+        (document.documentElement.clientWidth - 
+        obj.offsetWidth) / 2);
+  },
+  
+  getElementTop: function(obj) {
+    return (document.body.scrollTop + 
+        (document.documentElement.clientHeight - 200 - 
+        obj.offsetHeight) / 2);
   },
 
   /**
@@ -434,7 +447,6 @@ var page = {
         page.updateSize();
 
       }
-
     }
   },
 
