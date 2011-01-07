@@ -103,8 +103,10 @@ var page = {
       switch (request.msg) {
         case 'capture_window': response(page.getWindowSize()); break;
         case 'show_selection_area': page.showSelectionArea(); break;
-        case 'scroll_init': response(
-            page.scrollInit(0, 0, document.width, document.height, 'captureWhole')); break;
+        case 'scroll_init':
+          response(page.scrollInit(
+              0, 0, document.width, document.height, 'captureWhole'));
+          break;
         case 'scroll_next':
           page.visibleWidth = request.visibleWidth;
           page.visibleHeight = request.visibleHeight;
@@ -140,7 +142,8 @@ var page = {
     var hostName = window.location.hostname;
     if (page.isGMailPage() && type == 'captureWhole') {
       var frame = document.getElementById('canvas_frame');
-      docHeight = page.captureHeight = canvasHeight = frame.contentDocument.height;
+      docHeight = page.captureHeight = canvasHeight =
+          frame.contentDocument.height;
       docWidth = page.captureWidth = canvasWidth = frame.contentDocument.width;
       frame.contentDocument.body.scrollTop = 0;
       frame.contentDocument.body.scrollLeft = 0;
@@ -174,12 +177,16 @@ var page = {
       page.scrollYCount = 0;
     }
     if (page.scrollXCount * page.visibleHeight < page.captureHeight) {
-      window.scrollTo(page.scrollYCount * document.documentElement.clientWidth + page.scrollX,
-                      page.scrollXCount * document.documentElement.clientHeight + page.scrollY);
+      var doc = document.documentElement;
+      window.scrollTo(
+          page.scrollYCount * doc.clientWidth + page.scrollX,
+          page.scrollXCount * doc.clientHeight + page.scrollY);
       if (page.isGMailPage()) {
         var frame = document.getElementById('canvas_frame');
-        frame.contentDocument.body.scrollLeft = page.scrollYCount * document.documentElement.clientWidth;
-        frame.contentDocument.body.scrollTop = page.scrollXCount * document.documentElement.clientHeight;
+        frame.contentDocument.body.scrollLeft =
+            page.scrollYCount * doc.clientWidth;
+        frame.contentDocument.body.scrollTop =
+            page.scrollXCount * doc.clientHeight;
       }
       var x = page.scrollXCount;
       var y = page.scrollYCount;
@@ -480,12 +487,14 @@ var page = {
   * Update the location of the shadow layer
   */
   updateShadow: function(areaElement) {
-    $('sc_drag_shadow_top').style.height = parseInt(areaElement.style.top) + 'px';
+    $('sc_drag_shadow_top').style.height =
+        parseInt(areaElement.style.top) + 'px';
     $('sc_drag_shadow_top').style.width = (parseInt(areaElement.style.left) +
-        parseInt(areaElement.style.width) + 1) +'px';
-    $('sc_drag_shadow_left').style.height = (page.pageHeight -
-        parseInt(areaElement.style.top)) + 'px';
-    $('sc_drag_shadow_left').style.width = parseInt(areaElement.style.left) + 'px';
+        parseInt(areaElement.style.width) + 1) + 'px';
+    $('sc_drag_shadow_left').style.height =
+        (page.pageHeight - parseInt(areaElement.style.top)) + 'px';
+    $('sc_drag_shadow_left').style.width =
+        parseInt(areaElement.style.left) + 'px';
 
     var height = (parseInt(areaElement.style.top) +
         parseInt(areaElement.style.height) + 1);
@@ -555,7 +564,8 @@ var page = {
     css.type = 'text/css';
     css.rel = 'stylesheet';
     css.href = chrome.extension.getURL(cssResource);
-    (document.head || document.body || document.documentElement).appendChild(css);
+    (document.head || document.body || document.documentElement).
+        appendChild(css);
   },
 
   injectJavaScriptResource: function(scriptResource) {
@@ -563,14 +573,15 @@ var page = {
     script.type = "text/javascript";
     script.charset = "utf-8";
     script.src = chrome.extension.getURL(scriptResource);
-    (document.head || document.body || document.documentElement).appendChild(script);
+    (document.head || document.body || document.documentElement).
+        appendChild(script);
   },
 
   /**
   * Remove an element
   */
   init: function() { 
-    if (document.body.hasAttribute('isExecuteScrip')) {
+    if (document.body.hasAttribute('screen_capture_injected')) {
       return;
     }
     if (isPageCapturable()) {

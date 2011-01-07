@@ -1,10 +1,10 @@
 var toshortcut = { 
 
   init: function() {      
-    if (document.body.hasAttribute('isExecuteScrip')) {
+    if (document.body.hasAttribute('screen_capture_injected')) {
       return;
     }
-    document.body.setAttribute('isExecuteScrip');
+    document.body.setAttribute('screen_capture_injected', true);
     document.body.addEventListener('keydown', toshortcut.doshortcut, false);
   },
 
