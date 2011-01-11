@@ -249,6 +249,7 @@ var page = {
   */
   createSelectionArea: function() {
     var areaProtector = $('sc_drag_area_protector');
+    document.body.style.margin = '0';
     areaProtector.style.width = document.width + 'px';
     areaProtector.style.height = document.height + 'px';
     areaProtector.onclick = function() {
@@ -381,7 +382,6 @@ var page = {
       if (areaElement) {
         var xPosition = event.pageX;
         var yPosition = event.pageY;
-        console.log('y:' + yPosition);
         if (page.dragging || page.resizing) {
           var width = 0;
           var height = 0;
