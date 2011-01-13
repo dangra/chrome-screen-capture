@@ -249,7 +249,6 @@ var page = {
   */
   createSelectionArea: function() {
     var areaProtector = $('sc_drag_area_protector');
-    document.body.style.margin = '0';
     areaProtector.style.width = document.width + 'px';
     areaProtector.style.height = document.height + 'px';
     areaProtector.onclick = function() {

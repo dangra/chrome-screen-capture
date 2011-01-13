@@ -14,26 +14,30 @@ body {
 }
 .menu {
   color: #3d5d6a;
-  line-height: 22px;
-  text-indent: 1em;
+  line-height: 26px;
+  text-indent: .5em;
   float: left;
   white-space: nowrap;
-  padding: 1px 5px 0px 15px; 
   background-repeat: no-repeat no-repeat;
   background-position: 6px 5px;
 }
-.right {
-  color:  #A1A192;
-  float: right;
-  display : none;
+.text {
+  float: left;
+  margin-left: 26px;
+}
+.shortcut {
+  color: #A1A192;
+  float: left;
+  margin-left: 26px;
+  display: none;
 }
 .menuI {
-  display: none;	
+  display: none;
 }
 ul {
   list-style: none;
   margin: 0px;
-  padding: 0px;	
+  padding: 0px;
 }
 li {
   list-style: none;
@@ -42,15 +46,15 @@ li {
   padding: 0px;
   clear: both;
   overflow: hidden;
-  border: 1px solid white;    
+  border: 1px solid white;
 }
- li:hover {
-  border-radius: 3px 3px;	      
-  background: -webkit-gradient(linear, left top, left bottom,		
-      color-stop(0, #fff),  color-stop(0.4, hsl(215, 67%, 97%)), 
-      color-stop(0.41, hsl(213, 48%, 95%)));	
-  border: solid 1px #c5cdd3;  
-  } 
+li:hover {
+  border-radius: 3px 3px;
+  background: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0, #fff),  color-stop(0.4, hsl(215, 67%, 97%)),
+      color-stop(0.41, hsl(213, 48%, 95%)));
+  border: solid 1px #c5cdd3;
+}
 #loadDiv {
   color: #3d5d6a;
   display: none;
@@ -73,7 +77,7 @@ li {
   function $(id) {
     return document.getElementById(id);
   }
-  
+
   chrome.extension.onRequest.addListener(function(request, sender, response) {
     if (request.msg == 'page_capturable') {
       $('tip').style.display = 'none';
@@ -90,7 +94,7 @@ li {
       $('captureWebpageItem').style.display = 'none';
     }
   });
-    
+
   function toDo(what) {
     var bg = chrome.extension.getBackgroundPage();
     switch(what) {
@@ -117,13 +121,13 @@ li {
   function i18nReplace(id, name) {
     return $(id).innerHTML = chrome.i18n.getMessage(name);
   }
-  
+
   function resizeDivWidth(id, width) {
     $(id).style.width = width + "px";
   }
-  
+
   function init() {
-    i18nReplace('captureSpecialPage', 'capture_window');
+    i18nReplace('captureSpecialPageText', 'capture_window');
     i18nReplace('capturing', 'capturing');
     i18nReplace('captureWindowText', 'capture_window');
     i18nReplace('captureAreaText', 'capture_area');
@@ -133,7 +137,7 @@ li {
       $('captureAreaShortcut').style.display = 'inline';
       $('captureWebpageShortcut').style.display = 'inline';
       document.body.style.minWidth = "190px"
-    } else { 
+    } else {
       $('captureWindowShortcut').style.display = 'none';
       $('captureAreaShortcut').style.display = 'none';
       $('captureWebpageShortcut').style.display = 'none';
@@ -155,10 +159,16 @@ li {
             $('captureWindowItem').style.display = 'block';
             $('captureAreaItem').style.display = 'block';
             $('captureWebpageItem').style.display = 'block';
-            var liWidth = $('captureWindowItem')['scrollWidth'];
-            resizeDivWidth('captureWindow', liWidth);
-            resizeDivWidth('captureArea', liWidth);
-            resizeDivWidth('captureWebpage', liWidth);
+            var textWidth = $('captureWindowText')['scrollWidth'];
+            resizeDivWidth('captureWindowText', textWidth);
+            resizeDivWidth('captureAreaText', textWidth);
+            resizeDivWidth('captureWebpageText', textWidth);
+            var bg = chrome.extension.getBackgroundPage();
+            if (bg.screenshot.isThisPlatform('mac')) {
+              $('captureAreaShortcut').innerText = '\u2325\u2318R';
+              $('captureWindowShortcut').innerText = '\u2325\u2318V';
+              $('captureWebpageShortcut').innerText = '\u2325\u2318H';
+            }
           } else if (response.msg == 'uncapturable'){
             i18nReplace('tip', 'special');
           } else {
@@ -183,30 +193,34 @@ li {
   </div>
   <div id="tip"></div>
   <div id="item">
-  <ul><li id="captureSpecialPageItem" class="menuI" 
+  <ul><li id="captureSpecialPageItem" class="menuI"
       onclick="toDo('capture_special_page');">
-  <div class="menu"id="captureSpecialPage" 
+    <div class="menu" id="captureSpecialPage"
       style="background-image: url(images/screen.png);">
-  </div></li>
-  <li id="captureWindowItem"  class="menuI" 
-      onclick="toDo('capture_window');">
-  <div class="menu"  id="captureWindow" 
-      style="background-image: url(images/screen.png);">
-      <span id="captureWindowText" style="float:left;">
-      </span><span class="right"  id="captureWindowShortcut">
-      Ctrl+Alt+C</span></div> </li>
+      <span class="text" id="captureSpecialPageText"></span>
+    </div>
+  </li>
   <li id="captureAreaItem" class="menuI" onclick="toDo('capture_area');">
-  <div class="menu"id="captureArea"
+    <div class="menu" id="captureArea"
       style="background-image: url(images/custom.png);">
-      <span id="captureAreaText" style="float:left;"></span>
-      <span class="right"  id="captureAreaShortcut">Ctrl+Alt+V</span></div>
-  </li><li id="captureWebpageItem"  class="menuI"   
-      onclick="toDo('capture_webpage');">
-  <div class="menu"  id="captureWebpage"
+      <span class="text" id="captureAreaText"></span>
+      <span class="shortcut" id="captureAreaShortcut">Ctrl+Alt+R</span>
+    </div>
+  </li>
+  <li id="captureWindowItem" class="menuI" onclick="toDo('capture_window');">
+    <div class="menu" id="captureWindow"
+      style="background-image: url(images/screen.png);">
+      <span class="text" id="captureWindowText"></span>
+      <span class="shortcut" id="captureWindowShortcut">Ctrl+Alt+V</span>
+    </div>
+  </li>
+  <li id="captureWebpageItem" class="menuI" onclick="toDo('capture_webpage');">
+    <div class="menu" id="captureWebpage"
       style="background-image: url(images/whole.png);">
-      <span id="captureWebpageText" style="float:left;">
-      </span><span class="right" id="captureWebpageShortcut">
-      Ctrl+Alt+B</span></div></li></ul>
+      <span class="text" id="captureWebpageText"></span>
+      <span class="shortcut" id="captureWebpageShortcut">Ctrl+Alt+H</span>
+    </div>
+  </li></ul>
   </div>
 </body>
 </html>
