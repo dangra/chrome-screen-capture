@@ -165,9 +165,9 @@ li:hover {
             resizeDivWidth('captureWebpageText', textWidth);
             var bg = chrome.extension.getBackgroundPage();
             if (bg.screenshot.isThisPlatform('mac')) {
-              $('captureAreaShortcut').innerText = '⌥⌘R';
-              $('captureWindowShortcut').innerText = '⌥⌘V';
-              $('captureWebpageShortcut').innerText = '⌥⌘H';
+              $('captureAreaShortcut').innerText = '\u2325\u2318R';
+              $('captureWindowShortcut').innerText = '\u2325\u2318V';
+              $('captureWebpageShortcut').innerText = '\u2325\u2318H';
             }
           } else if (response.msg == 'uncapturable'){
             i18nReplace('tip', 'special');

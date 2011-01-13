@@ -13,9 +13,9 @@ var toshortcut = {
   },
 
   doshortcut: function (event) {
-    var isMac = isThisPlatform('mac');
-    if (event.ctrlKey && event.altKey && !isMac ||
-        event.commandKey && event.altKey && isMac) {
+    var isMac = toshortcut.isThisPlatform('mac');
+    if (event.ctrlKey && event.altKey && !isMac||
+        event.metaKey && event.altKey && isMac) {
       if(window.event.keyCode == 82) {         // 'R'
         toshortcut.sendMessage({msg: 'capture_area'});
       } else if(window.event.keyCode == 86) {  // 'V'
