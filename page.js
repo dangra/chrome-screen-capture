@@ -29,6 +29,8 @@ var page = {
   isScrollBarX: false,
   isScrollBarY: false,
   fixedElements_ : [],
+  marginTop: 0,
+  marginLeft: 0,
 
   hookBodyScrollValue: function(needHook) {
     document.documentElement.setAttribute(
@@ -112,9 +114,14 @@ var page = {
           page.visibleHeight = request.visibleHeight;
           response(page.scrollNext());
           break;
-        case 'capture_selected': response(page.scrollInit(page.startX,
-            page.startY, page.endX - page.startX, page.endY - page.startY,
-            'captureSelected'));
+        case 'capture_selected':
+          page.startX = page.startX + page.marginLeft;
+          page.endX = page.endX + page.marginLeft;
+          page.startY = page.startY + page.marginTop;
+          page.endY = page.endY + page.marginTop;
+          response(page.scrollInit(page.startX,
+              page.startY, page.endX - page.startX, page.endY - page.startY,
+              'captureSelected'));
           break;
       }
     });
@@ -243,12 +250,24 @@ var page = {
   createFloatLayer: function() {
     page.createDiv(document.body, 'sc_drag_area_protector');
   },
+  
+  matchMarginValue: function(str) {
+    return str.match(/\d+/);
+  },
 
   /**
   * Load the screenshot area interface
   */
   createSelectionArea: function() {
     var areaProtector = $('sc_drag_area_protector');
+    
+    var body_style = window.getComputedStyle(document.body,null);
+    if ('relative' == body_style['position']) {
+      page.marginTop = page.matchMarginValue(body_style['marginTop']) - 
+          page.matchMarginValue(body_style['marginBottom']);
+      page.marginLeft = page.matchMarginValue(body_style['marginLeft']) - 
+          page.matchMarginValue(body_style['marginRight']);
+    }
     areaProtector.style.width = document.width + 'px';
     areaProtector.style.height = document.height + 'px';
     areaProtector.onclick = function() {
