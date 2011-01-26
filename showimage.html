@@ -813,7 +813,12 @@
 
     save: function() {
       photoshop.draw();
-      var dataUrl = $('canvas').toDataURL('image/png');
+      var formatParam  = localStorage.screenshootQuality || 'png';
+      var dataUrl;
+      if (formatParam == 'jpeg')
+        dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
+      else
+        dataUrl = $('canvas').toDataURL('image/png');
 
       // Here we use the plugin object in showimage.html instead of the plugin object
       // in background page, so that the SaveScreenshot dialog will be a modal dialog.
