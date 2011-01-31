@@ -115,10 +115,6 @@ var page = {
           response(page.scrollNext());
           break;
         case 'capture_selected':
-          page.startX = page.startX + page.marginLeft;
-          page.endX = page.endX + page.marginLeft;
-          page.startY = page.startY + page.marginTop;
-          page.endY = page.endY + page.marginTop;
           response(page.scrollInit(page.startX,
               page.startY, page.endX - page.startX, page.endY - page.startY,
               'captureSelected'));
@@ -259,20 +255,19 @@ var page = {
   * Load the screenshot area interface
   */
   createSelectionArea: function() {
-    var areaProtector = $('sc_drag_area_protector');
-    
+    var areaProtector = $('sc_drag_area_protector'); 
     var body_style = window.getComputedStyle(document.body,null);
     if ('relative' == body_style['position']) {
-      page.marginTop = page.matchMarginValue(body_style['marginTop']) - 
-          page.matchMarginValue(body_style['marginBottom']);
-      page.marginLeft = page.matchMarginValue(body_style['marginLeft']) - 
-          page.matchMarginValue(body_style['marginRight']);
-    }
-    areaProtector.style.width = document.width + 'px';
-    areaProtector.style.height = document.height + 'px';
+      page.marginTop = page.matchMarginValue(body_style['marginTop']);
+      page.marginLeft = page.matchMarginValue(body_style['marginLeft']);
+      areaProtector.style.top =  - parseInt(page.marginTop) + 'px';
+      areaProtector.style.left =  - parseInt(page.marginLeft) + 'px';    
+    }    
+    areaProtector.style.width = (document.width + parseInt(page.marginLeft)) + 'px';
+    areaProtector.style.height = (document.height + parseInt(page.marginTop)) + 'px';
     areaProtector.onclick = function() {
-      event.stopPropagation();
-      return false;
+    event.stopPropagation();
+    return false;
     };
     page.createDiv(areaProtector, 'sc_drag_shadow_top');
     page.createDiv(areaProtector, 'sc_drag_shadow_bottom');
