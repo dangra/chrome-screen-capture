@@ -144,6 +144,7 @@ li:hover {
       document.body.style.minWidth = "140px";
     }
     var isScriptLoad = false;
+    chrome.tabs.executeScript(null, {file: 'isLoad.js'});
     chrome.tabs.getSelected(null, function(tab) {
       if (tab.url.indexOf('chrome') == 0) {
         $('tip').style.display = 'none';
@@ -180,7 +181,6 @@ li:hover {
       if (isScriptLoad == false) {
         $('tip').style.display = 'none';
         $('captureSpecialPageItem').style.display = 'block';
-        chrome.tabs.executeScript(null, {file: 'isLoad.js'});
       }
     }
     setTimeout(insertScript, 500);
