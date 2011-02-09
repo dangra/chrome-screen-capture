@@ -144,7 +144,6 @@ li:hover {
       document.body.style.minWidth = "140px";
     }
     var isScriptLoad = false;
-    chrome.tabs.executeScript(null, {file: 'isLoad.js'});
     chrome.tabs.getSelected(null, function(tab) {
       if (tab.url.indexOf('chrome') == 0) {
         $('tip').style.display = 'none';
@@ -170,13 +169,14 @@ li:hover {
               $('captureWindowShortcut').innerText = '\u2325\u2318V';
               $('captureWebpageShortcut').innerText = '\u2325\u2318H';
             }
-          } else if (response.msg == 'uncapturable'){
+          } else if (response.msg == 'uncapturable') {
             i18nReplace('tip', 'special');
           } else {
             i18nReplace('tip', 'loading');
           }
         });
     });
+    chrome.tabs.executeScript(null, {file: 'isLoad.js'});
     var insertScript = function() {
       if (isScriptLoad == false) {
         $('tip').style.display = 'none';
