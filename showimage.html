@@ -323,6 +323,11 @@
   <img id="pic" src="#" style="display:none">
   <embed id="pluginobj" width="0" height="0" type="application/x-screencapture">
   <script>
+  function isHighVersion() {
+    var version = navigator.userAgent.match(/Chrome\/(\d+)/)[1];
+    return version > 9;
+  }
+  
   var bg = chrome.extension.getBackgroundPage();
   var canvas = new Canvas();
   var photoshop = {
@@ -815,7 +820,7 @@
       photoshop.draw();
       var formatParam  = localStorage.screenshootQuality || 'png';
       var dataUrl;
-      if (formatParam == 'jpeg')
+      if (formatParam == 'jpeg' && isHighVersion())
         dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
       else
         dataUrl = $('canvas').toDataURL('image/png');
@@ -835,8 +840,13 @@
 
     copy: function() {
       photoshop.draw();
-      var data = $('canvas').toDataURL('image/png');
-      var copyFlag = bg.plugin.saveToClipboard(data);
+      var formatParam  = localStorage.screenshootQuality || 'png';
+      var dataUrl;
+      if (formatParam == 'jpeg' && isHighVersion())
+        dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
+      else
+        dataUrl = $('canvas').toDataURL('image/png');
+      var copyFlag = bg.plugin.saveToClipboard(dataUrl);
       if (copyFlag) {
         photoshop.showTip('tip_succeed', 'tip_copy_succeed');
       } else {

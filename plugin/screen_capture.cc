@@ -362,6 +362,9 @@ bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
   const char* base64 = strstr(url, "base64,");
   if (!base64)
     return false;
+  std::string postfix = ".png";
+  if (strncmp(url, "data:image/jpeg", 15) == 0)
+    postfix = ".jpeg";
 
   base64 += 7;
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
@@ -406,7 +409,7 @@ bool AutoSave(ScriptablePluginObject* obj, const NPVariant* args,
     filename += (title[i] < ' ' || strchr(kReplacedChars, title[i]) == NULL) ?
         title[i] : '-';
   }
-  filename += ".png";
+  filename += postfix;
   std::string unique_filename;
   if (!GenerateUniqueFileName(filename, &unique_filename) ||
       !SaveFileBase64(unique_filename.c_str(), base64, base64size))
@@ -520,6 +523,10 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   if (!base64)
     return false;
 
+  std::string postfix = ".png";
+  if (strncmp(url, "data:image/jpeg", 15) == 0)
+    postfix = ".jpeg";
+
   base64 += 7;
   int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
 
@@ -544,12 +551,18 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
     if (sz_file[i] > ' ' && strchr(kReplacedChars, sz_file[i]) != NULL)
       sz_file[i] = '-';
   }
-  strcat(sz_file, ".png");
+  strcat(sz_file, postfix.c_str());
 
   OPENFILENAMEA Ofn = {0};
   Ofn.lStructSize = sizeof(OPENFILENAMEA);
   Ofn.hwndOwner = ((CPlugin*)obj->npp->pdata)->GetHWnd();
-  Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
+  if (postfix == ".jpeg") {
+    Ofn.lpstrFilter = "JPEG Image\0*.jpeg\0All Files\0*.*\0\0";
+    Ofn.lpstrDefExt = "jpeg";
+  } else {
+    Ofn.lpstrFilter = "PNG Image\0*.png\0All Files\0*.*\0\0";
+    Ofn.lpstrDefExt = "png";
+  }
   Ofn.lpstrFile = sz_file;
   Ofn.nMaxFile = sizeof(sz_file);
   Ofn.lpstrFileTitle = NULL;
@@ -557,7 +570,6 @@ bool SaveScreenshot(ScriptablePluginObject* obj, const NPVariant* args,
   Ofn.lpstrInitialDir = initial_path;
   Ofn.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
   Ofn.lpstrTitle = sz_dialog_title;
-  Ofn.lpstrDefExt = "png";
 
   InvokeCallback(obj->npp, callback,
       !GetSaveFileNameA(&Ofn) || SaveFileBase64(sz_file, base64, base64size));

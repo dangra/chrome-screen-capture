@@ -153,7 +153,7 @@ var screenshot = {
   capturePortion: function(x, y, width, height,
                            visibleWidth, visibleHeight, docWidth, docHeight) {
     var formatParam  = localStorage.screenshootQuality || 'png';
-    chrome.tabs.captureVisibleTab(null, {format: formatParam,quality: 50}, function(data) {
+    chrome.tabs.captureVisibleTab(null, {format: formatParam, quality: 50}, function(data) {
       var image = new Image();
       image.onload = function() {
         var curHeight = image.width < docWidth ?
@@ -175,7 +175,7 @@ var screenshot = {
 
   captureVisible: function(docWidth, docHeight) {
     var formatParam  = localStorage.screenshootQuality || 'png';
-    chrome.tabs.captureVisibleTab(null, {format: formatParam,quality: 50}, function(data) {
+    chrome.tabs.captureVisibleTab(null, {format: formatParam, quality: 50}, function(data) {
       var image = new Image();
       image.onload = function() {
         var width = image.height < docHeight ?
@@ -197,7 +197,7 @@ var screenshot = {
   */
   captureAndScroll: function() {
     var formatParam  = localStorage.screenshootQuality || 'png';
-    chrome.tabs.captureVisibleTab(null, {format: formatParam,quality: 50}, function(data) {
+    chrome.tabs.captureVisibleTab(null, {format: formatParam, quality: 50}, function(data) {
       var image = new Image();
       image.onload = function() {
         var context = screenshot.canvas.getContext('2d');
