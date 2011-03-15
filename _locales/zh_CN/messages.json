@@ -1,4 +1,4 @@
-﻿{
+{
   "name": {"message": "网页截图（由Google提供）"},
   "description": {"message": "截取网页为图片，支持窗口截图，区域截图和整个网页截图三种方式。支持水平和垂直翻页截取超大网页，新版引进自动截图保存功能。"},
   "default_title": {"message": "网页截图"},
@@ -25,6 +25,7 @@
   "edit_tip": {"message": "以下是您的截图，您可以利用左边的工具进行编辑，然后点击“保存” 按钮。"},
   "copy": {"message": "拷贝"},
   "save": {"message": "保存"},
+  "share": {"message": "分享"},
   "close": {"message": "关闭"},
   "save_image": {"message": "保存图片"},
   "options": {"message": "网页截图选项"},
@@ -43,5 +44,28 @@
   "save_success": {"message": "截图保存成功。"},
   "save_fail": {"message": "截图保存失败。"},
   "tip_copy_succeed": {"message": "截图拷贝成功。"},
-  "tip_copy_failed": {"message": "截图拷贝失败。"}
+  "tip_copy_failed": {"message": "截图拷贝失败。"},
+  "upload_confirm": {"message": "使用当前用户分享？"},
+  "change_user": {"message": "使用其他用户"},
+  "upload_caption": {"message": "标题："},
+  "upload_sites_header": {"message": "分享图片"},
+  "sina_upload_header": {"message": "分享到新浪微博"},
+  "facebook_upload_header": {"message": "分享到Facebook"},
+  "share_to": {"message": "分享到"},
+  "deletion_title": {"message": "删除账号"},
+  "photo_link_text": {"message": "查看图片"},
+  "account_deletion_confirm": {"message": "确认删除该账号？"},
+  "return_to_site_selection": {"message": "返 回"},
+  "close_upload_wrapper": {"message": "关 闭"},
+  "share_to_other_account": {"message": "分享到其他账号"},
+  "share_to_sina_account": {"message": "分享到你的新浪微博账号"},
+  "share_to_facebook_account": {"message": "分享到你的 Facebook 账号"},
+  "image_caption": {"message": "图片描述"},
+  "facebook_get_photo_link": {"message": "正在获取图片链接..."},
+  "facebook_bad_access_token": {"message": "无效的 Access Token。"},
+  "facebook_unknown_error": {"message": "未知错误。"},
+  "failed_to_connect_to_server": {"message": "无法连接到服务器。"},
+  "invalid_caption": {"message": "图片描述不能为空。"},
+  "photo_size_tip": {"message": "注：建议图片大小不要超过3M。"},
+  "progress_info": {"message": "图片上传中，请稍候..."}
 }

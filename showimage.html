@@ -5,7 +5,8 @@
 -->
 <html>
 <head>
-<title> </title>
+<title></title>
+<meta charset="UTF-8">
 <style type="text/css">
   body {
     font-size: 12px;
@@ -229,13 +230,224 @@
     background: #fff1a8;
     color: #000000;
   }
-
   .tip_failed {
     color: #ffffff;
     background: #ff8080;
   }
+  #selectuploadposition {
+    border: 1px solid #ccc;
+    width: 300px;
+    height: 200px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1000;
+    left: 40%;
+    top: 25%;
+    display: none;
+    -webkit-box-shadow: #cccccc 0 0 7px 1px;
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#d0dff2), to(#f5f9fc));
+  }
+  .selectcontent
+  {
+    background-color: White;
+    width:300px;
+    height:168px;
+  }
+  button {
+    cursor: pointer;
+  }
+  input {
+    cursor: pointer;
+  }
+  #uploadWrapper {
+    width: 380px;
+    min-height: 255px;
+    border: 1px solid #8ec3eb;
+    border-radius: 5px;
+    position: absolute;
+    background: white;
+    box-shadow: 0 0 5px 1px #a0a0a0;
+    display: none;
+    z-index: 10000;
+  }
+  #uploadHeader {
+    border-bottom: 1px solid #aebece;
+    height: 33px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #004b80;
+    background: -webkit-gradient(linear, left top, left bottom, from(#e4f0ff), to(#b5cce8));
+  }
+  #uploadBody {
+    background: white url("images/popup_bg.jpg") left top no-repeat;
+    min-height: 160px;
+  }
+  #uploadFooter {
+    background: -webkit-gradient(linear, left top, left bottom, from(#e2effe), to(#cee1f9));
+    height: 36px;
+    text-align: right;
+    padding-right: 15px;
+  }
+  #uploadFooter button {
+    width: 72px;
+    height: 26px;
+    vertical-align: middle;
+    color: #1c5f8e;
+  }
+  .verticalAlignMiddle {
+    display: table-cell;
+    vertical-align: middle;
+    height: inherit;
+  }
+  #uploadSitesWrapper {
+    text-align: center;
+    height: 185px;
+  }
+  .btn {
+    display: inline-block;
+    text-align: center;
+    background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#e0ecfb));
+    border: 1px solid #c0cddd;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .btn:hover {
+    background: -webkit-gradient(linear, left top, left bottom, from(#e0ecfb), to(#fff));
+    border: 1px solid #8ec3eb;
+  }
+  #uploadSitesWrapper > span.btn {
+    display: inline-block;
+    font-size: 18px;
+    height: 44px;
+    width: 238px;
+    text-align: center;
+    color: #1c68a2;
+    border-radius: 4px;
+  }
+  #uploadSitesWrapper > span.btn > span.uploadSite > * {
+    vertical-align: middle;
+  }
+  .uploadSite {
+    display: inline-block;
+    text-align: left;
+    width: 180px;
+    line-height: 44px;
+  }
+  #uploadContentWrapper {
+    font-weight: bold;
+    color: #1c68a2;
+  }
+  #uploadContentWrapper > div {
+    text-align: left;
+    padding: 25px 0 0 30px;
+  }
+  #imageCaption {
+    width: 240px;
+    height: 23px;
+    padding-left: 5px;
+    outline-color: #cbecff;
+    margin-left: 10px;
+    border: 1px solid #aebece;
+    background: -webkit-gradient(linear, left top, left bottom, from(#eefbfa), to(#fff));
+    cursor: auto;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .accountItem {
+    padding-bottom: 10px;
+  }
+  .accountItem > *{
+    margin-right: 6px;
+  }
+  .account {
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .account > *, .shareToText {
+    vertical-align: middle;
+  }
+  .account:hover > img{
+    visibility: visible;
+  }
+  .account img {
+    visibility: hidden;
+    cursor: pointer;
+  }
+  .accountName {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-right: 10px;
+    display: inline-block;
+    max-width: 145px;
+    border-bottom: 1px solid #fff;
+  }
+  .accountName:hover {
+    border-bottom: 1px solid #1c68a2;
+    cursor: pointer;
+  }
+  .progressBar {
+    display: inline-block;
+    vertical-align: middle;
+    width: 41px;
+    height: 12px;
+    background: white url("images/loading_icon.gif") 0 0 no-repeat;
+  }
+  .photoLink {
+    color: #0091ff;
+    margin-left: 42px;
+    display: none;
+  }
+  #shareToOtherAccount {
+    display: inline-block;
+    margin-top: 6px;
+    cursor: pointer;
+    border-bottom: 1px solid #fff;
+  }
+  #shareToOtherAccount:hover {
+    border-bottom: 1px solid #1c68a2;
+  }
+  .uploadInfo {
+    display: inline-block;
+    vertical-align: middle;
+    font-weight: normal;
+  }
+  .error {
+    padding: 5px 0;
+    margin-top: 5px;
+    color: red;
+    font-weight: normal;
+    display: none;
+  }
+  #imageCaptionError {
+    font-size: 12px;
+    width: 302px;
+    margin-bottom: -15px;
+  }
+  #overlay {
+    position: absolute;
+    opacity: 0.3;
+    background: #000;
+    display: none;
+    z-index: 200;
+    top: 0;
+    left: 0;
+  }
+  #requiredFlag {
+    color: red;
+  }
 </style>
-<script type="text/javascript" src="editer.js"></script>
+<script type="text/javascript" src="editor.js"></script>
+<script type="text/javascript" src="sha1.js"></script>
+<script type="text/javascript" src="oauth.js"></script>
+<script type="text/javascript" src="ajax.js"></script>
+<script type="text/javascript" src="account.js"></script>
+<script type="text/javascript" src="upload_ui.js"></script>
+<script type="text/javascript" src="facebook.js"></script>
+<script type="text/javascript" src="sina_microblog.js"></script>
 </head>
 <body>
   <div id="header">
@@ -301,6 +513,10 @@
       <img src="images/icon_save.png" alt="">
       <span id="tSave"></span>
     </li>
+    <li id="btnUpload">
+      <img src="images/upload.png" alt="">
+      <span id="tUpload"></span>
+    </li>
     <li id="btnCopy" onclick="photoshop.copy()">
       <img src="images/icon_copy.png" alt="">
       <span id="tCopy"></span>
@@ -320,14 +536,93 @@
   <div class="layer" id="layer0"></div>
   </div>
   </div>
-  <img id="pic" src="#" style="display:none">
-  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture">
+  <div id='selectuploadposition'>
+    <div class="selectcontent" >
+    <div id="selectPrompt" style="padding:30px 0 0 30px; "></div>
+      <div style="padding: 5px 0 0 30px;">
+      <div style="padding: 5px 5px;"><input  id="selectSina" type= "radio"><span id="sina"></span></div>
+      <div style="padding: 5px 5px;"><input id="selectFacebook" type= "radio"><span id="facebook"></span></div>
+      </div>
+    </div>
+    <div style="float: right; margin: 5px 15px 0 0;"><button id="uploadFile"></button><button id="cancelUpload"></button></div>
+  </div>
+  <img id="pic" src="#" style="display:none" />
+  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture" />
+  <div id="uploadWrapper" style="display: none;">
+    <div id="uploadHeader">
+      <div style="height: 31px; padding-left: 12px; border: 1px solid white; border-top-left-radius: 3px; border-top-right-radius: 3px;">
+        <span class="verticalAlignMiddle"></span>
+      </div>
+    </div>
+    <div id="uploadBody">
+      <div id="uploadSitesWrapper" class="verticalAlignMiddle">
+        <span class="btn" id="sinaMicroblogBtn" style="margin-bottom: 21px;">
+          <span class="uploadSite">
+            <img src="images/sina_icon.png" alt="sina">
+            <span id="shareToSinaMicroblogText"></span>
+          </span>
+        </span>
+        <span class="btn" id="facebookBtn" type="button">
+          <span class="uploadSite">
+            <img src="images/facebook_icon.png" alt="facebook">
+            <span id="shareToFacebookText"></span>
+          </span>
+        </span>
+      </div>
+      <div id="uploadContentWrapper" style="display:none;">
+        <div style="font-size: 14px;">
+          <label id="imageCaptionText" for="imageCaption"></label>
+          <input type="text" maxLength="100" id="imageCaption" autofocus="true">
+          <span id="requiredFlag">*</span>
+          <div id="imageCaptionError" class="error"></div>
+        </div>
+        <div id="uploadAccountWrapper" style="min-height: 60px;">
+          <ul id="uploadAccountList"></ul>
+          <div id="shareToOtherAccount"></div>
+          <div id="accountItemTemplate" style="display: none;">
+            <li id="${accountId}" class="accountItem">
+              <span style="display: inline-block;">
+                <span class="account">
+                  <span class="accountName" title="${accountName}" onclick="UploadUI.upload('${site}', '${userId}');">${accountName}</span>
+                  <img src="images/delete_account_icon.png" alt="Delete" title="${deletionTitle}" onclick="UploadUI.deleteAccountItem('${accountId}');">
+                </span>
+              </span>
+              <span class="progressBar" style="display: none;" title="${progressInfo}"></span>
+              <span class="uploadInfo" style="display: none;"></span>
+              <span style="float: right; margin-right: 35px; font-weight: normal;">
+                <a class="photoLink" target="_blank" href="#">${photoLinkText}</a>
+              </span>
+              <div class="error"></div>
+            </li>
+          </div>
+        </div>
+        <div id="photoSizeTip" style="color: #a4a4a4; font-weight: normal; margin-bottom: 15px;"></div>
+      </div>
+    </div>
+    <div id="uploadFooter">
+      <span style="display: inline-block; height: inherit;">
+        <span class="verticalAlignMiddle">
+          <button id="lastStep" style="display: none;"></button>
+          <button id="closeUploadWrapper"></button>
+        </span>
+      </span>
+    </div>
+  </div>
+  <div id="overlay"></div>
   <script>
   function isHighVersion() {
     var version = navigator.userAgent.match(/Chrome\/(\d+)/)[1];
     return version > 9;
   }
   
+  function $(id) {
+    return document.getElementById(id);
+  }
+  function i18nReplace(id, messageKey) {
+    return $(id).innerHTML = chrome.i18n.getMessage(messageKey);
+  }
+  UploadUI.init();
+
   var bg = chrome.extension.getBackgroundPage();
   var canvas = new Canvas();
   var photoshop = {
@@ -354,9 +649,7 @@
     highlightMode: 'rectangle',
     text: '',
 
-    i18nReplace: function(id, name) {
-      return $(id).innerHTML = chrome.i18n.getMessage(name);
-    },
+    i18nReplace: i18nReplace,
 
     initCanvas: function() {
       $('canvas').width = $('mask-canvas').width = $('photo').style.width =
@@ -377,7 +670,6 @@
       }
       photoshop.initTools();
       photoshop.initCanvas();
-
       photoshop.tabTitle = bg.screenshot.tab.title;
       var showBoxHeight = function() {
         $('showBox').style.height = window.innerHeight - photoshop.offsetY - 1;
@@ -824,7 +1116,6 @@
         dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
       else
         dataUrl = $('canvas').toDataURL('image/png');
-
       // Here we use the plugin object in showimage.html instead of the plugin object
       // in background page, so that the SaveScreenshot dialog will be a modal dialog.
       var pluginobj = document.getElementById('pluginobj');
@@ -853,13 +1144,11 @@
         photoshop.showTip('tip_failed', 'tip_copy_failed');
       }
       photoshop.finish();
-
     },
 
     drawLineOnMaskCanvas: function(startX, startY, endX, endY, type, layerId) {
       var ctx = $('mask-canvas').getContext('2d');
       ctx.clearRect(0, 0, $('mask-canvas').width, $('mask-canvas').height);
-
       if (type == 'drawEnd') {
         var offset = 20;
         var width = Math.abs(endX - photoshop.startX) > 0 ?
@@ -995,6 +1284,7 @@
       photoshop.i18nReplace('tText', 'text');
       photoshop.i18nReplace('tCopy', 'copy');
       photoshop.i18nReplace('tSave', 'save');
+      photoshop.i18nReplace('tUpload', 'share');
       photoshop.i18nReplace('tClose', 'close');
       photoshop.i18nReplace('border', 'border');
       photoshop.i18nReplace('rect', 'rect');
@@ -1132,18 +1422,28 @@
       var div = document.createElement('DIV');
       div.className = className;
       div.innerText = chrome.i18n.getMessage(message);
+      if (arguments.length == 3)
+      div.innerHTML = div.innerText + '<a target="_blank" href="' + arguments[2] +'"/>' +
+        arguments[2] + '</a>';
       document.body.appendChild(div);
       div.style.left = (document.body.clientWidth - div.clientWidth) / 2 + 'px';
       window.setTimeout(function() {
         document.body.removeChild(div);
       }, 2000);
+    },
+
+    showLink: function(className, message, link) {
+      var div = document.createElement('DIV');
+      div.className = className;
+      document.body.appendChild(div);
+      div.style.width = (document.body.clientWidth) / 3 + 'px';
+      div.style.left = (document.body.clientWidth - div.clientWidth) / 2 + 'px';
+      div.innerHTML = chrome.i18n.getMessage(message) + ' <a target="_blank" href="' + link +'"/>' +
+        link + '</a>';
+      window.setTimeout(function() {
+        document.body.removeChild(div);
+      }, 10000);
     }
-  };
-
-  
-
-  function $(id) {
-    return document.getElementById(id);
   };
 
   photoshop.init();

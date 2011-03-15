@@ -628,4 +628,14 @@ window.onresize = function() {
     page.removeSelectionArea();
     page.showSelectionArea();
   }
+};
+
+var fbRedirectUrl = 'http://www.facebook.com/connect/login_success.html';
+var pageHref = window.location.href;
+if (pageHref.indexOf(fbRedirectUrl) == 0) {
+  page.sendMessage({
+    msg: 'access_token_result',
+    site: 'facebook',
+    url: pageHref
+  });
 }
