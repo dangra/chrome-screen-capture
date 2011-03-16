@@ -67,5 +67,11 @@
   "failed_to_connect_to_server": {"message": "无法连接到服务器。"},
   "invalid_caption": {"message": "图片描述不能为空。"},
   "photo_size_tip": {"message": "注：建议图片大小不要超过3M。"},
-  "progress_info": {"message": "图片上传中，请稍候..."}
+  "progress_info": {"message": "图片上传中，请稍候..."},
+  "sina_failed_to_get_request_token": {"message": "无法获取 request token，请稍候再试。"},
+  "sina_failed_to_get_access_token": {"message": "无法获取 access token，请稍候再试。"},
+  "sina_failed_to_get_user_info": {"message": "无法获取用户信息，请稍候再试。"},
+  "facebook_user_denied": {"message": "用户拒绝。"},
+  "user_authentication_tip": {"message": "用户认证中，请稍候..."},
+  "user_logout_tip": {"message": "用户注销中，请稍候..."}
 }

@@ -5,7 +5,7 @@
 -->
 <html>
 <head>
-<title></title>
+<title>Screen Capture</title>
 <meta charset="UTF-8">
 <style type="text/css">
   body {
@@ -292,7 +292,13 @@
     width: 72px;
     height: 26px;
     vertical-align: middle;
+    border:1px solid #8ec3eb;
     color: #1c5f8e;
+    border-radius: 3px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
+  }
+  #uploadFooter button:hover {
+    background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
   }
   .verticalAlignMiddle {
     display: table-cell;
@@ -342,7 +348,6 @@
     padding: 25px 0 0 30px;
   }
   #imageCaption {
-    width: 240px;
     height: 23px;
     padding-left: 5px;
     outline-color: #cbecff;
@@ -415,18 +420,6 @@
     vertical-align: middle;
     font-weight: normal;
   }
-  .error {
-    padding: 5px 0;
-    margin-top: 5px;
-    color: red;
-    font-weight: normal;
-    display: none;
-  }
-  #imageCaptionError {
-    font-size: 12px;
-    width: 302px;
-    margin-bottom: -15px;
-  }
   #overlay {
     position: absolute;
     opacity: 0.3;
@@ -438,6 +431,32 @@
   }
   #requiredFlag {
     color: red;
+  }
+  #uploadcontentwrapper > #errorWrapper {
+    display: none;
+    position: absolute;
+    padding: 0;
+    text-align: center;
+    width: 380px;
+    height: 25px;
+    margin-bottom: -15px;
+  }
+  #errorInfo {
+    display: inline-block;
+    padding: 4px 15px;
+    background: #fffed5;
+    color: red;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    font-weight: normal;
+    white-space: nowrap;
+    max-width: 350px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #authenticationProgress {
+    margin-left: 40px;
+    display: none;
   }
 </style>
 <script type="text/javascript" src="editor.js"></script>
@@ -570,15 +589,18 @@
         </span>
       </div>
       <div id="uploadContentWrapper" style="display:none;">
-        <div style="font-size: 14px;">
+        <div id="errorWrapper">
+          <div id="errorInfo"></div>
+        </div>
+        <div style="font-size: 14px; padding-top: 28px;">
           <label id="imageCaptionText" for="imageCaption"></label>
           <input type="text" maxLength="100" id="imageCaption" autofocus="true">
           <span id="requiredFlag">*</span>
-          <div id="imageCaptionError" class="error"></div>
         </div>
         <div id="uploadAccountWrapper" style="min-height: 60px;">
           <ul id="uploadAccountList"></ul>
           <div id="shareToOtherAccount"></div>
+          <span id="authenticationProgress" class="progressBar"></span>
           <div id="accountItemTemplate" style="display: none;">
             <li id="${accountId}" class="accountItem">
               <span style="display: inline-block;">
@@ -592,7 +614,6 @@
               <span style="float: right; margin-right: 35px; font-weight: normal;">
                 <a class="photoLink" target="_blank" href="#">${photoLinkText}</a>
               </span>
-              <div class="error"></div>
             </li>
           </div>
         </div>

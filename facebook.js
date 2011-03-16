@@ -1,5 +1,4 @@
-var currentLocale = chrome.i18n.getMessage('@@ui_locale');
-const FB_APP_ID = currentLocale == 'zh_CN' ? 170328509685996 : 118170701590738;
+const FB_APP_ID = CURRENT_LOCALE == 'zh_CN' ? 170328509685996 : 118170701590738;
 const FB_REDIRECT_URI = 'http://www.facebook.com/connect/login_success.html';
 const FB_PERMISSION = 'offline_access,user_photos,publish_stream';
 const FB_ACCESS_TOKEN_URL = 'https://www.facebook.com/dialog/oauth';
@@ -37,11 +36,13 @@ var Facebook = {
           Account.addUser(siteId, user);
           UploadUI.addAuthenticatedAccount(siteId, userId);
         }
+        UploadUI.hideAuthenticationProgress();
         UploadUI.upload(siteId, userId);
       });
     } else if (queryMap['error']) {
       // Show error information according to error reason
-      console.log('User denied.');
+      UploadUI.showErrorInfo(chrome.i18n.getMessage('facebook_user_denied'));
+      UploadUI.hideAuthenticationProgress();
     }
   },
 

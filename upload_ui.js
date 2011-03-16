@@ -1,4 +1,6 @@
+const CURRENT_LOCALE = chrome.i18n.getMessage('@@ui_locale');
 const MULTIPART_FORMDATA_BOUNDARY = 'Google_Chrome_Screen_Capture';
+const HIDE_ERROR_INFO_DELAY_TIME = 5000;
 
 var UI = {
 
@@ -60,6 +62,14 @@ var UI = {
       classes.splice(index, 1);
       element.className = classes.join(' ');
     }
+  },
+
+  addStyleSheet: function(path) {
+    var link = document.createElement('link');
+    link.setAttribute('type', 'text/css');
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('href', path);
+    document.head.appendChild(link);
   }
 };
 
@@ -72,6 +82,9 @@ var UploadUI = {
   },
 
   init: function() {
+    // Import style sheet for current locale
+    UI.addStyleSheet('./i18n_styles/' + CURRENT_LOCALE + '_upload_image.css');
+
     // Get i18n message
     i18nReplace('shareToSinaMicroblogText', SinaMicroblog.siteId +
       '_upload_header');
@@ -96,13 +109,22 @@ var UploadUI = {
     }, false);
     $('shareToOtherAccount').addEventListener('click', function() {
       var currentSite = UploadUI.currentSite;
+
+      // Validate image description first
       if (UploadUI.validatePhotoDescription(currentSite)) {
         var callback = function() {
+          var authenticationTip =
+            chrome.i18n.getMessage('user_authentication_tip');
+          UploadUI.showAuthenticationProgress(authenticationTip);
           UploadUI.getAccessToken(currentSite);
         };
         var users = Account.getUsers(currentSite);
         var numberOfUsers = Object.keys(users).length;
+
+        // Logout when user has authenticated app
         if (numberOfUsers) {
+          var logoutTip = chrome.i18n.getMessage('user_logout_tip');
+          UploadUI.showAuthenticationProgress(logoutTip);
           if (currentSite == Facebook.siteId)
             Facebook.logout(callback);
           else if (currentSite == SinaMicroblog.siteId)
@@ -183,7 +205,8 @@ var UploadUI = {
     var uploadHeader = chrome.i18n.getMessage(site + '_upload_header');
     UploadUI.updateUploadHeader(uploadHeader);
     UploadUI.hideUploadSitesWrapper();
-    UploadUI.hidePhotoCaptionError();
+    UploadUI.hideErrorInfo();
+    UploadUI.hideAuthenticationProgress();
     UploadUI.clearPhotoDescription();
     UI.show($('uploadContentWrapper'));
     UI.show($('lastStep'));
@@ -212,7 +235,7 @@ var UploadUI = {
 
     // Validate photo description
     if (site == SinaMicroblog.siteId && caption.value == '') {
-      UploadUI.showPhotoCaptionError(invalidCaptionMsg);
+      UploadUI.showErrorInfo(invalidCaptionMsg);
       caption.focus();
       return false;
     }
@@ -235,15 +258,16 @@ var UploadUI = {
       i18nReplace('shareToOtherAccount', 'share_to_' + siteId + '_account');
   },
 
-  showPhotoCaptionError: function(text) {
-    var error = $('imageCaptionError');
-    error.innerHTML = text;
-    UI.show(error);
+  showErrorInfo: function(text) {
+    UI.show($('errorWrapper'));
+    $('errorInfo').innerHTML = text;
+    setTimeout(function() {
+      UploadUI.hideErrorInfo();
+    }, HIDE_ERROR_INFO_DELAY_TIME);
   },
 
-  hidePhotoCaptionError: function() {
-    var error = $('imageCaptionError');
-    UI.hide(error);
+  hideErrorInfo: function() {
+    UI.hide($('errorWrapper'));
   },
 
   showProgressBar: function(accountId) {
@@ -256,6 +280,16 @@ var UploadUI = {
     var progress = document.querySelector('#' + accountId +
       ' .progressBar');
     UI.hide(progress);
+  },
+
+  showAuthenticationProgress: function(title) {
+    var progress = $('authenticationProgress');
+    progress.setAttribute('title', title);
+    UI.show(progress);
+  },
+
+  hideAuthenticationProgress: function() {
+    UI.hide($('authenticationProgress'));
   },
 
   setProgress: function(accountId, loaded, total) {
@@ -287,17 +321,6 @@ var UploadUI = {
   hideUploadInfo: function(accountId) {
     var uploadInfo = document.querySelector('#' + accountId + ' .uploadInfo');
     UI.hide(uploadInfo);
-  },
-
-  showUploadError: function(accountId, text) {
-    var uploadError = document.querySelector('#' + accountId + ' .error');
-    uploadError.innerHTML = text;
-    UI.show(uploadError);
-  },
-
-  hideUploadError: function(accountId) {
-    var uploadError = document.querySelector('#' + accountId + ' .error');
-    UI.hide(uploadError);
   },
 
   clearAccounts: function() {
@@ -353,9 +376,8 @@ var UploadUI = {
 
     // Initialize UI
     var accountId = site + '_' + userId;
-    UploadUI.hidePhotoCaptionError();
+    UploadUI.hideErrorInfo();
     UploadUI.hideUploadInfo(accountId);
-    UploadUI.hideUploadError(accountId);
     UploadUI.hidePhotoLink(accountId);
     if (!UploadUI.validatePhotoDescription(site))
       return;
@@ -406,7 +428,7 @@ var UploadUI = {
             infoText = chrome.i18n.getMessage('failed_to_connect_to_server');
           }
 
-          UploadUI.showUploadError(accountId, infoText);
+          UploadUI.showErrorInfo(infoText);
         };
 
         var captionValue = ajax.encodeForBinary(caption.value);
@@ -432,7 +454,7 @@ var UploadUI = {
           UploadUI.hideProgressBar(accountId);
           UploadUI.setUploadState(false);
           infoText = errorData.error;
-          UploadUI.showUploadError(accountId, infoText);
+          UploadUI.showErrorInfo(infoText);
         };
         SinaMicroblog.upload(access_token, access_token_secret, caption.value,
           successCallback, null, failureCallback);

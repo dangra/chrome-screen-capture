@@ -53,7 +53,8 @@ var SinaMicroblog = {
       },
       status: {
         others: function(data) {
-          console.log('Get request token failed.');
+          var msg = chrome.i18n.getMessage('sina_failed_to_get_request_token');
+          UploadUI.showErrorInfo(msg);
           console.log(data);
         }
       }
@@ -112,6 +113,7 @@ var SinaMicroblog = {
 
         var userId = responseMap.user_id;
         if (Account.getUser(SinaMicroblog.siteId, userId)) {
+          UploadUI.hideAuthenticationProgress();
           UploadUI.upload(SinaMicroblog.siteId, userId);
         } else {
           var access_token = responseMap.oauth_token;
@@ -120,20 +122,21 @@ var SinaMicroblog = {
           // Get user screen name
           SinaMicroblog.getUserInfo(access_token, access_token_secret, userId,
             function(data) {
-              var userName = data.name;
               var siteId = SinaMicroblog.siteId;
+              var userName = data.name;
               var user = new User(userId, userName, access_token,
                 access_token_secret);
-
               Account.addUser(siteId, user);
               UploadUI.addAuthenticatedAccount(siteId, userId);
+              UploadUI.hideAuthenticationProgress();
               UploadUI.upload(siteId, userId);
           });
         }
       },
       status: {
         others: function(data) {
-          console.log('Get access token failed.');
+          var msg = chrome.i18n.getMessage('sina_failed_to_get_access_token');
+          UploadUI.showErrorInfo(msg);
           console.log(data);
         }
       }
@@ -171,7 +174,8 @@ var SinaMicroblog = {
       },
       status: {
         others: function(data) {
-          console.log('Get user information failed.');
+          var msg = chrome.i18n.getMessage('sina_failed_to_get_user_info');
+          UploadUI.showErrorInfo(msg);
           console.log(data);
         }
       }

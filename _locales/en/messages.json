@@ -63,6 +63,12 @@
   "facebook_unknown_error": {"message": "Unknown error."},
   "failed_to_connect_to_server": {"message": "Can not connect to server."},
   "invalid_caption": {"message": "Image title is required."},
-  "photo_size_tip": {"message": "Hint: You may not succeed to upload an image bigger than 3M bytes."},
-  "progress_info": {"message": "Image uploading, please wait..."}
+  "photo_size_tip": {"message": "Hint: You may fail to upload an image bigger than 3M bytes."},
+  "progress_info": {"message": "Image uploading, please wait..."},
+  "sina_failed_to_get_request_token": {"message": "Get request token failed, please try again later."},
+  "sina_failed_to_get_access_token": {"message": "Get access token failed, please try again later."},
+  "sina_failed_to_get_user_info": {"message": "Get user information failed, please try again later."},
+  "facebook_user_denied": {"message": "User denied."},
+  "user_authentication_tip": {"message": "User authenticating, please wait..."},
+  "user_logout_tip": {"message": "Signing out, please wait..."}
 }
