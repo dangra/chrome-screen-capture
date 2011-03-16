@@ -69,7 +69,6 @@ var SinaMicroblog = {
   },
 
   parseAccessTokenResult: function(url) {
-    console.log(url);
     var queryString = url.split('?')[1];
     var oauthVerifier = queryString.split('&')[1].split('=')[1];
     SinaMicroblog.getAccessToken(oauthVerifier);
@@ -106,9 +105,6 @@ var SinaMicroblog = {
         'Authorization': header
       },
       success: function(response) {
-        console.log('Get sina microblog access token success.');
-        console.log(response);
-
         var responseMap = {};
         response.split('&').forEach(function(parameter) {
           responseMap[parameter.split('=')[0]] = parameter.split('=')[1];
@@ -135,8 +131,11 @@ var SinaMicroblog = {
           });
         }
       },
-      status: function(data) {
-        console.log(data);
+      status: {
+        others: function(data) {
+          console.log('Get access token failed.');
+          console.log(data);
+        }
       }
     });
   },

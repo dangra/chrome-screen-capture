@@ -67,10 +67,6 @@ var screenshot = {
           if (isShortcut) {
             screenshot.captureWebpage();
           }
-          break
-        case 'continueUpload':
-          var tabId = localStorage['upload_tabId'];
-          chrome.tabs.sendRequest(parseInt(tabId), {message:'continueUpload', value:obj.value});
           break;
       }
     });
