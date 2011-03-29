@@ -1066,13 +1066,12 @@
     },
 
     /**
-    * Use the fillStyle,fillText and fillRect functions draws Rectangles,
+    * Use fillStyle, fillText and fillRect functions to draw rectangles,
     * and render to canvas
     */
     draw: function() {
       var context = $('canvas').getContext('2d');
-
-      for(var j = 0; j < photoshop.markedArea.length; j++) {
+      for (var j = 0; j < photoshop.markedArea.length; j++) {
         var mark = photoshop.markedArea[j];
         var x = (mark.startX < mark.endX) ? mark.startX : mark.endX;
         var y = (mark.startY < mark.endY) ? mark.startY : mark.endY;
@@ -1089,41 +1088,47 @@
             }
             break;
           case 'radiusRectangle':
-            canvas.drawRoundedRect(context, color, x, y, width, height, 6,
-                mark.highlightType);
+            canvas.drawRoundedRect(
+                context, color, x, y, width, height, 6, mark.highlightType);
             break;
           case 'ellipse':
             x = (mark.startX + mark.endX) / 2;
             y = (mark.startY + mark.endY) / 2;
             var xAxis = Math.abs(mark.endX - mark.startX) / 2;
             var yAxis = Math.abs(mark.endY - mark.startY) / 2;
-            canvas.drawEllipse(context, color, x, y, xAxis, yAxis, 3,
-                mark.highlightType);
+            canvas.drawEllipse(
+                context, color, x, y, xAxis, yAxis, 3, mark.highlightType);
             break;
           case 'redact':
             canvas.drawFillRect(context, color, x, y, width, height);
             break;
           case 'text':
             for (var i = 0; i < mark.context.length; i++) {
-              canvas.setText(context, mark.context[i], color, mark.fontSize,
-                  ' arial', mark.fontSize, x, y + mark.fontSize * i)
+              canvas.setText(
+                  context, mark.context[i], color, mark.fontSize, 'arial',
+                  mark.fontSize, x, y + mark.fontSize * i, width);
             }
             break;
           case 'blur':
-            var imageData = context.getImageData(x, y,
-                photoshop.markedArea[j].width, photoshop.markedArea[j].height);
-            imageData = canvas.boxBlur(imageData, photoshop.markedArea[j].width,
+            var imageData = context.getImageData(
+                x, y, photoshop.markedArea[j].width,
+                photoshop.markedArea[j].height);
+            imageData = canvas.boxBlur(
+                imageData, photoshop.markedArea[j].width,
                 photoshop.markedArea[j].height, 10);
-            context.putImageData(imageData, x, y, 0, 0,
-                photoshop.markedArea[j].width, photoshop.markedArea[j].height);
+            context.putImageData(
+                imageData, x, y, 0, 0, photoshop.markedArea[j].width,
+                photoshop.markedArea[j].height);
             break;
           case 'line':
-            canvas.drawLine(context, color, 'round', 2, mark.startX,
-                mark.startY, mark.endX, mark.endY);
+            canvas.drawLine(
+                context, color, 'round', 2,
+                mark.startX, mark.startY, mark.endX, mark.endY);
             break;
           case 'arrow':
-            canvas.drawArrow(context, color, 2, 4, 10, 'round', mark.startX,
-                mark.startY, mark.endX, mark.endY);
+            canvas.drawArrow(
+                context, color, 2, 4, 10, 'round',
+                mark.startX, mark.startY, mark.endX, mark.endY);
             break;
         }
       }

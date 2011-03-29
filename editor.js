@@ -1,22 +1,19 @@
-function Canvas() {
-  
-}
+function Canvas() {}
 
-Canvas.prototype.drawStrokeRect =
-    function(ctx, color, x, y, width, height, lineWidth) {
+Canvas.prototype.drawStrokeRect = function(
+    ctx, color, x, y, width, height, lineWidth) {
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth;
   ctx.strokeRect(x, y, width, height);
 }
 
-Canvas.prototype.drawFillRect =
-    function(ctx, color, x, y, width, height) {
+Canvas.prototype.drawFillRect = function(ctx, color, x, y, width, height) {
   ctx.fillStyle = color;
   ctx.fillRect(x, y, width, height);
 }
 
-Canvas.prototype.drawEllipse =
-    function(ctx, color, x, y, xAxis, yAxis, lineWidth, type) {
+Canvas.prototype.drawEllipse = function(
+    ctx, color, x, y, xAxis, yAxis, lineWidth, type) {
   var startX = x + xAxis;
   var startY = y;
   ctx.beginPath();
@@ -38,17 +35,60 @@ Canvas.prototype.drawEllipse =
   ctx.closePath();
 }
 
-Canvas.prototype.setText =
-    function(ctx, text, color, fontSize, fontFamily, lineHeight, x, y) {
+// Divide an entire phrase in an array of phrases, all with the max pixel
+// length given.
+Canvas.prototype.getLines = function(ctx, text, width, font) {
+  var words = text.split(" ");
+  var lines = [];
+  var lastLine = "";
+  var measure = 0;
+  ctx.font = font;
+  for (var i = 0; i < words.length; i++) {
+    var word = words[i];
+    measure = ctx.measureText(lastLine + word).width;
+    if (measure <= width || word == "") {
+      lastLine += word + " ";
+    } else {
+      if (lastLine != "")
+        lines.push(lastLine);
+
+      // break the word if necessary 
+      measure = ctx.measureText(word).width;
+      if (measure <= width) {
+        lastLine = word + " ";
+      } else {
+        lastLine = word[0];
+        for (var j = 1; j < word.length; j++) {
+          measure = ctx.measureText(lastLine + word[j]).width;
+          if (measure <= width) {
+            lastLine += word[j];
+          } else {
+            lines.push(lastLine);
+            lastLine = word[j];
+          } 
+        }
+        lastLine += " ";
+      }
+    }
+  }
+  if (lastLine != "")
+    lines.push(lastLine);
+  return lines;
+}
+
+Canvas.prototype.setText = function(
+    ctx, text, color, fontSize, fontFamily, lineHeight, x, y, width) {
   ctx.textBaseline = 'top';
   ctx.fillStyle = color;
   ctx.font = fontSize + ' ' + fontFamily;
   ctx.lineHeight = lineHeight;
-  ctx.fillText(text, x, y);
+  var lines = Canvas.prototype.getLines(ctx, text, width - 2, ctx.font);
+  for (var i = 0; i < lines.length; i++)
+    ctx.fillText(lines[i], x, y + lineHeight * i, width);
 }
 
-Canvas.prototype.drawLine =
-    function(ctx, color, lineCap, lineWidth, startX, startY, endX, endY) {
+Canvas.prototype.drawLine = function(
+    ctx, color, lineCap, lineWidth, startX, startY, endX, endY) {
   ctx.beginPath();
   ctx.moveTo(startX, startY);
   ctx.strokeStyle = color;
@@ -59,9 +99,9 @@ Canvas.prototype.drawLine =
   ctx.stroke();
 }
 
-Canvas.prototype.drawArrow =  function(ctx, color, lineWidth, arrowWidth,
-                                       arrowHeight, lineCap, startX, startY,
-                                       endX, endY) {
+Canvas.prototype.drawArrow = function(
+    ctx, color, lineWidth, arrowWidth, arrowHeight, lineCap,
+    startX, startY, endX, endY) {
   var arrowCoordinates = calculateArrowCoordinates(
       arrowWidth, arrowHeight,startX, startY, endX, endY);
   ctx.beginPath();
@@ -77,8 +117,8 @@ Canvas.prototype.drawArrow =  function(ctx, color, lineWidth, arrowWidth,
   ctx.stroke();
 }
 
-Canvas.prototype.drawRoundedRect =
-    function(ctx, color, x, y, width, height, radius, type) {
+Canvas.prototype.drawRoundedRect = function(
+    ctx, color, x, y, width, height, radius, type) {
   ctx.beginPath();
   ctx.moveTo(x, y + radius);
   ctx.lineTo(x, y + height - radius);
@@ -100,7 +140,8 @@ Canvas.prototype.drawRoundedRect =
   ctx.closePath();
 }
 
-Canvas.prototype.blurImage = function(realCanvas, simulateCanvas, layerId, startX, startY, endX, endY) {
+Canvas.prototype.blurImage = function(
+    realCanvas, simulateCanvas, layerId, startX, startY, endX, endY) {
   var x = startX < endX ? startX : endX;
   var y = startY < endY ? startY : endY;
   var width = Math.abs(endX - startX - 1);
@@ -173,8 +214,8 @@ function changeColorToRgba(color, opacity) {
 }
 
 // Calculate coordinates of arrow
-function calculateArrowCoordinates(arrowWidth, arrowHeight,
-                                   startX, startY, endX, endY) {
+function calculateArrowCoordinates(
+    arrowWidth, arrowHeight, startX, startY, endX, endY) {
   var p1 = function() {
     var x = startX - endX;
     var y = startY - endY;
