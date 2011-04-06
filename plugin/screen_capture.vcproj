@@ -67,10 +67,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comsupp.lib comsuppwd.lib comdlg32.lib"
+				AdditionalDependencies="comsupp.lib comsuppwd.lib comdlg32.lib gdi32.lib"
 				OutputFile="$(ProjectDir)\$(ProjectName).dll"
 				LinkIncremental="2"
-				ModuleDefinitionFile="npcapture.def"
+				ModuleDefinitionFile="screen_capture.def"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
@@ -344,7 +344,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\log.cc"
+				>
+			</File>
+			<File
 				RelativePath=".\np_entry.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\npn_entry.cc"
 				>
 			</File>
 			<File
@@ -352,11 +360,27 @@
 				>
 			</File>
 			<File
-				RelativePath=".\plugin.cc"
+				RelativePath=".\plugin_base.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\screen_capture.cc"
+				RelativePath=".\plugin_factory.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\screen_capture_plugin.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\screen_capture_script_object.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\script_object_base.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\script_object_factory.cc"
 				>
 			</File>
 		</Filter>
@@ -380,6 +404,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\log.h"
+				>
+			</File>
+			<File
 				RelativePath=".\npapi.h"
 				>
 			</File>
@@ -396,7 +424,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\plugin.h"
+				RelativePath=".\plugin_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\plugin_factory.h"
 				>
 			</File>
 			<File
@@ -404,7 +436,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\screen_capture.h"
+				RelativePath=".\screen_capture_plugin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\screen_capture_script_object.h"
+				>
+			</File>
+			<File
+				RelativePath=".\script_object_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\script_object_factory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utils.h"
 				>
 			</File>
 		</Filter>
