@@ -1,4 +1,4 @@
-const FB_APP_ID = CURRENT_LOCALE == 'zh_CN' ? 170328509685996 : 118170701590738;
+const FB_APP_ID = CURRENT_LOCALE == 'zh_CN' ? 170328509685996 : 141404469263711;
 const FB_REDIRECT_URI = 'http://www.facebook.com/connect/login_success.html';
 const FB_PERMISSION = 'offline_access,user_photos,publish_stream';
 const FB_ACCESS_TOKEN_URL = 'https://www.facebook.com/dialog/oauth';
