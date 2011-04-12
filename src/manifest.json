@@ -4,33 +4,33 @@
   "description": "__MSG_description__",
   "background_page": "background.html",
   "browser_action": {
-    "default_icon": "icon_19.png",
+    "default_icon": "images/icon_19.png",
     "default_title": "__MSG_default_title__",
     "popup": "popup.html"
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*", "ftp://*/*"],
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file://*/*"],
       "js": ["page.js", "shortcut.js"],
       "css": ["style.css"],
       "run_at": "document_end"
     },
     {
-      "matches": ["http://*/*", "https://*/*", "ftp://*/*"],
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file://*/*"],
       "js": ["isLoad.js"],
       "run_at": "document_start"
     }
   ],
   "icons": {
-    "16": "icon_16.png",
-    "19": "icon_19.png",
-    "32": "icon_32.png",
-    "48": "icon_48.png",
-    "128": "icon_128.png"
+    "16": "images/icon_16.png",
+    "19": "images/icon_19.png",
+    "32": "images/icon_32.png",
+    "48": "images/icon_48.png",
+    "128": "images/icon_128.png"
   },
   "default_locale": "en",
   "options_page": "options.html",
-  "permissions": ["tabs", "http://*/*", "https://*/*","notifications"],
+  "permissions": ["tabs", "http://*/*", "https://*/*", "file://*/*", "notifications"],
   "plugins": [ {
     "path": "plugin/screen_capture.dll"
   }, {
