@@ -469,6 +469,7 @@
 <script type="text/javascript" src="sina_microblog.js"></script>
 </head>
 <body>
+  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture" />
   <div id="header">
   <div id="toolbar" class="toolbar">
    <ul>
@@ -536,6 +537,10 @@
       <img src="images/upload.png" alt="">
       <span id="tUpload"></span>
     </li>
+    <li id="btnPrint" onclick="photoshop.printImage()">
+      <img src="images/print.png" alt="">
+      <span id="tPrint"></span>
+    </li>
     <li id="btnCopy" onclick="photoshop.copy()">
       <img src="images/icon_copy.png" alt="">
       <span id="tCopy"></span>
@@ -566,7 +571,6 @@
     <div style="float: right; margin: 5px 15px 0 0;"><button id="uploadFile"></button><button id="cancelUpload"></button></div>
   </div>
   <img id="pic" src="#" style="display:none" />
-  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture" />
   <div id="uploadWrapper" style="display: none;">
     <div id="uploadHeader">
       <div style="height: 31px; padding-left: 12px; border: 1px solid white; border-top-left-radius: 3px; border-top-right-radius: 3px;">
@@ -1142,8 +1146,9 @@
         dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
       else
         dataUrl = $('canvas').toDataURL('image/png');
-      // Here we use the plugin object in showimage.html instead of the plugin object
-      // in background page, so that the SaveScreenshot dialog will be a modal dialog.
+      // Here we use the plugin object in showimage.html 
+      // instead of the plugin object in background page, 
+      // so that the SaveScreenshot dialog will be a modal dialog.
       var pluginobj = document.getElementById('pluginobj');
       pluginobj.SaveScreenshot(
           dataUrl, photoshop.tabTitle, localStorage.savePath,
@@ -1169,6 +1174,21 @@
       } else {
         photoshop.showTip('tip_failed', 'tip_copy_failed');
       }
+      photoshop.finish();
+    },
+    
+    printImage: function() {
+      photoshop.draw();
+      var formatParam  = localStorage.screenshootQuality || 'png';
+      var dataUrl;
+      if (formatParam == 'jpeg' && isHighVersion())
+        dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
+      else
+        dataUrl = $('canvas').toDataURL('image/png');
+      var width = $('canvas').width;
+      var height = $('canvas').height;
+      var pluginobj = document.getElementById('pluginobj');
+      pluginobj.PrintImage(dataUrl, photoshop.tabTitle, width, height);
       photoshop.finish();
     },
 
@@ -1311,6 +1331,7 @@
       photoshop.i18nReplace('tCopy', 'copy');
       photoshop.i18nReplace('tSave', 'save');
       photoshop.i18nReplace('tUpload', 'share');
+      photoshop.i18nReplace('tPrint', 'print');
       photoshop.i18nReplace('tClose', 'close');
       photoshop.i18nReplace('border', 'border');
       photoshop.i18nReplace('rect', 'rect');

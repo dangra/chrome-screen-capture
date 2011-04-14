@@ -28,6 +28,7 @@
   "copy": {"message": "Copy"},
   "save": {"message": "Save"},
   "share": {"message": "Share"},
+  "print": {"message": "Print"},
   "close": {"message": "Close"},
   "save_image": {"message": "Save Image"},
   "options": {"message": "Screen Capture Options"},

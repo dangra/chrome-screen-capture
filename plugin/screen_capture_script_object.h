@@ -33,10 +33,15 @@ public:
                       NPVariant* result);
   bool SaveToClipboard(const NPVariant* args, uint32_t argCount,
                        NPVariant* result);
+  bool PrintImage(const NPVariant* args, uint32_t argCount, NPVariant* result);
 
   void InitHandler();
 
 private:
+  enum ImageType {
+    kImageTypePNG = 0,
+    kImageTypeJPEG
+  };
   static bool SaveFile(const char* fileName, const unsigned char* bytes,
                        int byteLength);
   static bool SaveFileBase64(const char* fileName, const char* base64,
@@ -45,7 +50,9 @@ private:
   static void InvokeCallback(NPP npp, NPObject* callback, const char* param);
   static void InvokeCallback(NPP npp, NPObject* callback, bool param);
 #ifdef _WINDOWS
-
+  bool PrintImageWin(HDC printer_dc, ImageType imagetype, 
+                     unsigned char* imagedata, int imagelen, 
+                     int width, int height);
   std::string GetPicturePath();
 #elif defined GTK
 
