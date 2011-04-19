@@ -30,7 +30,7 @@
   },
   "default_locale": "en",
   "options_page": "options.html",
-  "permissions": ["tabs", "http://*/*", "https://*/*", "file://*/*", "notifications"],
+  "permissions": ["tabs", "http://*/*", "https://*/*", "notifications"],
   "plugins": [ {
     "path": "plugin/screen_capture.dll"
   }, {
