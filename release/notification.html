@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title></title>
+  <style type="text/css">
+    #tip {
+      margin:10px;
+      font-size:13px;
+      font-family: arial, Verdana;
+    }
+    #tip a{
+      float: right;
+      text-decoration: underline;
+      color: #2A5DB0;
+    }
+  </style>
+</head>
+<body>
+<div id="tip"></div>
+   <script type="text/javascript">
+      function init() {
+        var bg = chrome.extension.getBackgroundPage();
+        var tipDiv = document.getElementById('tip');
+        var captureStatus = bg.screenshot.captureStatus;
+        if (captureStatus) {
+          tipDiv.innerText = chrome.i18n.getMessage('save_success');
+          var aElement = document.createElement('a');
+          aElement.innerText = chrome.i18n.getMessage('open_save_path');
+          aElement.href = 'javascript:void(0)';
+          aElement.addEventListener('click', function() {
+            bg.plugin.openSavePath(localStorage.savePath);
+          }, false);
+          tipDiv.appendChild(aElement);
+        } else {
+          tipDiv.innerText = chrome.i18n.getMessage('save_fail');
+        }
+        closeWindow();
+      }
+
+      function closeWindow() {
+        window.setTimeout(function() {
+          window.close();
+        }, 10000);
+      }
+      init();
+   </script>
+
+</body>
+</html>

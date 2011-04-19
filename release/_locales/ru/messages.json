@@ -1,0 +1,218 @@
+﻿{
+   "account_deletion_confirm": {
+      "message": "Удалить эту учетную запись?"
+   },
+   "autosave": {
+      "message": "Автосохранение - после захвата пропустить редактирование экрана и сразу сохранить захваченное изображение в папку по умолчанию с названием веб-страницы в качестве имени файла."
+   },
+   "blur": {
+      "message": "Пятно"
+   },
+   "border": {
+      "message": "Только бордюр"
+   },
+   "cancel": {
+      "message": "Отмена"
+   },
+   "capture_area": {
+      "message": "Область захвата"
+   },
+   "capture_webpage": {
+      "message": "Захват всей страницы"
+   },
+   "capture_window": {
+      "message": "Захват видимой части"
+   },
+   "capturing": {
+      "message": "Захват, подождите..."
+   },
+   "close": {
+      "message": "Закрыть"
+   },
+   "close_upload_wrapper": {
+      "message": "Закрыть"
+   },
+   "copy": {
+      "message": "Копировать"
+   },
+   "default_title": {
+      "message": "Захват экрана"
+   },
+   "deletion_title": {
+      "message": "Удалить учетную запись"
+   },
+   "description": {
+      "message": "Захват видимого содержимого вкладки, области веб-страницы, или всей страницы в формате PNG. Поддержка горизонтальной и вертикальной прокрутки при захвате всей страницы, с использованием всех новых возможностей автосохранения."
+   },
+   "edit_tip": {
+      "message": "Ниже приведен скриншот, того что Вы захватили. Вы можете редактировать его с помощью инструментов слева. Нажмите Сохранить по завершении."
+   },
+   "facebook_bad_access_token": {
+      "message": "Неверный маркер доступа."
+   },
+   "facebook_get_photo_link": {
+      "message": "Получение ссылки на изображения..."
+   },
+   "facebook_unknown_error": {
+      "message": "Неизвестная ошибка."
+   },
+   "facebook_upload_header": {
+      "message": "Facebook"
+   },
+   "facebook_user_denied": {
+      "message": "Пользователю отказано."
+   },
+   "failed_to_connect_to_server": {
+      "message": "Невозможно подключиться к серверу."
+   },
+   "highlight": {
+      "message": "Выделить"
+   },
+   "image_caption": {
+      "message": "Название изображения"
+   },
+   "invalid_caption": {
+      "message": "Требуется название изображения."
+   },
+   "line": {
+      "message": "Линия"
+   },
+   "loading": {
+      "message": "Страница загружается, подождите."
+   },
+   "lossless": {
+      "message": "Без потери качества"
+   },
+   "lossy": {
+      "message": "C потерей качества"
+   },
+   "name": {
+      "message": "Захват экрана (от Google)"
+   },
+   "ok": {
+      "message": "OK"
+   },
+   "open_save_path": {
+      "message": "Перейти в папку"
+   },
+   "options": {
+      "message": "Параметры захвата экрана"
+   },
+   "photo_link_text": {
+      "message": "Проверить изображение"
+   },
+   "photo_size_tip": {
+      "message": "Подсказка: Вы не можете загрузить изображение больше 3Мб."
+   },
+   "progress_info": {
+      "message": "Изображение загружается, подождите..."
+   },
+   "quality_setting": {
+      "message": "Настройки качества скриншота: "
+   },
+   "rect": {
+      "message": "Заполнить всю область"
+   },
+   "redact": {
+      "message": "Скрыть"
+   },
+   "return_to_site_selection": {
+      "message": "Назад"
+   },
+   "save": {
+      "message": "Сохранить"
+   },
+   "save_and_close": {
+      "message": "Сохранить & Закрыть"
+   },
+   "save_fail": {
+      "message": "Не удалось сохранить скриншот."
+   },
+   "save_image": {
+      "message": "Сохранить изображение"
+   },
+   "save_setting": {
+      "message": "Настройки сохранения скриншота: "
+   },
+   "save_success": {
+      "message": "Скриншот сохранен."
+   },
+   "save_tip": {
+      "message": "Место сохранения по умолчанию: "
+   },
+   "set_save_path": {
+      "message": "Обзор..."
+   },
+   "set_save_path_title": {
+      "message": "Выбор места сохранения по умолчанию."
+   },
+   "share": {
+      "message": "Отправить"
+   },
+   "share_to": {
+      "message": "Отправить в"
+   },
+   "share_to_facebook_account": {
+      "message": "Отправить на Вашу учетную запись Facebook"
+   },
+   "share_to_other_account": {
+      "message": "Отправить на другую учетную запись"
+   },
+   "share_to_sina_account": {
+      "message": "Отправить на Вашу учетную запись в Sina Microblog"
+   },
+   "shortcut_setting": {
+      "message": "Настройки ярлыков:"
+   },
+   "shortcutsetting_text": {
+      "message": "Вкл. горячие клавиши"
+   },
+   "sina_failed_to_get_access_token": {
+      "message": "Не удалось получить маркер доступа, повторите попытку позже."
+   },
+   "sina_failed_to_get_request_token": {
+      "message": "Не удалось получить запрос маркера, повторите попытку позже."
+   },
+   "sina_failed_to_get_user_info": {
+      "message": "Не удалось получить информацию о пользователе, повторите попытку позже."
+   },
+   "sina_upload_header": {
+      "message": "Sina Microblog"
+   },
+   "size_huge": {
+      "message": "Огромный"
+   },
+   "size_large": {
+      "message": "Большой"
+   },
+   "size_normal": {
+      "message": "Обычный"
+   },
+   "size_small": {
+      "message": "Мелкий"
+   },
+   "solid_black": {
+      "message": "Сплошной"
+   },
+   "special": {
+      "message": "Это специальная страница. Невозможно осуществить захват экрана на этой странице."
+   },
+   "text": {
+      "message": "Текст"
+   },
+   "tip_copy_failed": {
+      "message": "Не удалось скопировать скриншот."
+   },
+   "tip_copy_succeed": {
+      "message": "Скриншот скопирован."
+   },
+   "upload_sites_header": {
+      "message": "Отправить изображение в"
+   },
+   "user_authentication_tip": {
+      "message": "Авторизация пользователя, подождите..."
+   },
+   "user_logout_tip": {
+      "message": "Выход, подождите..."
+   }
+}
