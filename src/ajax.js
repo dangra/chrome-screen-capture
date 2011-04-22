@@ -111,7 +111,12 @@
 
   function constructBlobData(dataString, contentType) {
     // Create a BlobBuilder instance to constrct a Blob object
-    var bb = new BlobBuilder();
+    var bb;
+    if (window.BlobBuilder) {
+      bb = new BlobBuilder();
+    } else if (window.WebKitBlobBuilder) {
+      bb = new WebKitBlobBuilder();
+    }
     var len = dataString.length;
 
     // Create a 8-bit unsigned integer ArrayBuffer view
