@@ -1,0 +1,43 @@
+{
+  "version": "4.0.3",
+  "name": "__MSG_name__",
+  "description": "__MSG_description__",
+  "background_page": "background.html",
+  "browser_action": {
+    "default_icon": "images/icon_19.png",
+    "default_title": "__MSG_default_title__",
+    "popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file://*/*"],
+      "js": ["page.js", "shortcut.js"],
+      "css": ["style.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file://*/*"],
+      "js": ["isLoad.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "16": "images/icon_16.png",
+    "19": "images/icon_19.png",
+    "32": "images/icon_32.png",
+    "48": "images/icon_48.png",
+    "128": "images/icon_128.png"
+  },
+  "default_locale": "en",
+  "options_page": "options.html",
+  "permissions": ["tabs", "http://*/*", "https://*/*", "notifications"],
+  "plugins": [ {
+    "path": "plugin/screen_capture.dll"
+  }, {
+    "path": "plugin/screen_capture.so"
+  }, {
+    "path": "plugin/screen_capture_64.so"
+  }, {
+    "path": "plugin/screen_capture.plugin"
+  } ]
+}

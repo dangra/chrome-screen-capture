@@ -1,0 +1,122 @@
+﻿{
+   "autosave": {
+      "message": "Autospeichern - nach dem Erfassen, den Bearbeiten-Bildschirm überspringen und den erfassten Bereich direkt am Standard-Speicherort mit dem Webseiten-Titel als Dateinamen speichern"
+   },
+   "blur": {
+      "message": "Verwischen"
+   },
+   "border": {
+      "message": "Nur umranden"
+   },
+   "cancel": {
+      "message": "Abbruch"
+   },
+   "capture_area": {
+      "message": "Ausgewählten Bereich"
+   },
+   "capture_webpage": {
+      "message": "Gesamte Seite"
+   },
+   "capture_window": {
+      "message": "Sichtbaren Bereich"
+   },
+   "capturing": {
+      "message": "Erfassen, bitte warten..."
+   },
+   "close": {
+      "message": "Schließen"
+   },
+   "default_title": {
+      "message": "Bildschirmerfassung"
+   },
+   "description": {
+      "message": "Erfasse den sichtbaren Bereich eines Tabs, einen Bereich einer Webseite oder die gesamte Seite als PNG Bild. Unterstützt horizontales und vertikales scrollen wenn die gesamte Seite erfasst wird, mit der brandneuen Autospeichern-Möglichkeit."
+   },
+   "edit_tip": {
+      "message": "    Unten ist der erfasste Screenshot. Sie können diesen mit den Tools links bearbeiten. Wenn fertig, auf speichern drücken."
+   },
+   "highlight": {
+      "message": "Markieren"
+   },
+   "line": {
+      "message": "Linie"
+   },
+   "loading": {
+      "message": "Die Seite wird geladen, bitte warten."
+   },
+   "lossless": {
+      "message": "Verlustfreier Screenshot"
+   },
+   "lossy": {
+      "message": "Verlustbehafteter Screenshot"
+   },
+   "name": {
+      "message": "Bildschirmerfassung (von Google)"
+   },
+   "ok": {
+      "message": "OK"
+   },
+   "open_save_path": {
+      "message": "Gehe zu Verzeichnis"
+   },
+   "options": {
+      "message": "Optionen Bildschirmerfassung"
+   },
+   "quality_setting": {
+      "message": "Einstellungen Screenshot Qualität: "
+   },
+   "rect": {
+      "message": "Bereich füllen"
+   },
+   "redact": {
+      "message": "Bearbeiten"
+   },
+   "save": {
+      "message": "Speichern"
+   },
+   "save_and_close": {
+      "message": "Speichern & Schließen"
+   },
+   "save_fail": {
+      "message": "Screenshot konnte nicht gespeichert werden."
+   },
+   "save_image": {
+      "message": "Bild speichern"
+   },
+   "save_setting": {
+      "message": "Einstellungen Screenshot speichern: "
+   },
+   "save_success": {
+      "message": "Screenshot gespeichert."
+   },
+   "save_tip": {
+      "message": "Standard-Speicherort: "
+   },
+   "set_save_path": {
+      "message": "Browse..."
+   },
+   "set_save_path_title": {
+      "message": "Standard-Speicherort wählen"
+   },
+   "size_huge": {
+      "message": "Riesig"
+   },
+   "size_large": {
+      "message": "Groß"
+   },
+   "size_normal": {
+      "message": "Normal"
+   },
+   "size_small": {
+      "message": "Klein"
+   },
+   "solid_black": {
+      "message": "Schwarz"
+   },
+   "special": {
+      "message": "Dies ist eine spezielle Seite. Eine Bildschirmerfassung ist auf dieser Seite nicht möglich."
+   },
+   "text": {
+      "message": "Text"
+   }
+}

@@ -1,0 +1,131 @@
+﻿{
+   "autosave": {
+      "message": "Autozapis - po przechwyceniu, pomiń ekran edycji i zapisz bezpośrednio w domyślnym katalogu z tytułem strony jako nazwa pliku"
+   },
+   "blur": {
+      "message": "Rozmyj"
+   },
+   "border": {
+      "message": "Kontury"
+   },
+   "cancel": {
+      "message": "Anuluj"
+   },
+   "capture_area": {
+      "message": "Przechwyć Wybrany Obszar"
+   },
+   "capture_webpage": {
+      "message": "Przechwyć Całą Stronę"
+   },
+   "capture_window": {
+      "message": "Przechwyć Widoczny Obszar"
+   },
+   "capturing": {
+      "message": "Przechwytywanie, proszę czekać ..."
+   },
+   "close": {
+      "message": "Zamknij"
+   },
+   "copy": {
+      "message": "Kopiuj"
+   },
+   "default_title": {
+      "message": "Zrzut Ekranu"
+   },
+   "description": {
+      "message": "Przechwyć widoczną część karty, wybrany fragment strony, lub całą stronę jako obraz PNG."
+   },
+   "edit_tip": {
+      "message": "Poniżej jest zrzut ekranu który zrobiłeś. Możesz go edytować za pomocą narzędzi po lewej stronie. Naciśnij Zapisz kiedy skończysz."
+   },
+   "highlight": {
+      "message": "Wyróżnij"
+   },
+   "line": {
+      "message": "Linia"
+   },
+   "loading": {
+      "message": "Strona ładuje się, proszę czekać."
+   },
+   "lossless": {
+      "message": "Kompresja bezstratna (PNG)"
+   },
+   "lossy": {
+      "message": "Kompresja stratna (JPEG)"
+   },
+   "name": {
+      "message": "Screen Capture (od Google)"
+   },
+   "ok": {
+      "message": "OK"
+   },
+   "open_save_path": {
+      "message": "Idź do folderu"
+   },
+   "options": {
+      "message": "Opcje Screen Capture"
+   },
+   "quality_setting": {
+      "message": "Ustawienia Jakości Zrzutu Ekranu: "
+   },
+   "rect": {
+      "message": "Wypełnij"
+   },
+   "redact": {
+      "message": "Ocenzuruj"
+   },
+   "save": {
+      "message": "Zapisz"
+   },
+   "save_and_close": {
+      "message": "Zapisz & Zamknij"
+   },
+   "save_fail": {
+      "message": "Nie udało się zapisać zrzutu ekranu."
+   },
+   "save_image": {
+      "message": "Zapisz Obraz"
+   },
+   "save_setting": {
+      "message": "Ustawienia Zapisu Zrzutu Ekranu: "
+   },
+   "save_success": {
+      "message": "Zrzut ekranu zapisany."
+   },
+   "save_tip": {
+      "message": "Domyślna lokalizacja do zapisu: "
+   },
+   "set_save_path": {
+      "message": "Przeglądaj ..."
+   },
+   "set_save_path_title": {
+      "message": "Wybierz Domyślną Lokalizację do Zapisu"
+   },
+   "size_huge": {
+      "message": "Ogromny"
+   },
+   "size_large": {
+      "message": "Duży"
+   },
+   "size_normal": {
+      "message": "Normalny"
+   },
+   "size_small": {
+      "message": "Mały"
+   },
+   "solid_black": {
+      "message": "Zamaż"
+   },
+   "special": {
+      "message": "To jest strona specjalna. Nie można zrobić zrzutu ekranu."
+   },
+   "text": {
+      "message": "Tekst"
+   },
+   "tip_copy_failed": {
+      "message": "Nie udało się skopiować zrzutu ekranu."
+   },
+   "tip_copy_succeed": {
+      "message": "Zrzut ekranu skopiowany."
+   }
+}
