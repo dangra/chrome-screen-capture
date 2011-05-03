@@ -8,10 +8,11 @@
 #include <io.h>
 #include <ShlObj.h>
 #elif defined GTK
+#include <libgen.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <libgen.h>
 #elif defined __APPLE__
+#include <libgen.h>
 #include <resolv.h>
 #endif
 
