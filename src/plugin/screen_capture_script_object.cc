@@ -10,6 +10,7 @@
 #elif defined GTK
 #include <sys/stat.h>
 #include <unistd.h>
+#include <libgen.h>
 #elif defined __APPLE__
 #include <resolv.h>
 #endif
@@ -141,12 +142,27 @@ void ScreenCaptureScriptObject::InvokeCallback(
 
 // static
 void ScreenCaptureScriptObject::InvokeCallback(
-    NPP npp, NPObject* callback, bool param) {
-  NPVariant npParam;
-  BOOLEAN_TO_NPVARIANT(param, npParam);
+    NPP npp, NPObject* callback, bool param0, const char* param1) {
+  NPVariant npParam[2];
+  int param_count = 0;
+  char path[MAX_PATH] = "";
+  BOOLEAN_TO_NPVARIANT(param0, npParam[0]);
+  param_count++;
+  if (param1 != NULL) {
+#ifdef _WINDOWS
+    char driver[_MAX_DRIVE] = "";
+    char dir[_MAX_DIR] = "";
+    _splitpath(param1, driver, dir, NULL, NULL);
+    sprintf(path, "%s%s", driver, dir);
+#else
+    strcpy(path, dirname((char*)param1));
+#endif
+    STRINGZ_TO_NPVARIANT(path, npParam[1]);
+    param_count++;
+  }
   NPVariant result;
   VOID_TO_NPVARIANT(result);
-  NPN_InvokeDefault(npp, callback, &npParam, 1, &result);
+  NPN_InvokeDefault(npp, callback, npParam, param_count, &result);
 }
 
 #ifdef _WINDOWS
@@ -240,12 +256,26 @@ void ScreenCaptureScriptObject::OnDialogResponse(
     if (dialog == GTK_DIALOG(save_dialog_)) {
       if (file && save_data_) {
         std::string filename = file;
-        int postfix_index = filename.rfind(".png");
-        if (postfix_index == std::string::npos ||
-            postfix_index != (filename.length() - 4))
-          filename += ".png";
+        GtkFileFilter* filter = gtk_file_chooser_get_filter(
+            GTK_FILE_CHOOSER(save_dialog_));
+        if (filter && strcmp(gtk_file_filter_get_name(filter), 
+                             "JPEG Image") == 0) {
+          int postfix_index = filename.rfind(".jpeg");
+          if (postfix_index == std::string::npos ||
+              postfix_index != (filename.length() - 5)) {
+            filename += ".jpeg";
+          }
+        } else {
+          int postfix_index = filename.rfind(".png");
+          if (postfix_index == std::string::npos ||
+              postfix_index != (filename.length() - 4)) {
+            filename += ".png";
+          }
+        }          
         InvokeCallback((NPP)userData, save_callback_,
-                       SaveFile(filename.c_str(), save_data_, save_data_length_));
+                       SaveFile(filename.c_str(), save_data_, 
+                                save_data_length_),
+                       filename.c_str());
         // To indicate the callback has already been invoked.
         ReleaseSaveCallback();
       }
@@ -577,7 +607,8 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
   char sz_dialog_title[MAX_PATH];
 
   MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, temp_value, MAX_PATH);
-  WideCharToMultiByte(CP_ACP, 0, temp_value, -1, sz_dialog_title, MAX_PATH, 0, 0);
+  WideCharToMultiByte(CP_ACP, 0, temp_value, -1, 
+                      sz_dialog_title, MAX_PATH, 0, 0);
 
   MultiByteToWideChar(CP_UTF8, 0, path, -1, temp_value, MAX_PATH);
   WideCharToMultiByte(CP_ACP, 0, temp_value, -1, initial_path, MAX_PATH, 0, 0);
@@ -614,7 +645,8 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
 
   InvokeCallback(
       get_plugin()->get_npp(), callback,
-      !GetSaveFileNameA(&Ofn) || SaveFileBase64(sz_file, base64, base64size));
+      !GetSaveFileNameA(&Ofn) || SaveFileBase64(sz_file, base64, base64size),
+      sz_file);
 
 #elif defined GTK
   ReleaseSaveCallback();
@@ -641,8 +673,13 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
 
     GtkFileFilter *file_filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(file_filter, "PNG Image");
-    gtk_file_filter_add_pattern(file_filter, "*.png");
+    if (postfix == ".png") {
+      gtk_file_filter_set_name(file_filter, "PNG Image");
+      gtk_file_filter_add_pattern(file_filter, "*.png");
+    } else {
+      gtk_file_filter_set_name(file_filter, "JPEG Image");
+      gtk_file_filter_add_pattern(file_filter, "*.jpeg");
+    }
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
 
     file_filter = gtk_file_filter_new();
@@ -653,6 +690,10 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
                      get_plugin()->get_npp());
     g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy),
                      get_plugin()->get_npp());
+    std::string file_name = title;
+    file_name += postfix;
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), 
+                                      file_name.c_str());
     gtk_widget_show_all(dialog);
     gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
     save_dialog_ = dialog;
@@ -662,7 +703,8 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
   std::string file = GetSaveFileName(title, path, dialog_title);
   InvokeCallback(
       get_plugin()->get_npp(), callback,
-      file.empty() || SaveFileBase64(file.c_str(), base64, base64size));
+      file.empty() || SaveFileBase64(file.c_str(), base64, base64size),
+      file.c_str());
 #endif
 
   return true;

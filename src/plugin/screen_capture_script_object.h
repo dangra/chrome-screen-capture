@@ -41,9 +41,11 @@ private:
                        int byteLength);
   static bool SaveFileBase64(const char* fileName, const char* base64,
                              int base64size);
-  bool GenerateUniqueFileName(const std::string& srcFile, std::string* destFile);
+  bool GenerateUniqueFileName(const std::string& srcFile, 
+                              std::string* destFile);
   static void InvokeCallback(NPP npp, NPObject* callback, const char* param);
-  static void InvokeCallback(NPP npp, NPObject* callback, bool param);
+  static void InvokeCallback(NPP npp, NPObject* callback, bool param0, 
+                             const char* param1 = NULL);
 #ifdef _WINDOWS
 
   std::string GetPicturePath();
