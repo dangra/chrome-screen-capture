@@ -21,16 +21,28 @@ public:
   bool Construct(const NPVariant* args, uint32_t argCount,
                  NPVariant* result) { return true; }
 
+  // Get system default save path for pictures.
   bool GetDefaultSavePath(const NPVariant* args, uint32_t argCount,
                           NPVariant* result);
+
+  // Save the picture to the preset save location without prompting
+  // a save dialog.
   bool AutoSave(const NPVariant* args, uint32_t argCount,
                 NPVariant* result);
+
+  // Set save location.
   bool SetSavePath(const NPVariant* args, uint32_t argCount,
                    NPVariant* result);
+
+  // Open save location.
   bool OpenSavePath(const NPVariant* args, uint32_t argCount,
                     NPVariant* result);
+
+  // Prompt a save dialog to save the picture.
   bool SaveScreenshot(const NPVariant* args, uint32_t argCount,
                       NPVariant* result);
+
+  // Save the picture to clipboard.
   bool SaveToClipboard(const NPVariant* args, uint32_t argCount,
                        NPVariant* result);
 

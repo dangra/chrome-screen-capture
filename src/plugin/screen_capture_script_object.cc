@@ -158,8 +158,10 @@ void ScreenCaptureScriptObject::InvokeCallback(
 #else
     strcpy(path, dirname((char*)param1));
 #endif
-    STRINGZ_TO_NPVARIANT(path, npParam[1]);
-    param_count++;
+    if (strcmp(path, ".") != 0) {
+      STRINGZ_TO_NPVARIANT(path, npParam[1]);
+      param_count++;
+    }
   }
   NPVariant result;
   VOID_TO_NPVARIANT(result);
@@ -306,7 +308,8 @@ void ScreenCaptureScriptObject::OnDialogDestroy(
 }
 #elif defined __APPLE__
 
-std::string GetSaveFileName(const char* title, const char* path, const char* dialog_title);
+std::string GetSaveFileName(const char* title, const char* path,
+                            const char* dialog_title, const char* ext);
 std::string GetDocumentFolder();
 std::string SetSaveFolder(const char* path, const char* dialog_title);
 bool OpenSaveFolder(const char* path);
@@ -701,7 +704,8 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
   }
   gtk_window_present(GTK_WINDOW(save_dialog_));
 #elif defined __APPLE__
-  std::string file = GetSaveFileName(title, path, dialog_title);
+  std::string file = GetSaveFileName(title, path, dialog_title,
+                                     postfix.substr(1).c_str());
   InvokeCallback(
       get_plugin()->get_npp(), callback,
       file.empty() || SaveFileBase64(file.c_str(), base64, base64size),
