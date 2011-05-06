@@ -26,6 +26,7 @@
   "copy": {"message": "拷贝"},
   "save": {"message": "保存"},
   "share": {"message": "分享"},
+  "print": {"message": "打印"},
   "close": {"message": "关闭"},
   "save_image": {"message": "保存图片"},
   "options": {"message": "网页截图选项"},

@@ -73,6 +73,10 @@ void ScreenCaptureScriptObject::InitHandler() {
   item.function_pointer = ON_INVOKEHELPER(
       &ScreenCaptureScriptObject::SaveToClipboard);
   AddFunction(item);
+  item.function_name = "PrintImage";
+  item.function_pointer = ON_INVOKEHELPER(
+      &ScreenCaptureScriptObject::PrintImage);
+  AddFunction(item);
 }
 
 
@@ -419,6 +423,229 @@ bool ScreenCaptureScriptObject::SaveToClipboard(
   }
 #endif
   BOOLEAN_TO_NPVARIANT(true, *result);
+  return true;
+}
+
+#ifdef _WINDOWS
+bool ScreenCaptureScriptObject::PrintImageWin(
+    HDC printer_dc, ImageType imagetype, byte* imagedata, 
+    int imagelen, int width, int height) {
+  DOCINFO di = {sizeof(DOCINFO)};
+  di.lpszDocName = _T("Image Print"); 
+  di.lpszOutput = NULL; 
+  di.lpszDatatype = NULL;
+  di.fwType = 0; 
+
+  int error = StartDoc(printer_dc, &di); 
+  if (error == SP_ERROR) { 
+    return false; 
+  } 
+
+  float scale_x, scale_y;
+  int left, top, printer_width, printer_height, print_width, print_height;
+
+  HDC screen_dc = GetDC(NULL);
+  float screen_log_pixel_x = (float)GetDeviceCaps(screen_dc, LOGPIXELSX); 
+  float screen_log_pixel_y = (float)GetDeviceCaps(screen_dc, LOGPIXELSY); 
+
+  float printer_log_pixel_x = (float)GetDeviceCaps(printer_dc, LOGPIXELSX); 
+  float printer_log_pixel_y = (float)GetDeviceCaps(printer_dc, LOGPIXELSY); 
+
+  scale_x = printer_log_pixel_x / screen_log_pixel_x;
+
+  scale_y = printer_log_pixel_y / screen_log_pixel_y;
+
+  printer_width = GetDeviceCaps(printer_dc, HORZRES); 
+  printer_height = GetDeviceCaps(printer_dc, VERTRES); 
+  printer_width -= printer_log_pixel_x;
+  printer_height -= printer_log_pixel_y;
+
+  if (width * scale_x < printer_width) {
+    print_width = width * scale_x;
+  } else {
+    print_width = printer_width;
+  }
+  if (height * scale_y < printer_height) {
+    print_height = height * scale_y; 
+  } else {
+    print_height = printer_height;
+  }
+
+  int page_height = print_height / scale_y;
+  int totoal_page_count = height / page_height + 
+      ((height % page_height) ? 1 : 0);
+
+  DWORD support_format = 0;
+  BITMAPINFO bmi;
+  memset(&bmi, 0, sizeof(bmi));
+  bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+  bmi.bmiHeader.biWidth       = width;
+  bmi.bmiHeader.biHeight      = height;
+  bmi.bmiHeader.biPlanes      = 1;
+  bmi.bmiHeader.biBitCount    = 0;
+  bmi.bmiHeader.biSizeImage   = imagelen;
+
+  if (imagetype == kImageTypePNG && 
+      ExtEscape(printer_dc, CHECKPNGFORMAT, 
+                imagelen, (LPCSTR)imagedata, 
+                sizeof(support_format), (LPSTR)&support_format) && 
+      support_format == 1) {
+    bmi.bmiHeader.biCompression = BI_PNG;
+  } else if (imagetype == kImageTypeJPEG &&
+    ExtEscape(printer_dc, CHECKJPEGFORMAT, 
+              imagelen, (LPCSTR)imagedata, 
+              sizeof(support_format), (LPSTR)&support_format) && 
+    support_format == 1) {
+    bmi.bmiHeader.biCompression = BI_JPEG;
+  } else {
+    FILE* f = fopen("tempprint.png", "wb");
+    if (f) {
+      fwrite(imagedata, imagelen, 1, f);
+      fflush(f);
+      fclose(f);
+    } else {
+      return false;
+    }
+    Image* image = Image::FromFile(_T("tempprint.png"));
+    HDC memdc = CreateCompatibleDC(screen_dc);
+    HBITMAP hbitmap = CreateCompatibleBitmap(screen_dc, image->GetWidth(),
+                                             image->GetHeight());
+    SelectObject(memdc, hbitmap);
+    SolidBrush brush(Color::White);
+    Graphics g(memdc);
+    g.FillRectangle(&brush, 0, 0, image->GetWidth(), image->GetHeight());
+    g.DrawImage(image, 0, 0);
+    delete image;
+    HDC source_dc = g.GetHDC();
+    for (int page_index = 0; page_index < totoal_page_count; page_index++) {
+      error = StartPage(printer_dc); 
+      left = 0;
+      top = page_index * page_height;
+      if ((page_index == totoal_page_count - 1) && 
+        (height % page_height) != 0) {
+          page_height = height % page_height;
+      }
+      print_height = page_height * scale_y;
+      StretchBlt(printer_dc, printer_log_pixel_x/2, printer_log_pixel_y/2,
+                 print_width, print_height, source_dc, left, top, width, 
+                 page_height, SRCCOPY);
+
+      error = EndPage(printer_dc);
+    }
+    DeleteObject(hbitmap);
+    DeleteDC(memdc);
+    g.ReleaseHDC(source_dc);
+  }
+  
+  // If printer supports the image format, we send DIB data directly.
+  if (support_format) {
+    for (int page_index = 0; page_index < totoal_page_count; page_index++) {
+      error = StartPage(printer_dc); 
+      left = 0;
+      top = height - page_index * page_height;
+      if ((page_index == totoal_page_count - 1) && 
+        (height % page_height) != 0) {
+          page_height = height % page_height;
+      }
+      print_height = page_height * scale_y;
+      top -= page_height;
+
+      if (StretchDIBits(
+          printer_dc, printer_log_pixel_x/2, printer_log_pixel_y/2,
+          print_width, print_height, left, top, 
+          width, page_height, imagedata, &bmi, 
+          DIB_RGB_COLORS, SRCCOPY) == GDI_ERROR) {
+        g_logger.WriteLog("Error", "StretchDIBits");
+      }
+
+      error = EndPage(printer_dc);
+    }
+  }
+  ReleaseDC(NULL, screen_dc);
+
+  error = EndDoc(printer_dc);
+  return true;
+}
+#endif
+
+bool ScreenCaptureScriptObject::PrintImage(const NPVariant* args, 
+                                           uint32_t argCount, 
+                                           NPVariant* result) {
+  bool ret_value = false;
+  BOOLEAN_TO_NPVARIANT(ret_value, *result);
+  if (argCount != 4)
+    return false;
+  if (!NPVARIANT_IS_STRING(args[0]) || !NPVARIANT_IS_STRING(args[1]))
+    return false;
+  if (!NPVARIANT_IS_DOUBLE(args[2]) && !NPVARIANT_IS_INT32(args[2]))
+    return false;
+  if (!NPVARIANT_IS_DOUBLE(args[3]) && !NPVARIANT_IS_INT32(args[3]))
+    return false;
+
+  const char* url = (const char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+  const char* title = (const char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
+  int image_width = NPVARIANT_IS_DOUBLE(args[2]) ? 
+      NPVARIANT_TO_DOUBLE(args[2]) : NPVARIANT_TO_INT32(args[2]);
+  int image_height = NPVARIANT_IS_DOUBLE(args[3]) ?
+      NPVARIANT_TO_DOUBLE(args[3]) : NPVARIANT_TO_INT32(args[3]);
+
+  const char* base64 = strstr(url, "base64,");
+  if (!base64)
+    return false;
+  ImageType image_type = kImageTypePNG;
+  if (strncmp(url, "data:image/jpeg", 15) == 0)
+    image_type = kImageTypeJPEG;
+
+  base64 += 7;
+  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
+
+#ifdef _WINDOWS
+  int image_data_len = Base64DecodeGetRequiredLength(base64size);
+  byte* image_data = new byte[image_data_len];
+  Base64Decode(base64, base64size, image_data, &image_data_len);
+
+  PRINTDLGEX option = {sizeof(PRINTDLGEX)};
+
+  option.hwndOwner = get_plugin()->get_native_window();
+  option.hDevMode = NULL;
+  option.hDevNames = NULL;
+  option.hDC = NULL;
+  option.Flags = PD_RETURNDC | PD_HIDEPRINTTOFILE | PD_NOSELECTION | 
+      PD_NOCURRENTPAGE | PD_USEDEVMODECOPIESANDCOLLATE | PD_NOPAGENUMS;
+  option.Flags2 = 0;
+  option.ExclusionFlags = 0;
+  option.nPageRanges = 0;
+  option.nMaxPageRanges = 0;
+  option.lpPageRanges = NULL;
+  option.nMinPage = 0;
+  option.nMaxPage = 0;
+  option.nCopies = 1;
+  option.hInstance = NULL;
+  option.lpPrintTemplateName = NULL;
+  option.lpCallback = NULL;
+  option.nPropertyPages = 0;
+  option.lphPropertyPages = NULL;
+  option.nStartPage = START_PAGE_GENERAL;
+  option.dwResultAction = 0;
+  HRESULT ret = PrintDlgEx(&option);
+
+  if ((ret == S_OK)) {
+    if (option.dwResultAction == PD_RESULT_PRINT) {
+      DEVMODE* devmode = (DEVMODE*)GlobalLock(option.hDevMode);
+      DEVNAMES* devnames = (DEVNAMES*)GlobalLock(option.hDevNames);
+      ret_value = PrintImageWin(
+          option.hDC, image_type, image_data, image_data_len, 
+          image_width, image_height);
+      GlobalUnlock(option.hDevMode);
+      GlobalUnlock(option.hDevNames);
+    }
+    DeleteDC(option.hDC);
+    GlobalFree(option.hDevMode);
+    GlobalFree(option.hDevNames);
+  }
+#endif
+
+  BOOLEAN_TO_NPVARIANT(ret_value, *result);
   return true;
 }
 
