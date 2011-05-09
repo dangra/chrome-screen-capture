@@ -7,458 +7,7 @@
 <head>
 <title>Screen Capture</title>
 <meta charset="UTF-8">
-<style type="text/css">
-  body {
-    font-size: 12px;
-    font-family: arial, Verdana;
-    margin: 0;
-    padding: 0;
-    background: #959595;
-  }
-  #header {
-    background: url(images/toolbar_bg.png);
-    height: 36px;
-    overflow: hidden;
-  }
-  #showBox {
-     overflow: auto;
-  }
-  #photo {
-    cursor: crosshair;
-    margin: 0;
-    padding: 0;
-    position: relative;
-  }
-  #tip {
-    color: #333333;
-    padding: 0 5px;
-    height: 36px;
-    font-size: 13px;
-    line-height: 36px;
-    overflow: hidden;
-    text-align: left;
-    margin: 0 180px 0 300px;
-  }
-  .toolbar {
-    position:fixed;
-    height: 30px;
-    margin-left: 10px;
-    padding-top: 6px;
-  }
-  .toolbar ul {
-    margin: 0px;
-    padding: 0px;
-    list-style: none;
-  }
-  .toolBar ul li {
-    cursor: pointer;
-    margin-right: 8px;
-    float: left;
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FEFEFE), to(#CDDCF0));
-    border: 1px solid #788390;
-    border-bottom-left-radius: 3px 3px;
-    border-bottom-right-radius: 3px 3px;
-    border-top-left-radius: 3px 3px;
-    border-top-right-radius: 3px 3px;
-    color:#333333;
-    height: 18px;
-    line-height: 18px;
-    padding: 2px 8px 2px 8px;
-    position: relative;
-  }
-  .toolBar ul li:hover {
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#CDDCF0), to(#FEFEFE));
-    border: 1px solid #333333;
-  }
-  .toolbar ul li.mark {
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FEFEFE), to(#FEFEFE));
-    border: 1px solid #333333;
-  }
-  .toolbar li .tool {
-    float: none;
-    border: 1px #333333 solid;
-    display: none;
-  }
-  .toolbar li:hover .tool {
-    display: block;
-  }
-  .toolbar li img {
-    position: relative;
-    top: 2px;
-  }
-  .layer {
-    font-size:12px;
-    font-family: arial;
-    height: 0;
-    position: absolute;
-    width: 0;
-    z-index: 100;
-    line-height: 22px;
-    word-wrap: break-word;
-    text-align: left;
-    outline: 0;
-  }
-  .closeButton {
-    position: absolute;
-    display: none;
-    cursor: pointer;
-    top: -15px;
-  }
-  .clear {
-    clear: both;
-  }
-  .tool {
-    position: absolute;
-    border-radius: 3px 3px;
-    border:1px solid #cccccc;
-    left: -1;
-    top: 23px;
-    padding:3px;
-    padding:2px 2px 2px 2px;
-    background: #ffffff;
-    z-index: 9999;
-    -webkit-box-shadow: #8B8B8B 0px 4px 10px;
-    min-width: 90px;
-  }
-  #colorpad {
-    word-wrap: break-word;
-    word-break: normal;
-    background-color: #ffffff;
-    padding: 4px;
-    width: 145px;
-  }
-  #colorpad a {
-    margin: 1px;
-    padding: 1px;
-    display: block;
-    height: 10px;
-    width: 10px;
-    float: left;
-    border: 1px solid #333333;
-  }
-  .colorBox, .ellipseBox  {
-    float: left;
-    margin:3px 3px 0 0;
-    height:10px;
-    width:10px;
-    border:1px solid #333333;
-  }
-  #lineIconCav {
-    float: left;
-    margin:2px 2px 0 0;
-  }
-  .rectBox {
-    float: left;
-    margin:3px 3px 0 0;
-    height:12px;
-    width:12px;
-    background: #000000;
-  }
-  .blurBox {
-    float: left;
-    margin:3px 10px 0 5px;
-    -webkit-box-shadow:#333333 0px 6px 5px 5px;
-  }
-  #mask-canvas {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-  }
-  .tool-option {
-    text-indent: 1.5em;
-    line-height: normal;
-  }
-  .tool-option div {
-    padding: 4px 0;
-    cursor: pointer;
-  }
-  .tool-option div:hover {
-    background-color: #ffffcc;
-  }
-  .mark {
-    background: url(images/mark.png) no-repeat 5px 50%;
-  }
-  .tool-option-line {
-    margin-top: 5px;
-    border-top:1px #ccc solid;
-  }
-  .tool-option-line div{
-    float: left;
-    padding:5px;
-    margin:2px;
-    border:1px #ffffff solid;
-  }
-  .tool-option-line .mark{
-    border:1px #cccccc solid;
-    background: #ffffcc;
-  }
-  .tool-option-line div:hover {
-    border:1px #cccccc solid;
-    background-color: #ffffcc;
-  }
-  .ellipse {
-    width: 9px;
-    height: 8px;
-    display: block;
-    border-radius: 8px 8px;
-    border: 1px solid #2a5db0;
-  }
-  .radiusRect {
-    width: 9px;
-    height: 8px;
-    display: block;
-    border-radius:3px 3px;
-    border: 1px solid #2a5db0;
-  }
-  .rect {
-    width: 9px;
-    height: 8px;
-    display: block;
-    border: 1px solid #2a5db0;
-  }
-  .tip_succeed, .tip_failed{
-    position :fixed;
-    border-radius: 4px 4px;
-    height: 30px;
-    line-height: 30px;
-    top: 5px;
-    margin: 0 auto;
-    padding: 0 10px;
-    font-size: 12px;
-  }
-  .tip_succeed {
-    background: #fff1a8;
-    color: #000000;
-  }
-  .tip_failed {
-    color: #ffffff;
-    background: #ff8080;
-  }
-  #selectuploadposition {
-    border: 1px solid #ccc;
-    width: 300px;
-    height: 200px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1000;
-    left: 40%;
-    top: 25%;
-    display: none;
-    -webkit-box-shadow: #cccccc 0 0 7px 1px;
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#d0dff2), to(#f5f9fc));
-  }
-  .selectcontent
-  {
-    background-color: White;
-    width:300px;
-    height:168px;
-  }
-  button {
-    cursor: pointer;
-  }
-  input {
-    cursor: pointer;
-  }
-  #uploadWrapper {
-    width: 380px;
-    min-height: 255px;
-    border: 1px solid #8ec3eb;
-    border-radius: 5px;
-    position: absolute;
-    background: white;
-    box-shadow: 0 0 5px 1px #a0a0a0;
-    display: none;
-    z-index: 10000;
-  }
-  #uploadHeader {
-    border-bottom: 1px solid #aebece;
-    height: 33px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #004b80;
-    background: -webkit-gradient(linear, left top, left bottom, from(#e4f0ff), to(#b5cce8));
-  }
-  #uploadBody {
-    background: white url("images/popup_bg.jpg") left top no-repeat;
-    min-height: 160px;
-  }
-  #uploadFooter {
-    background: -webkit-gradient(linear, left top, left bottom, from(#e2effe), to(#cee1f9));
-    height: 36px;
-    text-align: right;
-    padding-right: 15px;
-  }
-  #uploadFooter button {
-    width: 72px;
-    height: 26px;
-    vertical-align: middle;
-    border:1px solid #8ec3eb;
-    color: #1c5f8e;
-    border-radius: 3px;
-    background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
-  }
-  #uploadFooter button:hover {
-    background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
-  }
-  .verticalAlignMiddle {
-    display: table-cell;
-    vertical-align: middle;
-    height: inherit;
-  }
-  #uploadSitesWrapper {
-    text-align: center;
-    height: 185px;
-  }
-  .btn {
-    display: inline-block;
-    text-align: center;
-    background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#e0ecfb));
-    border: 1px solid #c0cddd;
-    cursor: pointer;
-    border-radius: 3px;
-  }
-  .btn:hover {
-    background: -webkit-gradient(linear, left top, left bottom, from(#e0ecfb), to(#fff));
-    border: 1px solid #8ec3eb;
-  }
-  #uploadSitesWrapper > span.btn {
-    display: inline-block;
-    font-size: 18px;
-    height: 44px;
-    width: 238px;
-    text-align: center;
-    color: #1c68a2;
-    border-radius: 4px;
-  }
-  #uploadSitesWrapper > span.btn > span.uploadSite > * {
-    vertical-align: middle;
-  }
-  .uploadSite {
-    display: inline-block;
-    text-align: left;
-    width: 180px;
-    line-height: 44px;
-  }
-  #uploadContentWrapper {
-    font-weight: bold;
-    color: #1c68a2;
-  }
-  #uploadContentWrapper > div {
-    text-align: left;
-    padding: 25px 0 0 30px;
-  }
-  #imageCaption {
-    height: 23px;
-    padding-left: 5px;
-    outline-color: #cbecff;
-    margin-left: 10px;
-    border: 1px solid #aebece;
-    background: -webkit-gradient(linear, left top, left bottom, from(#eefbfa), to(#fff));
-    cursor: auto;
-  }
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .accountItem {
-    padding-bottom: 10px;
-  }
-  .accountItem > *{
-    margin-right: 6px;
-  }
-  .account {
-    overflow: hidden;
-    display: inline-block;
-    white-space: nowrap;
-  }
-  .account > *, .shareToText {
-    vertical-align: middle;
-  }
-  .account:hover > img{
-    visibility: visible;
-  }
-  .account img {
-    visibility: hidden;
-    cursor: pointer;
-  }
-  .accountName {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    margin-right: 10px;
-    display: inline-block;
-    max-width: 145px;
-    border-bottom: 1px solid #fff;
-  }
-  .accountName:hover {
-    border-bottom: 1px solid #1c68a2;
-    cursor: pointer;
-  }
-  .progressBar {
-    display: inline-block;
-    vertical-align: middle;
-    width: 41px;
-    height: 12px;
-    background: white url("images/loading_icon.gif") 0 0 no-repeat;
-  }
-  .photoLink {
-    color: #0091ff;
-    margin-left: 42px;
-    display: none;
-  }
-  #shareToOtherAccount {
-    display: inline-block;
-    margin-top: 6px;
-    cursor: pointer;
-    border-bottom: 1px solid #fff;
-  }
-  #shareToOtherAccount:hover {
-    border-bottom: 1px solid #1c68a2;
-  }
-  .uploadInfo {
-    display: inline-block;
-    vertical-align: middle;
-    font-weight: normal;
-  }
-  #overlay {
-    position: absolute;
-    opacity: 0.3;
-    background: #000;
-    display: none;
-    z-index: 200;
-    top: 0;
-    left: 0;
-  }
-  #requiredFlag {
-    color: red;
-  }
-  #uploadcontentwrapper > #errorWrapper {
-    display: none;
-    position: absolute;
-    padding: 0;
-    text-align: center;
-    width: 380px;
-    height: 25px;
-    margin-bottom: -15px;
-  }
-  #errorInfo {
-    display: inline-block;
-    padding: 4px 15px;
-    background: #fffed5;
-    color: red;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    font-weight: normal;
-    white-space: nowrap;
-    max-width: 350px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #authenticationProgress {
-    margin-left: 40px;
-    display: none;
-  }
-</style>
+<link href="showimage.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="editor.js"></script>
 <script type="text/javascript" src="sha1.js"></script>
 <script type="text/javascript" src="oauth.js"></script>
@@ -469,6 +18,7 @@
 <script type="text/javascript" src="sina_microblog.js"></script>
 </head>
 <body>
+  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture" />
   <div id="header">
   <div id="toolbar" class="toolbar">
    <ul>
@@ -527,24 +77,35 @@
   </div>
   <div id="tip"></div>
   <div class="toolbar" id="okBtn" style="position:fixed; right:30px; top:0px;">
-   <ul>
-    <li id="btnSave" onclick="photoshop.save()">
-      <img src="images/icon_save.png" alt="">
-      <span id="tSave"></span>
-    </li>
-    <li id="btnUpload">
-      <img src="images/upload.png" alt="">
-      <span id="tUpload"></span>
-    </li>
-    <li id="btnCopy" onclick="photoshop.copy()">
-      <img src="images/icon_copy.png" alt="">
-      <span id="tCopy"></span>
-    </li>
-    <li id="btnClose" onclick="photoshop.closeCurrentTab()">
-      <img src="images/icon_close.png" alt="">
-      <span id="tClose">Close</span>
-    </li>
-   </ul>
+    <ul>
+      <li id="btnSave" onclick="photoshop.save()">
+        <img src="images/icon_save.png" alt="">
+        <span id="tSave"></span>
+      </li>
+      <li id="btnUpload">
+        <img src="images/upload.png" alt="">
+        <span id="tUpload"></span>
+      </li>
+      <li id="btnClose" onclick="photoshop.closeCurrentTab()">
+        <img src="images/icon_close.png" alt="">
+        <span id="tClose">Close</span>
+      </li>
+      <li id="btnMore">
+        <img src="images/down_arrow.png" alt="arrow">
+        <div id="more-tools">
+          <ul>
+            <li id="btnCopy" onclick="photoshop.copy()">
+              <img src="images/copy.png" alt="">
+              <span id="tCopy"></span>
+            </li>
+            <li id="btnPrint" onclick="photoshop.printImage()">
+              <img src="images/print.png" alt="">
+              <span id="tPrint"></span>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
   </div>
   <div class="clear"></div>
   </div>
@@ -566,7 +127,6 @@
     <div style="float: right; margin: 5px 15px 0 0;"><button id="uploadFile"></button><button id="cancelUpload"></button></div>
   </div>
   <img id="pic" src="#" style="display:none" />
-  <embed id="pluginobj" width="0" height="0" type="application/x-screencapture" />
   <div id="uploadWrapper" style="display: none;">
     <div id="uploadHeader">
       <div style="height: 31px; padding-left: 12px; border: 1px solid white; border-top-left-radius: 3px; border-top-right-radius: 3px;">
@@ -1142,14 +702,20 @@
         dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
       else
         dataUrl = $('canvas').toDataURL('image/png');
-      // Here we use the plugin object in showimage.html instead of the plugin object
-      // in background page, so that the SaveScreenshot dialog will be a modal dialog.
+
+      // Here we use the plugin object in showimage.html 
+      // instead of the plugin object in background page, 
+      // so that the SaveScreenshot dialog will be a modal dialog.
       var pluginobj = document.getElementById('pluginobj');
+      if (!localStorage.lastSavePath)
+        localStorage.lastSavePath = localStorage.savePath;
       pluginobj.SaveScreenshot(
-          dataUrl, photoshop.tabTitle, localStorage.savePath,
-          function(success) {
+          dataUrl, photoshop.tabTitle, localStorage.lastSavePath,
+          function(success, path) {
             if (!success)
               alert(chrome.i18n.getMessage('save_fail'));
+            else if (path && path != "")
+              localStorage.lastSavePath = path;
           },
           chrome.i18n.getMessage("save_image"));
       photoshop.finish();
@@ -1169,6 +735,21 @@
       } else {
         photoshop.showTip('tip_failed', 'tip_copy_failed');
       }
+      photoshop.finish();
+    },
+    
+    printImage: function() {
+      photoshop.draw();
+      var formatParam  = localStorage.screenshootQuality || 'png';
+      var dataUrl;
+      if (formatParam == 'jpeg' && isHighVersion())
+        dataUrl = $('canvas').toDataURL('image/jpeg', 0.5);
+      else
+        dataUrl = $('canvas').toDataURL('image/png');
+      var width = $('canvas').width;
+      var height = $('canvas').height;
+      var pluginobj = document.getElementById('pluginobj');
+      pluginobj.PrintImage(dataUrl, photoshop.tabTitle, width, height);
       photoshop.finish();
     },
 
@@ -1311,6 +892,7 @@
       photoshop.i18nReplace('tCopy', 'copy');
       photoshop.i18nReplace('tSave', 'save');
       photoshop.i18nReplace('tUpload', 'share');
+      photoshop.i18nReplace('tPrint', 'print');
       photoshop.i18nReplace('tClose', 'close');
       photoshop.i18nReplace('border', 'border');
       photoshop.i18nReplace('rect', 'rect');
@@ -1478,6 +1060,22 @@
   $('photo').addEventListener('mouseup', photoshop.onMouseUp, true);
   document.addEventListener('mouseup', photoshop.onMouseUp, true);
   document.addEventListener('mousemove', photoshop.onMouseMove, true);
+
+  // Control more tools list showing and hiding.
+  (function() {
+    const HIDE_MORE_TOOLS_DELAY = 200;
+    var timer;
+    var moreBtn = $('btnMore');
+    var moreToolsList = $('more-tools');
+    var printBtn = $('btnPrint');
+    var isMac = bg.screenshot.isThisPlatform('mac');
+    var isLinux = bg.screenshot.isThisPlatform('linux');
+    if (isMac) {
+      UI.hide(moreBtn);
+    } else if (isLinux) {
+      UI.hide(printBtn);
+    }
+  })();
   </script>
 </body>
 </html>

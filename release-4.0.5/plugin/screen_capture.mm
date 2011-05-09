@@ -2,14 +2,15 @@
 #import <Cocoa/Cocoa.h>
 
 std::string GetSaveFileName(const char* title, const char* path,
-                            const char* dialog_title) {
+                            const char* dialog_title, const char* ext) {
   int runResult;
 
   /* create or get the shared instance of NSSavePanel */
   NSSavePanel *sp = [NSSavePanel savePanel];
  
   /* set up new attributes */
-  [sp setRequiredFileType:@"png"];
+  NSString *file_type = [NSString stringWithUTF8String:ext];
+  [sp setAllowedFileTypes:[NSArray arrayWithObjects:file_type, nil]];
   [sp setTitle:[NSString stringWithUTF8String:dialog_title]];
  
   /* display the NSSavePanel */

@@ -8,9 +8,11 @@
 #include <io.h>
 #include <ShlObj.h>
 #elif defined GTK
+#include <libgen.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #elif defined __APPLE__
+#include <libgen.h>
 #include <resolv.h>
 #endif
 
@@ -70,6 +72,10 @@ void ScreenCaptureScriptObject::InitHandler() {
   item.function_name = "SaveToClipboard";
   item.function_pointer = ON_INVOKEHELPER(
       &ScreenCaptureScriptObject::SaveToClipboard);
+  AddFunction(item);
+  item.function_name = "PrintImage";
+  item.function_pointer = ON_INVOKEHELPER(
+      &ScreenCaptureScriptObject::PrintImage);
   AddFunction(item);
 }
 
@@ -141,12 +147,29 @@ void ScreenCaptureScriptObject::InvokeCallback(
 
 // static
 void ScreenCaptureScriptObject::InvokeCallback(
-    NPP npp, NPObject* callback, bool param) {
-  NPVariant npParam;
-  BOOLEAN_TO_NPVARIANT(param, npParam);
+    NPP npp, NPObject* callback, bool param0, const char* param1) {
+  NPVariant npParam[2];
+  int param_count = 0;
+  char path[MAX_PATH] = "";
+  BOOLEAN_TO_NPVARIANT(param0, npParam[0]);
+  param_count++;
+  if (param1 != NULL) {
+#ifdef _WINDOWS
+    char driver[_MAX_DRIVE] = "";
+    char dir[_MAX_DIR] = "";
+    _splitpath(param1, driver, dir, NULL, NULL);
+    sprintf(path, "%s%s", driver, dir);
+#else
+    strcpy(path, dirname((char*)param1));
+#endif
+    if (strcmp(path, ".") != 0) {
+      STRINGZ_TO_NPVARIANT(path, npParam[1]);
+      param_count++;
+    }
+  }
   NPVariant result;
   VOID_TO_NPVARIANT(result);
-  NPN_InvokeDefault(npp, callback, &npParam, 1, &result);
+  NPN_InvokeDefault(npp, callback, npParam, param_count, &result);
 }
 
 #ifdef _WINDOWS
@@ -240,12 +263,26 @@ void ScreenCaptureScriptObject::OnDialogResponse(
     if (dialog == GTK_DIALOG(save_dialog_)) {
       if (file && save_data_) {
         std::string filename = file;
-        int postfix_index = filename.rfind(".png");
-        if (postfix_index == std::string::npos ||
-            postfix_index != (filename.length() - 4))
-          filename += ".png";
+        GtkFileFilter* filter = gtk_file_chooser_get_filter(
+            GTK_FILE_CHOOSER(save_dialog_));
+        if (filter && strcmp(gtk_file_filter_get_name(filter), 
+                             "JPEG Image") == 0) {
+          int postfix_index = filename.rfind(".jpeg");
+          if (postfix_index == std::string::npos ||
+              postfix_index != (filename.length() - 5)) {
+            filename += ".jpeg";
+          }
+        } else {
+          int postfix_index = filename.rfind(".png");
+          if (postfix_index == std::string::npos ||
+              postfix_index != (filename.length() - 4)) {
+            filename += ".png";
+          }
+        }          
         InvokeCallback((NPP)userData, save_callback_,
-                       SaveFile(filename.c_str(), save_data_, save_data_length_));
+                       SaveFile(filename.c_str(), save_data_, 
+                                save_data_length_),
+                       filename.c_str());
         // To indicate the callback has already been invoked.
         ReleaseSaveCallback();
       }
@@ -275,7 +312,8 @@ void ScreenCaptureScriptObject::OnDialogDestroy(
 }
 #elif defined __APPLE__
 
-std::string GetSaveFileName(const char* title, const char* path, const char* dialog_title);
+std::string GetSaveFileName(const char* title, const char* path,
+                            const char* dialog_title, const char* ext);
 std::string GetDocumentFolder();
 std::string SetSaveFolder(const char* path, const char* dialog_title);
 bool OpenSaveFolder(const char* path);
@@ -385,6 +423,229 @@ bool ScreenCaptureScriptObject::SaveToClipboard(
   }
 #endif
   BOOLEAN_TO_NPVARIANT(true, *result);
+  return true;
+}
+
+#ifdef _WINDOWS
+bool ScreenCaptureScriptObject::PrintImageWin(
+    HDC printer_dc, ImageType imagetype, byte* imagedata, 
+    int imagelen, int width, int height) {
+  DOCINFO di = {sizeof(DOCINFO)};
+  di.lpszDocName = _T("Image Print"); 
+  di.lpszOutput = NULL; 
+  di.lpszDatatype = NULL;
+  di.fwType = 0; 
+
+  int error = StartDoc(printer_dc, &di); 
+  if (error == SP_ERROR) { 
+    return false; 
+  } 
+
+  float scale_x, scale_y;
+  int left, top, printer_width, printer_height, print_width, print_height;
+
+  HDC screen_dc = GetDC(NULL);
+  float screen_log_pixel_x = (float)GetDeviceCaps(screen_dc, LOGPIXELSX); 
+  float screen_log_pixel_y = (float)GetDeviceCaps(screen_dc, LOGPIXELSY); 
+
+  float printer_log_pixel_x = (float)GetDeviceCaps(printer_dc, LOGPIXELSX); 
+  float printer_log_pixel_y = (float)GetDeviceCaps(printer_dc, LOGPIXELSY); 
+
+  scale_x = printer_log_pixel_x / screen_log_pixel_x;
+
+  scale_y = printer_log_pixel_y / screen_log_pixel_y;
+
+  printer_width = GetDeviceCaps(printer_dc, HORZRES); 
+  printer_height = GetDeviceCaps(printer_dc, VERTRES); 
+  printer_width -= printer_log_pixel_x;
+  printer_height -= printer_log_pixel_y;
+
+  if (width * scale_x < printer_width) {
+    print_width = width * scale_x;
+  } else {
+    print_width = printer_width;
+  }
+  if (height * scale_y < printer_height) {
+    print_height = height * scale_y; 
+  } else {
+    print_height = printer_height;
+  }
+
+  int page_height = print_height / scale_y;
+  int totoal_page_count = height / page_height + 
+      ((height % page_height) ? 1 : 0);
+
+  DWORD support_format = 0;
+  BITMAPINFO bmi;
+  memset(&bmi, 0, sizeof(bmi));
+  bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+  bmi.bmiHeader.biWidth       = width;
+  bmi.bmiHeader.biHeight      = height;
+  bmi.bmiHeader.biPlanes      = 1;
+  bmi.bmiHeader.biBitCount    = 0;
+  bmi.bmiHeader.biSizeImage   = imagelen;
+
+  if (imagetype == kImageTypePNG && 
+      ExtEscape(printer_dc, CHECKPNGFORMAT, 
+                imagelen, (LPCSTR)imagedata, 
+                sizeof(support_format), (LPSTR)&support_format) && 
+      support_format == 1) {
+    bmi.bmiHeader.biCompression = BI_PNG;
+  } else if (imagetype == kImageTypeJPEG &&
+    ExtEscape(printer_dc, CHECKJPEGFORMAT, 
+              imagelen, (LPCSTR)imagedata, 
+              sizeof(support_format), (LPSTR)&support_format) && 
+    support_format == 1) {
+    bmi.bmiHeader.biCompression = BI_JPEG;
+  } else {
+    FILE* f = fopen("tempprint.png", "wb");
+    if (f) {
+      fwrite(imagedata, imagelen, 1, f);
+      fflush(f);
+      fclose(f);
+    } else {
+      return false;
+    }
+    Image* image = Image::FromFile(_T("tempprint.png"));
+    HDC memdc = CreateCompatibleDC(screen_dc);
+    HBITMAP hbitmap = CreateCompatibleBitmap(screen_dc, image->GetWidth(),
+                                             image->GetHeight());
+    SelectObject(memdc, hbitmap);
+    SolidBrush brush(Color::White);
+    Graphics g(memdc);
+    g.FillRectangle(&brush, 0, 0, image->GetWidth(), image->GetHeight());
+    g.DrawImage(image, 0, 0);
+    delete image;
+    HDC source_dc = g.GetHDC();
+    for (int page_index = 0; page_index < totoal_page_count; page_index++) {
+      error = StartPage(printer_dc); 
+      left = 0;
+      top = page_index * page_height;
+      if ((page_index == totoal_page_count - 1) && 
+        (height % page_height) != 0) {
+          page_height = height % page_height;
+      }
+      print_height = page_height * scale_y;
+      StretchBlt(printer_dc, printer_log_pixel_x/2, printer_log_pixel_y/2,
+                 print_width, print_height, source_dc, left, top, width, 
+                 page_height, SRCCOPY);
+
+      error = EndPage(printer_dc);
+    }
+    DeleteObject(hbitmap);
+    DeleteDC(memdc);
+    g.ReleaseHDC(source_dc);
+  }
+  
+  // If printer supports the image format, we send DIB data directly.
+  if (support_format) {
+    for (int page_index = 0; page_index < totoal_page_count; page_index++) {
+      error = StartPage(printer_dc); 
+      left = 0;
+      top = height - page_index * page_height;
+      if ((page_index == totoal_page_count - 1) && 
+        (height % page_height) != 0) {
+          page_height = height % page_height;
+      }
+      print_height = page_height * scale_y;
+      top -= page_height;
+
+      if (StretchDIBits(
+          printer_dc, printer_log_pixel_x/2, printer_log_pixel_y/2,
+          print_width, print_height, left, top, 
+          width, page_height, imagedata, &bmi, 
+          DIB_RGB_COLORS, SRCCOPY) == GDI_ERROR) {
+        g_logger.WriteLog("Error", "StretchDIBits");
+      }
+
+      error = EndPage(printer_dc);
+    }
+  }
+  ReleaseDC(NULL, screen_dc);
+
+  error = EndDoc(printer_dc);
+  return true;
+}
+#endif
+
+bool ScreenCaptureScriptObject::PrintImage(const NPVariant* args, 
+                                           uint32_t argCount, 
+                                           NPVariant* result) {
+  bool ret_value = false;
+  BOOLEAN_TO_NPVARIANT(ret_value, *result);
+  if (argCount != 4)
+    return false;
+  if (!NPVARIANT_IS_STRING(args[0]) || !NPVARIANT_IS_STRING(args[1]))
+    return false;
+  if (!NPVARIANT_IS_DOUBLE(args[2]) && !NPVARIANT_IS_INT32(args[2]))
+    return false;
+  if (!NPVARIANT_IS_DOUBLE(args[3]) && !NPVARIANT_IS_INT32(args[3]))
+    return false;
+
+  const char* url = (const char*)NPVARIANT_TO_STRING(args[0]).UTF8Characters;
+  const char* title = (const char*)NPVARIANT_TO_STRING(args[1]).UTF8Characters;
+  int image_width = NPVARIANT_IS_DOUBLE(args[2]) ? 
+      NPVARIANT_TO_DOUBLE(args[2]) : NPVARIANT_TO_INT32(args[2]);
+  int image_height = NPVARIANT_IS_DOUBLE(args[3]) ?
+      NPVARIANT_TO_DOUBLE(args[3]) : NPVARIANT_TO_INT32(args[3]);
+
+  const char* base64 = strstr(url, "base64,");
+  if (!base64)
+    return false;
+  ImageType image_type = kImageTypePNG;
+  if (strncmp(url, "data:image/jpeg", 15) == 0)
+    image_type = kImageTypeJPEG;
+
+  base64 += 7;
+  int base64size = NPVARIANT_TO_STRING(args[0]).UTF8Length - 7;
+
+#ifdef _WINDOWS
+  int image_data_len = Base64DecodeGetRequiredLength(base64size);
+  byte* image_data = new byte[image_data_len];
+  Base64Decode(base64, base64size, image_data, &image_data_len);
+
+  PRINTDLGEX option = {sizeof(PRINTDLGEX)};
+
+  option.hwndOwner = get_plugin()->get_native_window();
+  option.hDevMode = NULL;
+  option.hDevNames = NULL;
+  option.hDC = NULL;
+  option.Flags = PD_RETURNDC | PD_HIDEPRINTTOFILE | PD_NOSELECTION | 
+      PD_NOCURRENTPAGE | PD_USEDEVMODECOPIESANDCOLLATE | PD_NOPAGENUMS;
+  option.Flags2 = 0;
+  option.ExclusionFlags = 0;
+  option.nPageRanges = 0;
+  option.nMaxPageRanges = 0;
+  option.lpPageRanges = NULL;
+  option.nMinPage = 0;
+  option.nMaxPage = 0;
+  option.nCopies = 1;
+  option.hInstance = NULL;
+  option.lpPrintTemplateName = NULL;
+  option.lpCallback = NULL;
+  option.nPropertyPages = 0;
+  option.lphPropertyPages = NULL;
+  option.nStartPage = START_PAGE_GENERAL;
+  option.dwResultAction = 0;
+  HRESULT ret = PrintDlgEx(&option);
+
+  if ((ret == S_OK)) {
+    if (option.dwResultAction == PD_RESULT_PRINT) {
+      DEVMODE* devmode = (DEVMODE*)GlobalLock(option.hDevMode);
+      DEVNAMES* devnames = (DEVNAMES*)GlobalLock(option.hDevNames);
+      ret_value = PrintImageWin(
+          option.hDC, image_type, image_data, image_data_len, 
+          image_width, image_height);
+      GlobalUnlock(option.hDevMode);
+      GlobalUnlock(option.hDevNames);
+    }
+    DeleteDC(option.hDC);
+    GlobalFree(option.hDevMode);
+    GlobalFree(option.hDevNames);
+  }
+#endif
+
+  BOOLEAN_TO_NPVARIANT(ret_value, *result);
   return true;
 }
 
@@ -577,7 +838,8 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
   char sz_dialog_title[MAX_PATH];
 
   MultiByteToWideChar(CP_UTF8, 0, dialog_title, -1, temp_value, MAX_PATH);
-  WideCharToMultiByte(CP_ACP, 0, temp_value, -1, sz_dialog_title, MAX_PATH, 0, 0);
+  WideCharToMultiByte(CP_ACP, 0, temp_value, -1, 
+                      sz_dialog_title, MAX_PATH, 0, 0);
 
   MultiByteToWideChar(CP_UTF8, 0, path, -1, temp_value, MAX_PATH);
   WideCharToMultiByte(CP_ACP, 0, temp_value, -1, initial_path, MAX_PATH, 0, 0);
@@ -614,7 +876,8 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
 
   InvokeCallback(
       get_plugin()->get_npp(), callback,
-      !GetSaveFileNameA(&Ofn) || SaveFileBase64(sz_file, base64, base64size));
+      !GetSaveFileNameA(&Ofn) || SaveFileBase64(sz_file, base64, base64size),
+      sz_file);
 
 #elif defined GTK
   ReleaseSaveCallback();
@@ -641,8 +904,13 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
 
     GtkFileFilter *file_filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(file_filter, "PNG Image");
-    gtk_file_filter_add_pattern(file_filter, "*.png");
+    if (postfix == ".png") {
+      gtk_file_filter_set_name(file_filter, "PNG Image");
+      gtk_file_filter_add_pattern(file_filter, "*.png");
+    } else {
+      gtk_file_filter_set_name(file_filter, "JPEG Image");
+      gtk_file_filter_add_pattern(file_filter, "*.jpeg");
+    }
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
 
     file_filter = gtk_file_filter_new();
@@ -653,16 +921,22 @@ bool ScreenCaptureScriptObject::SaveScreenshot(
                      get_plugin()->get_npp());
     g_signal_connect(dialog, "destroy", G_CALLBACK(OnDialogDestroy),
                      get_plugin()->get_npp());
+    std::string file_name = title;
+    file_name += postfix;
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), 
+                                      file_name.c_str());
     gtk_widget_show_all(dialog);
     gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
     save_dialog_ = dialog;
   }
   gtk_window_present(GTK_WINDOW(save_dialog_));
 #elif defined __APPLE__
-  std::string file = GetSaveFileName(title, path, dialog_title);
+  std::string file = GetSaveFileName(title, path, dialog_title,
+                                     postfix.substr(1).c_str());
   InvokeCallback(
       get_plugin()->get_npp(), callback,
-      file.empty() || SaveFileBase64(file.c_str(), base64, base64size));
+      file.empty() || SaveFileBase64(file.c_str(), base64, base64size),
+      file.c_str());
 #endif
 
   return true;
