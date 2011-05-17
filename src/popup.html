@@ -145,10 +145,12 @@ li:hover {
     }
     var isScriptLoad = false;
     chrome.tabs.getSelected(null, function(tab) {
-      if (tab.url.indexOf('chrome') == 0) {
+      if (tab.url.indexOf('chrome') == 0 || tab.url.indexOf('about') == 0) {
+        i18nReplace('tip', 'special');
+        return;
+      } else {
         $('tip').style.display = 'none';
         $('captureSpecialPageItem').style.display = 'block';
-        return;
       }
       chrome.tabs.sendRequest(tab.id, {msg: 'is_page_capturable'},
         function(response) {
@@ -179,8 +181,15 @@ li:hover {
     chrome.tabs.executeScript(null, {file: 'isLoad.js'});
     var insertScript = function() {
       if (isScriptLoad == false) {
-        $('tip').style.display = 'none';
-        $('captureSpecialPageItem').style.display = 'block';
+        chrome.tabs.getSelected(null, function(tab) {
+          if (tab.url.indexOf('chrome') == 0 || 
+              tab.url.indexOf('about') == 0) {
+            i18nReplace('tip', 'special');
+          } else {
+            $('tip').style.display = 'none';
+            $('captureSpecialPageItem').style.display = 'block';
+          }
+        });
       }
     }
     setTimeout(insertScript, 500);
