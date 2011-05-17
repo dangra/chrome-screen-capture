@@ -21,29 +21,35 @@
     var method = option.method || 'GET';
     var status = option.status;
     var headers = option.headers || {};
-    var multipartFormData = option.multipartFormData;
+    var data = option.data || null;
+    var multipartData = option.multipartData;
+    var queryString = constructQueryString(parameters);
 
-    var data = constructQueryString(parameters);
-
-    if (multipartFormData) {
-      var boundary = multipartFormData.boundary || 'XMLHttpRequest2';
+    if (multipartData) {
+      var boundary = multipartData.boundary || 'XMLHttpRequest2';
       method = 'POST';
-      headers['Content-Type'] = 'multipart/form-data; boundary=' + boundary;
-      var formData = constructMultipartFormData(multipartFormData, boundary,
-        parameters);
-      data = constructBlobData(formData);
-    }
-    
-    // Attach parameters on url if it's a Get request
-    if (method.toUpperCase() == 'GET') {
-      url += '?' + data;
-      data = null;
+      var multipartDataString;
+      var contentType = headers['Content-Type'] || 'multipart/form-data';
+      if (contentType.indexOf('multipart/form-data') == 0) {
+        headers['Content-Type'] = 'multipart/form-data; boundary=' + boundary;
+        multipartDataString = constructMultipartFormData(multipartData, boundary,
+          parameters);
+      } else if (contentType.indexOf('multipart/related') == 0) {
+        headers['Content-Type'] = 'multipart/related; boundary=' + boundary;
+        multipartDataString = constructMultipartRelatedData(boundary,
+          multipartData.dataList);
+      }
+
+      data = constructBlobData(multipartDataString);
+    } else {
+      if (queryString)
+        url += '?' + queryString;
     }
 
     var xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
     xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4 ) {
+      if (xhr.readyState == 4) {
         var statusCode = xhr.status;
         var parsedResponse = parseResponse(xhr);
         if (complete)
@@ -52,13 +58,11 @@
           success(parsedResponse);
         } else if (status) {
           if (status[statusCode]) {
-
             // Call specified status code handler
             status[statusCode](parsedResponse);
           } else if (status['others']) {
-
             // Call others status code handler
-            status['others'](parsedResponse);
+            status['others'](parsedResponse, statusCode);
           }
         }
       }
@@ -164,10 +168,29 @@
     return data.join('');
   }
 
+  function constructMultipartRelatedData(boundary, dataList) {
+    var result = [];
+    dataList.forEach(function(data) {
+      result.push('--' + boundary + '\r\n');
+      result.push('Content-Type: ' + data.contentType + '\r\n\r\n');
+      result.push(data.data + '\r\n');
+    });
+    result.push('--' + boundary + '--\r\n');
+    return result.join('');
+  }
+
   ajax.encodeForBinary = function(string) {
     string = encodeURI(string).replace(/%([A-Z0-9]{2})/g, '%u00$1');
     return unescape(string);
   };
 
+  ajax.convertEntityString = function(string) {
+    var entitychars = ['<', '>', '&', '"', '\''];
+    var entities = ['&lt;', '&gt;', '&amp;', '&quot;', '&apos;'];
+    entitychars.forEach(function(character, index) {
+      string = string.replace(character, entities[index]);
+    });
+    return string;
+  };
   window.ajax = ajax;
 })();

@@ -11,16 +11,21 @@ const OAUTH_VERSION = '1.0';
 
 var SinaMicroblog = {
   siteId: 'sina',
+  currentUserId: null,
   currentUserOauthToken: '',
   currentUserOauthTokenSecret: '',
-
+  accessTokenCallback: null,
+  
+  isRedirectUrl: function() {},
+  
   getAuthorizationHeader: function(message, accessor) {
     OAuth.setTimestampAndNonce(message);
     OAuth.SignatureMethod.sign(message, accessor);
     return OAuth.getAuthorizationHeader("", message.parameters);
   },
 
-  getRequestToken: function() {
+  getRequestToken: function(callback) {
+    SinaMicroblog.accessTokenCallback = callback;
     var message = {
       action: SINA_REQUEST_TOKEN_URL,
       method: 'POST',
@@ -52,10 +57,8 @@ var SinaMicroblog = {
         SinaMicroblog.getUserAuthentication(oauth_token);
       },
       status: {
-        others: function(data) {
-          var msg = chrome.i18n.getMessage('sina_failed_to_get_request_token');
-          UploadUI.showErrorInfo(msg);
-          console.log(data);
+        others: function() {
+          callback('failure', 'sina_failed_to_get_request_token');
         }
       }
     });
@@ -69,15 +72,17 @@ var SinaMicroblog = {
     chrome.tabs.create({url: url});
   },
 
-  parseAccessTokenResult: function(url) {
+  parseAccessToken: function(url) {
     var queryString = url.split('?')[1];
     var oauthVerifier = queryString.split('&')[1].split('=')[1];
-    SinaMicroblog.getAccessToken(oauthVerifier);
+    SinaMicroblog.getAccessToken(SinaMicroblog.accessTokenCallback,
+      oauthVerifier);
+    SinaMicroblog.accessTokenCallback = null;
   },
 
-  getAccessToken: function(oauth_verifier) {
+  getAccessToken: function(callback, oauth_verifier) {
     if (!oauth_verifier) {
-      SinaMicroblog.getRequestToken();
+      SinaMicroblog.getRequestToken(callback);
       return;
     }
     var message = {
@@ -112,45 +117,32 @@ var SinaMicroblog = {
         });
 
         var userId = responseMap.user_id;
-        if (Account.getUser(SinaMicroblog.siteId, userId)) {
-          UploadUI.hideAuthenticationProgress();
-          UploadUI.upload(SinaMicroblog.siteId, userId);
-        } else {
-          var access_token = responseMap.oauth_token;
-          var access_token_secret = responseMap.oauth_token_secret;
+        var accessToken = responseMap.oauth_token;
+        var accessTokenSecret = responseMap.oauth_token_secret;
+        var user = new User({
+          id: userId,
+          accessToken: accessToken,
+          accessTokenSecret: accessTokenSecret
+        });
 
-          // Get user screen name
-          SinaMicroblog.getUserInfo(access_token, access_token_secret, userId,
-            function(data) {
-              var siteId = SinaMicroblog.siteId;
-              var userName = data.name;
-              var user = new User(userId, userName, access_token,
-                access_token_secret);
-              Account.addUser(siteId, user);
-              UploadUI.addAuthenticatedAccount(siteId, userId);
-              UploadUI.hideAuthenticationProgress();
-              UploadUI.upload(siteId, userId);
-          });
-        }
+        callback('success', user);
       },
       status: {
         others: function(data) {
-          var msg = chrome.i18n.getMessage('sina_failed_to_get_access_token');
-          UploadUI.showErrorInfo(msg);
-          console.log(data);
+          callback('failure', 'sina_failed_to_get_access_token');
         }
       }
     });
   },
 
-  getUserInfo: function(access_token, access_token_secret, userId, callback) {
-    var url = SINA_USER_INFO_URL + '?user_id=' + userId;
+  getUserInfo: function(user, callback) {
+    var url = SINA_USER_INFO_URL + '?user_id=' + user.id;
     var message = {
       action: url,
       method: 'POST',
       parameters: {
         'oauth_consumer_key': SINA_APP_KEY,
-        'oauth_token': access_token,
+        'oauth_token': user.accessToken,
         'oauth_signature_method': OAUTH_SIGNATURE_METHOD,
         'oauth_version': OAUTH_VERSION
       }
@@ -158,7 +150,7 @@ var SinaMicroblog = {
 
     var accessor = {
       consumerSecret: SINA_APP_SECRET,
-      tokenSecret: access_token_secret
+      tokenSecret: user.accessTokenSecret
     };
 
     var header = SinaMicroblog.getAuthorizationHeader(message, accessor);
@@ -169,31 +161,27 @@ var SinaMicroblog = {
         'Authorization': header
       },
       success: function(data) {
-        if (callback)
-          callback(data);
+        if (callback) {
+          user.name = data.name;
+          callback('success', user);
+        }
       },
       status: {
         others: function(data) {
-          var msg = chrome.i18n.getMessage('sina_failed_to_get_user_info');
-          UploadUI.showErrorInfo(msg);
-          console.log(data);
+          callback('failure', 'failed_to_get_user_info');
         }
       }
     });
   },
 
-  upload: function(access_token, access_token_secret, caption, successCallback,
-                   progressCallback, failureCallback) {
+  upload: function(user, caption, imageData, callback) {
     caption = encodeURIComponent(caption);
-    
-    // Get photo binary data
-    var photoData = UploadUI.getPhotoData();
     var message = {
       action: SINA_PHOTO_UPLOAD_URL,
       method: 'POST',
       parameters: {
         'oauth_consumer_key': SINA_APP_KEY,
-        'oauth_token': access_token,
+        'oauth_token': user.accessToken,
         'oauth_signature_method': OAUTH_SIGNATURE_METHOD,
         'status': caption,
         'oauth_version': OAUTH_VERSION
@@ -202,7 +190,7 @@ var SinaMicroblog = {
 
     var accessor = {
       consumerSecret: SINA_APP_SECRET,
-      tokenSecret: access_token_secret
+      tokenSecret: user.accessTokenSecret
     };
 
     var header = SinaMicroblog.getAuthorizationHeader(message, accessor);
@@ -213,27 +201,39 @@ var SinaMicroblog = {
       boundary: MULTIPART_FORMDATA_BOUNDARY,
       name: 'pic',
       value: 'test.png',
-      data: photoData,
+      data: imageData,
       type: 'image/png'
     };
+    
     ajax({
       url: SINA_PHOTO_UPLOAD_URL,
       parameters: params,
-      multipartFormData: binaryData,
+      multipartData: binaryData,
       headers: {
         'Authorization': header
       },
-      success: successCallback,
-      progress: progressCallback,
+      success: function(microblog) {
+        callback('success', microblog.id);
+      },
       status: {
-        others: function(err) {
-          console.log(err);
-          failureCallback(err);
+        others: function(err, statusCode) {
+          var message = 'failed_to_upload_image';
+          if (statusCode == 400 &&
+              message == '40072:Error: accessor was revoked!') {
+            message = 'bad_access_token';
+          }
+          callback('failure', message);
         }
       }
     });
   },
 
+  getPhotoLink: function(user, microblogId, callback) {
+    var photoLink = 'http://api.t.sina.com.cn/' + user.id + '/statuses/' +
+      microblogId;
+    callback('success', photoLink);
+  },
+  
   logout: function(callback) {
     var params = {source: SINA_APP_KEY};
     ajax({

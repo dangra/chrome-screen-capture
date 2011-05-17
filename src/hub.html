@@ -5,8 +5,8 @@
   <script>
     var href = window.location.href;
     chrome.extension.sendRequest({
-      msg: 'user_authentication_result',
-      site: 'sina',
+      msg: 'url_for_access_token',
+      siteId: 'sina',
       url: href
     });
   </script>

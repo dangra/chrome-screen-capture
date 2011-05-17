@@ -8,58 +8,74 @@ const FB_LOGOUT_URL = 'http://m.facebook.com/logout.php?confirm=1';
 
 var Facebook = {
   siteId: 'facebook',
+  redirectUrl: FB_REDIRECT_URI,
   currentUserId: null,
+  accessTokenCallback: null,
 
-  getAccessToken: function() {
+  isRedirectUrl: function(url) {
+    return url.indexOf(FB_REDIRECT_URI) == 0;
+  },
+  
+  getAccessToken: function(callback) {
+    Facebook.accessTokenCallback = callback;
     var url = FB_ACCESS_TOKEN_URL + '?client_id=' + FB_APP_ID +
       '&redirect_uri=' + FB_REDIRECT_URI + '&scope=' + FB_PERMISSION +
       '&response_type=token';
     chrome.tabs.create({url: url});
   },
 
-  parseAccessTokenResult: function(url) {
+  parseAccessToken: function(url) {
     var queryString = url.split('#')[1] || url.split('?')[1];
     var queries = queryString.split('&');
     var queryMap = {};
     queries.forEach(function(pair) {
       queryMap[pair.split('=')[0]] = pair.split('=')[1];
     });
-    var access_token = queryMap['access_token'];
-    if (access_token) {
-      Facebook.getUserInfo(access_token, function(data) {
-        var userId = data.id;
-        var siteId = Facebook.siteId;
-        if (!Account.getUser(siteId, userId)) {
-          var userName = data.name;
-          Facebook.currentUserId = userId;
-          var user = new User(userId, userName, access_token);
-          Account.addUser(siteId, user);
-          UploadUI.addAuthenticatedAccount(siteId, userId);
-        }
-        UploadUI.hideAuthenticationProgress();
-        UploadUI.upload(siteId, userId);
+    var accessToken = queryMap['access_token'];
+    if (accessToken) {
+      var user = new User({
+        accessToken: accessToken
       });
+      Facebook.accessTokenCallback('success', user);
     } else if (queryMap['error']) {
-      // Show error information according to error reason
-      UploadUI.showErrorInfo(chrome.i18n.getMessage('facebook_user_denied'));
-      UploadUI.hideAuthenticationProgress();
+      Facebook.accessTokenCallback('failure', 'user_denied');
     }
+    Facebook.accessTokenCallback = null;
   },
 
-  setAccessToken: function(fb_access_token) {
-    localStorage['fb_access_token'] = fb_access_token;
+  getUserInfo: function(user, callback) {
+    ajax({
+      url: FB_USER_INFO_URL,
+      parameters: {
+        'access_token': user.accessToken
+      },
+      success: function(userInfo) {
+        userInfo = JSON.parse(userInfo);
+        if (callback) {
+          user.id = userInfo.id;
+          user.name = userInfo.name;
+          callback('success', user);
+        }
+      },
+      status: {
+        others: function() {
+          if (callback)
+            callback('failure', 'failed_to_get_user_info');
+        }
+      }
+    });
   },
-
-  upload: function(access_token, caption, photoData, successCallback,
-                   progressCallback, failureCallback) {
+  
+  upload: function(user, caption, imageData, callback) {
+    caption = ajax.encodeForBinary(caption);
     var params = {
-      'access_token': access_token,
+      'access_token': user.accessToken,
       message: caption
     };
     
     var binaryData = {
       boundary: MULTIPART_FORMDATA_BOUNDARY,
-      data: photoData,
+      data: imageData,
       value: 'test.png',
       type: 'image/png'
     };
@@ -67,44 +83,46 @@ var Facebook = {
     ajax({
       url: FB_PHOTO_UPLOAD_URL,
       parameters: params,
-      multipartFormData: binaryData,
+      multipartData: binaryData,
       success: function(data) {
-        if (successCallback)
-          successCallback(JSON.parse(data).id);
+        callback('success', JSON.parse(data).id);
       },
       status: {
         others: function(data) {
-          console.log('Bad access_token');
-          failureCallback(data);
+          var message;
+          if (data) {
+            data = JSON.parse(data);
+            if (data.error.message.indexOf('access token') >= 0) {
+              // User removed application permission
+              // {"error":{"type":"OAuthException",
+              // "message":"Error validating access token."}}
+              message = 'bad_access_token';
+            } else {
+              // {"error":{"type":"OAuthException",
+              // "message":"(#1) An unknown error occurred"}}
+              message = 'unknown_error';
+            }
+          } else {
+            message = 'failed_to_connect_to_server';
+          }
+          callback('failure', message);
         }
-      },
-      progress: progressCallback
-    });
-  },
-
-  getUserInfo: function(access_token, callback) {
-    ajax({
-      url: FB_USER_INFO_URL,
-      parameters: {
-        'access_token': access_token
-      },
-      success: function(userInfo) {
-        var user = JSON.parse(userInfo);
-        if (callback && callback.constructor == Function)
-          callback(user);
       }
     });
   },
 
-  getPhotoLink: function(access_token, photoId, callback) {
+  getPhotoLink: function(user, photoId, callback) {
     ajax({
       url: 'https://graph.facebook.com/' + photoId,
       parameters: {
-        'access_token': access_token
+        'access_token': user.accessToken
       },
-      success: function(data) {
-        if (callback && callback.constructor == Function)
-          callback(JSON.parse(data));
+      complete: function(statusCode, data) {
+        if (statusCode == 200) {
+          callback('success', JSON.parse(data).link);
+        } else {
+          callback('failure', 'failed_to_get_photo_link');
+        }
       }
     });
   },

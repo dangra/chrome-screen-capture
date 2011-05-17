@@ -630,12 +630,8 @@ window.onresize = function() {
   }
 };
 
-var fbRedirectUrl = 'http://www.facebook.com/connect/login_success.html';
-var pageHref = window.location.href;
-if (pageHref.indexOf(fbRedirectUrl) == 0) {
-  page.sendMessage({
-    msg: 'access_token_result',
-    site: 'facebook',
-    url: pageHref
-  });
-}
+// Send page url for retriving and parsing access token for facebook and picasa.
+page.sendMessage({
+  msg: 'url_for_access_token',
+  url: window.location.href
+});

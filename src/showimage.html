@@ -8,14 +8,16 @@
 <title>Screen Capture</title>
 <meta charset="UTF-8">
 <link href="showimage.css" rel="stylesheet" type="text/css">
-<script type="text/javascript" src="editor.js"></script>
-<script type="text/javascript" src="sha1.js"></script>
-<script type="text/javascript" src="oauth.js"></script>
-<script type="text/javascript" src="ajax.js"></script>
-<script type="text/javascript" src="account.js"></script>
-<script type="text/javascript" src="upload_ui.js"></script>
-<script type="text/javascript" src="facebook.js"></script>
-<script type="text/javascript" src="sina_microblog.js"></script>
+<script src="editor.js"></script>
+<script src="sha1.js"></script>
+<script src="oauth.js"></script>
+<script src="ajax.js"></script>
+<script src="account.js"></script>
+<script src="ui.js"></script>
+<script src="upload_ui.js"></script>
+<script src="facebook.js"></script>
+<script src="sina_microblog.js"></script>
+<script src="picasa.js"></script>
 </head>
 <body>
   <embed id="pluginobj" width="0" height="0" type="application/x-screencapture" />
@@ -135,16 +137,22 @@
     </div>
     <div id="uploadBody">
       <div id="uploadSitesWrapper" class="verticalAlignMiddle">
-        <span class="btn" id="sinaMicroblogBtn" style="margin-bottom: 21px;">
+        <span class="btn" id="picasaBtn">
           <span class="uploadSite">
-            <img src="images/sina_icon.png" alt="sina">
-            <span id="shareToSinaMicroblogText"></span>
+            <img src="images/picasa_icon.png" alt="picasa">
+            <span id="shareToPicasaText"></span>
           </span>
         </span>
-        <span class="btn" id="facebookBtn" type="button">
+        <span class="btn" id="facebookBtn">
           <span class="uploadSite">
             <img src="images/facebook_icon.png" alt="facebook">
             <span id="shareToFacebookText"></span>
+          </span>
+        </span>
+        <span class="btn" id="sinaMicroblogBtn">
+          <span class="uploadSite">
+            <img src="images/sina_icon.png" alt="sina">
+            <span id="shareToSinaMicroblogText"></span>
           </span>
         </span>
       </div>
@@ -152,9 +160,9 @@
         <div id="errorWrapper">
           <div id="errorInfo"></div>
         </div>
-        <div style="font-size: 14px; padding-top: 28px;">
+        <div id="captionWrapper" style="font-size: 14px; padding-top: 28px;">
           <label id="imageCaptionText" for="imageCaption"></label>
-          <input type="text" maxLength="100" id="imageCaption" autofocus="true">
+          <input type="text" maxLength="140" id="imageCaption" autofocus="true">
           <span id="requiredFlag">*</span>
         </div>
         <div id="uploadAccountWrapper" style="min-height: 60px;">

@@ -2,86 +2,29 @@ const CURRENT_LOCALE = chrome.i18n.getMessage('@@ui_locale');
 const MULTIPART_FORMDATA_BOUNDARY = 'Google_Chrome_Screen_Capture';
 const HIDE_ERROR_INFO_DELAY_TIME = 5000;
 
-var UI = {
-
-  show: function(element) {
-    if (UI.getStyle(element, 'display') == 'none') {
-      // Set display value to be defined by style sheet
-      var cssRules = window.getMatchedCSSRules(element, '', true);
-      var ruleLength = cssRules.length;
-      var display;
-      for (var i = ruleLength - 1; i >= 0 ; --i) {
-        display = cssRules[i].style.display;
-        if (display && display != 'none') {
-          element.style.display = display;
-          return;
-        }
-      }
-
-      // Set display value to be UA default value
-      var tmpElement = document.createElement(element.nodeName);
-      document.body.appendChild(tmpElement);
-      display = UI.getStyle(tmpElement, 'display');
-      document.body.removeChild(tmpElement);
-      element.style.display = display;
-    }
-  },
-
-  hide: function(element) {
-    element.style.display = 'none';
-  },
-
-  setStyle: function(element) {
-    var argLength = arguments.length;
-    var arg1 = arguments[1];
-    if (argLength == 2 && arg1.constructor == Object) {
-      for (var prop in arg1) {
-        var camelCasedProp = prop.replace(/-([a-z])/gi, function(n, letter) {
-          return letter.toUpperCase();
-        });
-        element.style[camelCasedProp] = arg1[prop];
-      }
-    } else if (argLength == 3)
-      element.style[arg1] = arguments[2];
-  },
-
-  getStyle: function(element, property) {
-    return window.getComputedStyle(element)[property];
-  },
-
-  addClass: function(element, className) {
-    var classes = element.className.split(' ');
-    classes.push(className);
-    element.className = classes.join(' ');
-  },
-
-  removeClass: function(element, className) {
-    var classes = element.className.split(' ');
-    var index = classes.indexOf(className);
-    if (index >= 0) {
-      classes.splice(index, 1);
-      element.className = classes.join(' ');
-    }
-  },
-
-  addStyleSheet: function(path) {
-    var link = document.createElement('link');
-    link.setAttribute('type', 'text/css');
-    link.setAttribute('rel', 'stylesheet');
-    link.setAttribute('href', path);
-    document.head.appendChild(link);
-  }
-};
-
 var UploadUI = {
   currentSite: '',
   uploading: false,
+  sites: {},
 
-  setUploadState: function(state) {
+  registerSite: function(id, siteObject) {
+    this.sites[id] = siteObject;
+  },
+
+  getSiteObject: function(id) {
+    return this.sites[id];
+  },
+  
+  setUploading: function(state) {
     UploadUI.uploading = state;
   },
 
   init: function() {
+    // Register supported site for image sharing.
+    UploadUI.registerSite(SinaMicroblog.siteId, SinaMicroblog);
+    UploadUI.registerSite(Facebook.siteId, Facebook);
+    UploadUI.registerSite(Picasa.siteId, Picasa);
+    
     // Import style sheet for current locale
     UI.addStyleSheet('./i18n_styles/' + CURRENT_LOCALE + '_upload_image.css');
 
@@ -89,6 +32,7 @@ var UploadUI = {
     i18nReplace('shareToSinaMicroblogText', SinaMicroblog.siteId +
       '_upload_header');
     i18nReplace('shareToFacebookText', Facebook.siteId + '_upload_header');
+    i18nReplace('shareToPicasaText', Picasa.siteId + '_upload_header');
     i18nReplace('lastStep', 'return_to_site_selection');
     i18nReplace('closeUploadWrapper', 'close_upload_wrapper');
     i18nReplace('imageCaptionText', 'image_caption');
@@ -101,6 +45,10 @@ var UploadUI = {
       false);
     $('closeUploadWrapper').addEventListener('click',
       UploadUI.hideUploadWrapper, false);
+
+    $('picasaBtn').addEventListener('click', function() {
+      UploadUI.showUploadContentWrapper(Picasa.siteId);
+    });
     $('facebookBtn').addEventListener('click', function() {
       UploadUI.showUploadContentWrapper(Facebook.siteId);
     }, false);
@@ -125,10 +73,8 @@ var UploadUI = {
         if (numberOfUsers) {
           var logoutTip = chrome.i18n.getMessage('user_logout_tip');
           UploadUI.showAuthenticationProgress(logoutTip);
-          if (currentSite == Facebook.siteId)
-            Facebook.logout(callback);
-          else if (currentSite == SinaMicroblog.siteId)
-            SinaMicroblog.logout(callback);
+          var site = UploadUI.getSiteObject(currentSite);
+          site.logout(callback);
         } else {
           callback();
         }
@@ -347,7 +293,7 @@ var UploadUI = {
     // At most show 3 authenticated users
     var uploadAccountList = $('uploadAccountList');
     var accountsNumber = uploadAccountList.childElementCount;
-    if (accountsNumber == 3) {
+    if (accountsNumber == 2) {
       uploadAccountList.removeChild(uploadAccountList.lastElementChild);
     }
     uploadAccountList.innerHTML = template + uploadAccountList.innerHTML;
@@ -356,7 +302,7 @@ var UploadUI = {
   },
 
   deleteAccountItem: function(accountId, noConfirm) {
-    if (UploadUI.uploading)
+    if (UploadUI.uploading && !noConfirm)
       return;
     var confirmText = chrome.i18n.getMessage('account_deletion_confirm');
     if (noConfirm || confirm(confirmText)) {
@@ -370,120 +316,113 @@ var UploadUI = {
     }
   },
 
-  upload: function(site, userId) {
+  upload: function(siteId, userId) {
     if (UploadUI.uploading)
       return;
 
     // Initialize UI
-    var accountId = site + '_' + userId;
+    var accountId = siteId + '_' + userId;
     UploadUI.hideErrorInfo();
     UploadUI.hideUploadInfo(accountId);
     UploadUI.hidePhotoLink(accountId);
-    if (!UploadUI.validatePhotoDescription(site))
+    if (!UploadUI.validatePhotoDescription(siteId))
       return;
-    var caption = $('imageCaption');
+    var caption = $('imageCaption').value;
 
-    UploadUI.setUploadState(true);
+    // Get ready for upload image.
     photoshop.draw();
-    var access_token = Account.getUser(site, userId)['accessToken'];
-    var infoText;
-    var successCallback;
-    var failureCallback;
-
+    UploadUI.setUploading(true);
     UploadUI.showProgressBar(accountId);
-    if (site == Facebook.siteId) {
-      Facebook.currentUserId = userId;
-      if (access_token) {
-        successCallback = function(photoId) {
-          console.log('Upload success.');
-          UploadUI.hideProgressBar(accountId);
-          infoText = chrome.i18n.getMessage('facebook_get_photo_link');
-          UploadUI.showUploadInfo(accountId, infoText);
-          Facebook.getPhotoLink(access_token, photoId, function(data) {
-            UploadUI.setUploadState(false);
+
+    var site = UploadUI.getSiteObject(siteId);
+    var user = Account.getUser(siteId, userId);
+    var imageData = UploadUI.getImageData();
+    var infoText;
+
+    var callback = function(result, photoIdOrMessage) {
+      if (result == 'success') {
+        infoText = chrome.i18n.getMessage('get_photo_link');
+        UploadUI.showUploadInfo(accountId, infoText);
+        site.getPhotoLink(user, photoIdOrMessage, function(photoLinkResult,
+                                                           photoLinkOrMessage) {
+          if (photoLinkResult == 'success') {
+            UploadUI.setUploading(false);
             UploadUI.hideUploadInfo(accountId);
-            UploadUI.showPhotoLink(accountId, data.link);
-          });
-        };
-        failureCallback = function(data) {
-          console.log('Upload failed.');
-          UploadUI.setUploadState(false);
-          UploadUI.hideProgressBar(accountId);
-          if (data) {
-            data = JSON.parse(data);
-            if (data.error.message.indexOf('access token') >= 0) {
-              infoText = chrome.i18n.getMessage('facebook_bad_access_token');
-              // User removed application permission
-              // {"error":{"type":"OAuthException",
-              // "message":"Error validating access token."}}
-              Account.removeUser(Facebook.siteId, Facebook.currentUserId);
-              UploadUI.deleteAccountItem(accountId, true);
-              Facebook.getAccessToken();
-            } else {
-              // {"error":{"type":"OAuthException",
-              // "message":"(#1) An unknown error occurred"}}
-              infoText = chrome.i18n.getMessage('facebook_unknown_error');
-            }
+            UploadUI.showPhotoLink(accountId, photoLinkOrMessage);
           } else {
-            infoText = chrome.i18n.getMessage('failed_to_connect_to_server');
+            UploadUI.showErrorInfo(photoLinkOrMessage);
           }
-
-          UploadUI.showErrorInfo(infoText);
-        };
-
-        var captionValue = ajax.encodeForBinary(caption.value);
-        var photoData = UploadUI.getPhotoData();
-        Facebook.upload(access_token, captionValue, photoData, successCallback,
-          null, failureCallback);
+        });
       } else {
-        Facebook.getAccessToken();
+        if (photoIdOrMessage == 'bad_access_token' ||
+            photoIdOrMessage == 'invalid_album_id') {
+          Account.removeUser(site.siteId, site.currentUserId);
+          UploadUI.deleteAccountItem(accountId, true);
+          UploadUI.getAccessToken(siteId);
+        }
+        UploadUI.setUploading(false);
+        UploadUI.hideProgressBar(accountId);
+        UploadUI.showErrorInfo(chrome.i18n.getMessage(photoIdOrMessage));
       }
-    } else if (site == SinaMicroblog.siteId) {
-      if (access_token) {
-        var access_token_secret =
-          Account.getUser(site, userId)['accessTokenSecret'];
-        successCallback = function(data) {
-          UploadUI.setUploadState(false);
-          UploadUI.hideProgressBar(accountId);
-          var microblogId = data.id;
-          var url = 'http://api.t.sina.com.cn/' + userId + '/statuses/' +
-            microblogId; // + '?source=' + SINA_APP_KEY;
-          UploadUI.showPhotoLink(accountId, url);
-        };
-        failureCallback = function(errorData) {
-          UploadUI.hideProgressBar(accountId);
-          UploadUI.setUploadState(false);
-          infoText = errorData.error;
-          UploadUI.showErrorInfo(infoText);
-        };
-        SinaMicroblog.upload(access_token, access_token_secret, caption.value,
-          successCallback, null, failureCallback);
-      } else {
-        SinaMicroblog.getAccessToken();
-      }
+      UploadUI.hideProgressBar(accountId);
+    };
+    
+    if (user) {
+      site.currentUserId = user.id;
+      site.upload(user, caption, imageData, callback);
+    } else {
+      UploadUI.getAccessToken(siteId);
     }
   },
 
-  getAccessToken: function(site) {
-    if (site == Facebook.siteId) {
-      Facebook.getAccessToken();
-    } else if (site == SinaMicroblog.siteId) {
-      SinaMicroblog.getAccessToken();
-    }
+  getAccessToken: function(siteId) {
+    var site = UploadUI.getSiteObject(siteId);
+    var accessTokenCallback = function(result, userOrMessage) {
+      if (result == 'success') {
+        UploadUI.getUserInfo(siteId, userOrMessage);
+      } else {
+        // Show error information according to error reason
+        UploadUI.showErrorInfo(chrome.i18n.getMessage(userOrMessage));
+        UploadUI.hideAuthenticationProgress();
+      }
+    };
+
+    site.getAccessToken(accessTokenCallback);
   },
 
-  getPhotoData: function() {
+  getUserInfo: function(siteId, user) {
+    var site = UploadUI.getSiteObject(siteId);
+    site.getUserInfo(user, function(result, userOrMessage) {
+      if (result == 'success') {
+        var userId = user.id;
+        // Check if the authenticated user is added.
+        if (!Account.getUser(siteId, userId)) {
+          site.currentUserId = userId;
+          Account.addUser(siteId, user);
+          UploadUI.addAuthenticatedAccount(siteId, userId);
+        }
+        UploadUI.hideAuthenticationProgress();
+        UploadUI.upload(siteId, userId);
+      } else {
+        var msg = chrome.i18n.getMessage(userOrMessage);
+        UploadUI.showErrorInfo(msg);
+      }
+    });
+  },
+
+  getImageData: function() {
     var dataUrl = $('canvas').toDataURL('image/png');
-    var photoDataIndex = dataUrl.indexOf('data:image/png;base64,');
-    if (photoDataIndex != 0) {
+    var imageDataIndex = dataUrl.indexOf('data:image/png;base64,');
+    if (imageDataIndex != 0) {
       return;
     }
 
     // Decode to binary data
-    return atob(dataUrl.substr(photoDataIndex + 22));
+    return atob(dataUrl.substr(imageDataIndex + 22));
   }
 };
 
+(function() {
 // Cache tab id of edit page, so that we can get tab focus after getting access
 // token
 var tabIdOfEditPage;
@@ -501,19 +440,25 @@ function closeTab(tabId) {
   chrome.tabs.remove(tabId);
 }
 
-chrome.extension.onRequest.addListener(function(request, sender, response) {
+function parseAccessToken(senderId, url, siteId) {
+  var sites = UploadUI.sites;
+  for (var id in sites) {
+    var site = sites[id];
+    if ((siteId && id == siteId) || site.isRedirectUrl(url)) {
+      selectTab(tabIdOfEditPage);
+      closeTab(senderId);
+      site.parseAccessToken(url);
+      return true;
+    }
+  }
+  return false;
+}
+
+chrome.extension.onRequest.addListener(function(request, sender) {
   switch (request.msg) {
-  case 'access_token_result':
-    selectTab(tabIdOfEditPage);
-    closeTab(sender.tab.id);
-    Facebook.parseAccessTokenResult(request.url);
-    console.log('Received get_access_token_success message');
-    break;
-  case 'user_authentication_result':
-    selectTab(tabIdOfEditPage);
-    closeTab(sender.tab.id);
-    SinaMicroblog.parseAccessTokenResult(request.url);
-    console.log('Received sina microblog user authentication:' + request.url);
+  case 'url_for_access_token':
+    parseAccessToken(sender.tab.id, request.url, request.siteId);
     break;
   }
 });
+})();
