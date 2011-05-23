@@ -75,6 +75,10 @@
   "failure_to_create_album": {"message": "Failed to create album, please try again later."},
   "failed_to_upload_image": {"message": "Failed to upload image, please try again later."},
   "failed_to_get_photo_link": {"message": "Failed to retrieve photo link."},
+  "imgur_upload_header": {"message": "Imgur"},
+  "share_to_imgur_account": {"message": "Share to your Imgur account"},
+  "imgur_failed_to_get_request_token": {"message": "Get request token failed, please try again later."},
+  "imgur_failed_to_get_access_token": {"message": "Get access token failed, please try again later."},
   "picasa_upload_header": {"message": "Picasa Web"},
   "share_to_picasa_account": {"message": "Share to your Picasa Web account"},
   "invalid_album_id": {"message": "Album not found."}

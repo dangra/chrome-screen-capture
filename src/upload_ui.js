@@ -24,6 +24,7 @@ var UploadUI = {
     UploadUI.registerSite(SinaMicroblog.siteId, SinaMicroblog);
     UploadUI.registerSite(Facebook.siteId, Facebook);
     UploadUI.registerSite(Picasa.siteId, Picasa);
+    UploadUI.registerSite(Imgur.siteId, Imgur);
     
     // Import style sheet for current locale
     UI.addStyleSheet('./i18n_styles/' + CURRENT_LOCALE + '_upload_image.css');
@@ -33,6 +34,7 @@ var UploadUI = {
       '_upload_header');
     i18nReplace('shareToFacebookText', Facebook.siteId + '_upload_header');
     i18nReplace('shareToPicasaText', Picasa.siteId + '_upload_header');
+    i18nReplace('shareToImgurText', Imgur.siteId + '_upload_header');
     i18nReplace('lastStep', 'return_to_site_selection');
     i18nReplace('closeUploadWrapper', 'close_upload_wrapper');
     i18nReplace('imageCaptionText', 'image_caption');
@@ -54,6 +56,9 @@ var UploadUI = {
     }, false);
     $('sinaMicroblogBtn').addEventListener('click', function() {
       UploadUI.showUploadContentWrapper(SinaMicroblog.siteId);
+    }, false);
+    $('imgurBtn').addEventListener('click', function() {
+      UploadUI.showUploadContentWrapper(Imgur.siteId);
     }, false);
     $('shareToOtherAccount').addEventListener('click', function() {
       var currentSite = UploadUI.currentSite;
